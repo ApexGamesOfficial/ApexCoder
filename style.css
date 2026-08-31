@@ -67,6 +67,11 @@
         </section>
 
     </main>
-
+.account-note {
+    margin-top: 18px;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+}
 </body>
 </html>
