@@ -1,77 +1,381 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+* {
+    box-sizing: border-box;
+}
 
-    <title>ApexCoder</title>
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
 
-    <link rel="stylesheet" href="style.css">
-</head>
+body {
+    background: #000;
+    color: #fff;
 
-<body>
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+}
 
-    <main class="welcome">
+/* =========================
+   WELCOME
+========================= */
 
-        <div class="background-grid"></div>
-        <div class="background-glow"></div>
+.welcome {
+    position: relative;
 
-        <section class="welcome-content">
+    min-height: 100vh;
+    min-height: 100dvh;
 
-            <div class="brand">
-                <div class="brand-icon">&lt;/&gt;</div>
-                <span>ApexCoder</span>
-            </div>
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-            <div class="hero">
+    overflow: hidden;
 
-                <p class="eyebrow">
-                    CREATE • DEVELOP • EXPERIMENT
-                </p>
+    padding:
+        max(32px, env(safe-area-inset-top))
+        max(24px, env(safe-area-inset-right))
+        max(32px, env(safe-area-inset-bottom))
+        max(24px, env(safe-area-inset-left));
+}
 
-                <h1>
-                    Build without
-                    <span>boundaries.</span>
-                </h1>
+/* =========================
+   BACKGROUND
+========================= */
 
-                <p class="description">
-                    Create websites, develop games, and explore
-                    malware behavior inside safe, isolated
-                    learning sandboxes.
-                </p>
+.background-grid {
+    position: absolute;
+    inset: 0;
 
-                <div class="actions">
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        );
 
-                    <a href="signup.html" class="button primary">
-                        Create Account
-                    </a>
+    background-size: 55px 55px;
 
-                    <a href="login.html" class="button secondary">
-                        Log In
-                    </a>
+    pointer-events: none;
+}
 
-                </div>
+.background-glow {
+    position: absolute;
 
-            </div>
+    width: min(800px, 90vw);
+    height: min(800px, 90vw);
 
-            <div class="motto">
-                <span class="motto-line"></span>
+    left: 50%;
+    top: 45%;
 
-                <p>
-                    Apex creation. Absolute isolation.
-                </p>
+    transform: translate(-50%, -50%);
 
-                <span class="motto-line"></span>
-            </div>
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.08),
+            transparent 65%
+        );
 
-        </section>
+    pointer-events: none;
+}
 
-    </main>
+/* =========================
+   CONTENT
+========================= */
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+
+    width: min(100%, 1000px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+/* =========================
+   BRAND
+========================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    font-size: 22px;
+    font-weight: 900;
+
+    letter-spacing: -.03em;
+}
+
+.brand-icon {
+    min-width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #fff;
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: 900;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    margin-top: clamp(65px, 9vh, 110px);
+}
+
+.eyebrow {
+    margin: 0 0 20px;
+
+    color: #a0a0a0;
+
+    font-size: 11px;
+    font-weight: 800;
+
+    letter-spacing: .22em;
+}
+
+h1 {
+    margin: 0;
+
+    font-size:
+        clamp(
+            48px,
+            8vw,
+            100px
+        );
+
+    line-height: .95;
+
+    letter-spacing: -.065em;
+}
+
+h1 span {
+    display: block;
+    color: #777;
+}
+
+.description {
+    max-width: 640px;
+
+    margin:
+        30px auto
+        0;
+
+    color: #a7a7a7;
+
+    font-size:
+        clamp(
+            15px,
+            2vw,
+            18px
+        );
+
+    line-height: 1.65;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 36px;
+}
+
+.button {
+    min-width: 165px;
+    min-height: 54px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 24px;
+
+    border: 2px solid transparent;
+    border-radius: 8px;
+
+    color: #fff;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 900;
+
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease,
+        box-shadow .18s ease;
+}
+
+.button.primary {
+    background: #fff;
+    color: #000;
+}
+
+.button.secondary {
+    border-color: #303030;
+
+    background: #0b0b0b;
+    color: #fff;
+}
+
+.button:hover,
+.button:focus-visible {
+    transform: scale(1.06);
+
+    border-color: #fff;
+
+    box-shadow:
+        0 0 0 1px #fff,
+        0 0 25px rgba(255,255,255,.15);
+
+    outline: none;
+}
+
+.button.primary:hover,
+.button.primary:focus-visible {
+    background: #e9e9e9;
+}
+
 .account-note {
     margin-top: 18px;
     color: #666;
     font-size: 12px;
     font-weight: 600;
 }
-</body>
-</html>
+
+/* =========================
+   MOTTO
+========================= */
+
+.motto {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 18px;
+
+    margin-top: clamp(70px, 11vh, 130px);
+}
+
+.motto-line {
+    width: 70px;
+    height: 1px;
+
+    background: #292929;
+}
+
+.motto p {
+    margin: 0;
+
+    color: #676767;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: .18em;
+
+    text-transform: uppercase;
+}
+
+/* =========================
+   TOUCH
+========================= */
+
+@media (pointer: coarse) {
+    .button {
+        min-height: 58px;
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .welcome {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .hero {
+        margin-top: 60px;
+    }
+
+    h1 {
+        font-size:
+            clamp(
+                45px,
+                15vw,
+                68px
+            );
+    }
+
+    .description {
+        max-width: 440px;
+    }
+
+    .actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .button {
+        width: min(100%, 340px);
+    }
+
+    .motto {
+        margin-top: 75px;
+    }
+
+    .motto-line {
+        width: 30px;
+    }
+}
+
+/* =========================
+   REDUCED MOTION
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+}
