@@ -1,46 +1,30 @@
 const accountCard =
-    document.getElementById(
-        "accountCard"
-    );
+    document.getElementById("accountCard");
 
 const accountAvatar =
-    document.getElementById(
-        "accountAvatar"
-    );
+    document.getElementById("accountAvatar");
 
 const accountGamertag =
-    document.getElementById(
-        "accountGamertag"
-    );
+    document.getElementById("accountGamertag");
 
 const newProjectButton =
-    document.getElementById(
-        "newProjectButton"
-    );
+    document.getElementById("newProjectButton");
 
 const projectSearch =
-    document.getElementById(
-        "projectSearch"
-    );
+    document.getElementById("projectSearch");
 
 const projectsGrid =
-    document.getElementById(
-        "projectsGrid"
-    );
+    document.getElementById("projectsGrid");
 
 const emptyState =
-    document.getElementById(
-        "emptyState"
-    );
+    document.getElementById("emptyState");
 
 const filterTabs =
-    document.querySelectorAll(
-        ".filter-tab"
-    );
-
+    document.querySelectorAll(".filter-tab");
 
 let currentUser = null;
 let currentFilter = "all";
+let loadedProjects = [];
 
 
 /* =========================
@@ -52,23 +36,16 @@ async function loadAccount() {
     const {
         data: { session }
     } =
-        await supabaseClient
-            .auth
-            .getSession();
-
+        await supabaseClient.auth.getSession();
 
     if (!session?.user) {
-
         window.location.href =
             "login.html";
-
         return;
     }
 
-
     currentUser =
         session.user;
-
 
     const {
         data: profile,
@@ -86,7 +63,6 @@ async function loadAccount() {
             )
             .single();
 
-
     if (error || !profile) {
 
         console.error(
@@ -97,85 +73,337 @@ async function loadAccount() {
         accountGamertag.textContent =
             "Account";
 
-        return;
+    } else {
+
+        accountGamertag.textContent =
+            profile.gamertag;
+
+        accountAvatar.src =
+            profile.avatar_url ||
+            "Default Apex Games Profile Picture.png";
     }
 
-
-    accountGamertag.textContent =
-        profile.gamertag;
-
-
-    accountAvatar.src =
-        profile.avatar_url ||
-        "Default Apex Games Profile Picture.png";
+    await loadProjects();
 }
 
 
 /* =========================
-   FILTERING
+   LOAD PROJECTS
 ========================= */
 
-function updateProjectVisibility() {
+async function loadProjects() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("projects")
+            .select(`
+                id,
+                name,
+                type,
+                created_at,
+                updated_at
+            `)
+            .eq(
+                "owner_id",
+                currentUser.id
+            )
+            .order(
+                "updated_at",
+                {
+                    ascending: false
+                }
+            );
+
+    if (error) {
+
+        console.error(
+            "Unable to load projects:",
+            error
+        );
+
+        return;
+    }
+
+    loadedProjects =
+        data || [];
+
+    renderProjects();
+}
+
+
+/* =========================
+   SAFE TEXT
+========================= */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+/* =========================
+   PROJECT LABELS
+========================= */
+
+function getProjectLabel(type) {
+
+    if (type === "game") {
+        return "Game";
+    }
+
+    if (type === "website") {
+        return "Website";
+    }
+
+    if (type === "malware") {
+        return "Malware Sandbox";
+    }
+
+    return "Project";
+}
+
+
+function getProjectSymbol(type) {
+
+    if (type === "game") {
+        return "◇";
+    }
+
+    if (type === "website") {
+        return "</>";
+    }
+
+    if (type === "malware") {
+        return "⌁";
+    }
+
+    return "•";
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderProjects() {
 
     const search =
         projectSearch.value
             .trim()
             .toLowerCase();
 
+    const visibleProjects =
+        loadedProjects.filter(project => {
 
-    const cards =
-        projectsGrid.querySelectorAll(
-            ".project-card"
+            const matchesFilter =
+                currentFilter === "all" ||
+                project.type ===
+                currentFilter;
+
+            const matchesSearch =
+                project.name
+                    .toLowerCase()
+                    .includes(search);
+
+            return (
+                matchesFilter &&
+                matchesSearch
+            );
+        });
+
+
+    projectsGrid.innerHTML = "";
+
+
+    visibleProjects.forEach(project => {
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+        card.type =
+            "button";
+
+        card.className =
+            "project-card saved-project-card";
+
+        card.dataset.projectType =
+            project.type;
+
+        card.innerHTML = `
+            <span class="project-icon">
+                ${escapeHTML(
+                    getProjectSymbol(
+                        project.type
+                    )
+                )}
+            </span>
+
+            <span class="project-type-label">
+                ${escapeHTML(
+                    getProjectLabel(
+                        project.type
+                    )
+                )}
+            </span>
+
+            <span class="project-name">
+                ${escapeHTML(
+                    project.name
+                )}
+            </span>
+
+            <span class="project-meta">
+                Open project
+            </span>
+        `;
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    `editor.html?project=${encodeURIComponent(project.id)}`;
+            }
         );
 
-
-    let visibleCount = 0;
-
-
-    cards.forEach(card => {
-
-        const type =
-            card.dataset.createType ||
-            card.dataset.projectType ||
-            "";
-
-
-        const name =
-            card.textContent
-                .toLowerCase();
-
-
-        const matchesFilter =
-            currentFilter === "all" ||
-            type === currentFilter;
-
-
-        const matchesSearch =
-            name.includes(search);
-
-
-        const visible =
-            matchesFilter &&
-            matchesSearch;
-
-
-        card.hidden =
-            !visible;
-
-
-        if (visible) {
-            visibleCount++;
-        }
+        projectsGrid.appendChild(
+            card
+        );
     });
 
 
+    addCreateCards();
+
+
+    const hasVisibleContent =
+        visibleProjects.length > 0 ||
+        currentFilter === "all" ||
+        currentFilter === "game" ||
+        currentFilter === "website" ||
+        currentFilter === "malware";
+
+
     emptyState.hidden =
-        visibleCount !== 0;
+        hasVisibleContent;
 }
 
 
 /* =========================
-   FILTER BUTTONS
+   CREATE CARDS
+========================= */
+
+function addCreateCards() {
+
+    const createTypes = [
+        {
+            type: "game",
+            name: "New Game",
+            meta: "Start a game project"
+        },
+        {
+            type: "website",
+            name: "New Website",
+            meta: "Start a website project"
+        },
+        {
+            type: "malware",
+            name: "New Malware",
+            meta: "Create in a safe sandbox"
+        }
+    ];
+
+
+    createTypes.forEach(item => {
+
+        if (
+            currentFilter !== "all" &&
+            currentFilter !== item.type
+        ) {
+            return;
+        }
+
+
+        const search =
+            projectSearch.value
+                .trim()
+                .toLowerCase();
+
+
+        const searchText =
+            `${item.name} ${item.meta}`
+                .toLowerCase();
+
+
+        if (
+            search &&
+            !searchText.includes(search)
+        ) {
+            return;
+        }
+
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+        card.type =
+            "button";
+
+        card.className =
+            item.type === "malware"
+                ? "project-card create-card sandbox"
+                : "project-card create-card";
+
+        card.dataset.createType =
+            item.type;
+
+        card.innerHTML = `
+            <span class="project-icon">
+                +
+            </span>
+
+            <span class="project-name">
+                ${escapeHTML(
+                    item.name
+                )}
+            </span>
+
+            <span class="project-meta">
+                ${escapeHTML(
+                    item.meta
+                )}
+            </span>
+        `;
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    `new-project.html?type=${encodeURIComponent(item.type)}`;
+            }
+        );
+
+        projectsGrid.appendChild(
+            card
+        );
+    });
+}
+
+
+/* =========================
+   FILTERS
 ========================= */
 
 filterTabs.forEach(tab => {
@@ -186,23 +414,21 @@ filterTabs.forEach(tab => {
 
             filterTabs.forEach(
                 button => {
+
                     button.classList.remove(
                         "active"
                     );
                 }
             );
 
-
             tab.classList.add(
                 "active"
             );
 
-
             currentFilter =
                 tab.dataset.filter;
 
-
-            updateProjectVisibility();
+            renderProjects();
         }
     );
 });
@@ -214,48 +440,17 @@ filterTabs.forEach(tab => {
 
 projectSearch.addEventListener(
     "input",
-    updateProjectVisibility
+    renderProjects
 );
 
 
 /* =========================
-   CREATE PROJECT
+   NEW PROJECT
 ========================= */
-
-function goToCreateProject(type) {
-
-    window.location.href =
-        `new-project.html?type=${encodeURIComponent(type)}`;
-}
-
-
-document
-    .querySelectorAll(
-        "[data-create-type]"
-    )
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                goToCreateProject(
-                    button.dataset.createType
-                );
-            }
-        );
-    });
-
 
 newProjectButton.addEventListener(
     "click",
     () => {
-
-        /*
-            No type selected yet.
-            The new-project page can
-            ask what they're creating.
-        */
 
         window.location.href =
             "new-project.html";
