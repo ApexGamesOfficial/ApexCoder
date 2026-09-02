@@ -2,22 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>ApexCoder | Home</title>
 
-    <link rel="stylesheet" href="dashboard.css">
+    <link
+        rel="stylesheet"
+        href="dashboard.css?v=2"
+    >
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="auth.js" defer></script>
-    <script src="dashboard.js" defer></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script
+        src="auth.js"
+        defer
+    ></script>
+
+    <script
+        src="dashboard.js?v=2"
+        defer
+    ></script>
 </head>
 
 <body>
 
     <div class="app-shell">
 
-        <!-- SIDEBAR -->
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
         <aside class="sidebar">
 
             <button
@@ -33,15 +53,21 @@
                 >
 
                 <div class="account-info">
-                    <span class="account-gamertag" id="accountGamertag">
+
+                    <span
+                        class="account-gamertag"
+                        id="accountGamertag"
+                    >
                         Loading...
                     </span>
 
                     <span class="account-label">
                         Apex Games Account
                     </span>
+
                 </div>
             </button>
+
 
             <nav class="sidebar-nav">
 
@@ -97,39 +123,50 @@
 
         </aside>
 
-        <!-- MAIN CONTENT -->
+
+        <!-- =========================
+             MAIN
+        ========================== -->
+
         <main class="main-content">
 
-            <section class="hero">
+            <!-- BRAND -->
 
-                <div class="apexcoder-logo">
-                    <div class="logo-icon">
-                        &lt;/&gt;
-                    </div>
+            <div class="brand">
 
-                    <span>
-                        ApexCoder
+                <div class="brand-icon">
+                    &lt;/&gt;
+                </div>
+
+                <span>
+                    ApexCoder
+                </span>
+
+            </div>
+
+
+            <!-- WELCOME -->
+
+            <section class="welcome">
+
+                <h1>
+                    Welcome,
+                    <span id="welcomeName">
+                        Developer
                     </span>
-                </div>
+                </h1>
 
-                <div class="welcome-copy">
-
-                    <h1>
-                        Welcome,
-                        <span id="welcomeName">
-                            Developer
-                        </span>
-                    </h1>
-
-                    <p>
-                        What are you working on today?
-                    </p>
-
-                </div>
+                <p>
+                    What are you working on today?
+                </p>
 
             </section>
 
-            <!-- GAMES -->
+
+            <!-- =====================
+                 GAMES
+            ====================== -->
+
             <section class="project-section">
 
                 <div class="section-heading">
@@ -146,32 +183,33 @@
 
                     <a
                         href="projects.html?type=game"
-                        class="view-all-link"
+                        class="view-all"
                     >
                         View All
                     </a>
 
                 </div>
 
+
                 <div
                     class="project-row"
-                    id="gamesRow"
+                    id="gamesProjects"
                 >
 
                     <button
-                        class="new-project-card"
+                        class="project-card new-project-card"
                         type="button"
                         data-project-type="game"
                     >
-                        <span class="plus-icon">
+                        <span class="project-plus">
                             +
                         </span>
 
-                        <span class="new-project-title">
+                        <span class="project-name">
                             New Game
                         </span>
 
-                        <span class="new-project-description">
+                        <span class="project-description">
                             Start a new game project.
                         </span>
                     </button>
@@ -180,7 +218,11 @@
 
             </section>
 
-            <!-- WEBSITES -->
+
+            <!-- =====================
+                 WEBSITES
+            ====================== -->
+
             <section class="project-section">
 
                 <div class="section-heading">
@@ -197,33 +239,34 @@
 
                     <a
                         href="projects.html?type=website"
-                        class="view-all-link"
+                        class="view-all"
                     >
                         View All
                     </a>
 
                 </div>
 
+
                 <div
                     class="project-row"
-                    id="websitesRow"
+                    id="websiteProjects"
                 >
 
                     <button
-                        class="new-project-card"
+                        class="project-card new-project-card"
                         type="button"
                         data-project-type="website"
                     >
-                        <span class="plus-icon">
+                        <span class="project-plus">
                             +
                         </span>
 
-                        <span class="new-project-title">
+                        <span class="project-name">
                             New Website
                         </span>
 
-                        <span class="new-project-description">
-                            Build a new website project.
+                        <span class="project-description">
+                            Start a new website project.
                         </span>
                     </button>
 
@@ -231,14 +274,18 @@
 
             </section>
 
-            <!-- MALWARE SANDBOX -->
+
+            <!-- =====================
+                 MALWARE SANDBOX
+            ====================== -->
+
             <section class="project-section">
 
                 <div class="section-heading">
 
                     <div>
                         <p class="section-label">
-                            SANDBOX PROJECTS
+                            PROJECTS
                         </p>
 
                         <h2>
@@ -248,32 +295,33 @@
 
                     <a
                         href="projects.html?type=malware"
-                        class="view-all-link"
+                        class="view-all"
                     >
                         View All
                     </a>
 
                 </div>
 
+
                 <div
                     class="project-row"
-                    id="malwareRow"
+                    id="malwareProjects"
                 >
 
                     <button
-                        class="new-project-card sandbox-card"
+                        class="project-card new-project-card sandbox-card"
                         type="button"
                         data-project-type="malware"
                     >
-                        <span class="plus-icon">
+                        <span class="project-plus">
                             +
                         </span>
 
-                        <span class="new-project-title">
+                        <span class="project-name">
                             New Malware
                         </span>
 
-                        <span class="new-project-description">
+                        <span class="project-description">
                             Create inside an isolated learning sandbox.
                         </span>
                     </button>
