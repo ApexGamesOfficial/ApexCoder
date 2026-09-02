@@ -1,0 +1,303 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background: #000;
+    color: #fff;
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+.account-page {
+    position: relative;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    padding: 32px 20px;
+}
+
+.background-grid {
+    position: absolute;
+    inset: 0;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.035) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        55px 55px;
+
+    pointer-events: none;
+}
+
+.background-glow {
+    position: absolute;
+
+    width: min(800px, 90vw);
+    height: min(800px, 90vw);
+
+    left: 50%;
+    top: 45%;
+
+    transform:
+        translate(-50%, -50%);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.08),
+            transparent 65%
+        );
+
+    pointer-events: none;
+}
+
+.account-card {
+    position: relative;
+    z-index: 2;
+
+    width: min(100%, 440px);
+
+    padding: 34px;
+
+    border:
+        1px solid #262626;
+
+    border-radius: 14px;
+
+    background:
+        rgba(8,8,8,.94);
+
+    box-shadow:
+        0 30px 80px
+        rgba(0,0,0,.6);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 10px;
+
+    color: #fff;
+
+    text-decoration: none;
+
+    font-size: 19px;
+    font-weight: 900;
+
+    letter-spacing: -.03em;
+}
+
+.brand-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        2px solid #fff;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.account-heading {
+    margin-top: 40px;
+}
+
+.eyebrow {
+    margin:
+        0 0 12px;
+
+    color: #777;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    letter-spacing: .2em;
+}
+
+.account-heading h1 {
+    margin: 0;
+
+    font-size: 34px;
+
+    letter-spacing: -.045em;
+}
+
+.account-heading p:not(.eyebrow) {
+    margin:
+        12px 0 0;
+
+    color: #888;
+
+    font-size: 14px;
+
+    line-height: 1.55;
+}
+
+.account-form {
+    display: grid;
+
+    gap: 18px;
+
+    margin-top: 32px;
+}
+
+.account-form label {
+    display: grid;
+
+    gap: 8px;
+
+    color: #bbb;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.account-form input {
+    width: 100%;
+    height: 50px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid #303030;
+
+    border-radius: 7px;
+
+    background: #0d0d0d;
+    color: #fff;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color .18s ease,
+        box-shadow .18s ease;
+}
+
+.account-form input:focus {
+    border-color: #fff;
+
+    box-shadow:
+        0 0 0 1px #fff;
+}
+
+.submit-button {
+    min-height: 52px;
+
+    border: 0;
+    border-radius: 7px;
+
+    background: #fff;
+    color: #000;
+
+    font-size: 14px;
+    font-weight: 900;
+
+    cursor: pointer;
+
+    transition:
+        transform .18s ease,
+        background .18s ease;
+}
+
+.submit-button:hover {
+    transform:
+        translateY(-1px);
+
+    background: #e9e9e9;
+}
+
+.submit-button:disabled {
+    cursor: default;
+    opacity: .55;
+    transform: none;
+}
+
+.form-message {
+    min-height: 18px;
+
+    margin: -2px 0;
+
+    color: #aaa;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+.form-message.error {
+    color: #ff7676;
+}
+
+.form-message.success {
+    color: #8dffb0;
+}
+
+.switch-account {
+    margin:
+        26px 0 0;
+
+    color: #666;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.switch-account a {
+    color: #fff;
+
+    font-weight: 800;
+
+    text-decoration: none;
+}
+
+.switch-account a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+
+    .account-card {
+        padding: 26px 20px;
+    }
+
+    .account-heading h1 {
+        font-size: 30px;
+    }
+}
