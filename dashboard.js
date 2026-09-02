@@ -18,12 +18,92 @@ const welcomeName =
         "welcomeName"
     );
 
+const gamesProjects =
+    document.getElementById(
+        "gamesProjects"
+    );
+
+const websiteProjects =
+    document.getElementById(
+        "websiteProjects"
+    );
+
+const malwareProjects =
+    document.getElementById(
+        "malwareProjects"
+    );
+
 
 let currentUser = null;
 
 
 /* =========================
-   LOAD ACCOUNT
+   SAFE HTML
+========================= */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+/* =========================
+   PROJECT SYMBOL
+========================= */
+
+function getProjectSymbol(type) {
+
+    if (type === "game") {
+        return "◇";
+    }
+
+
+    if (type === "website") {
+        return "</>";
+    }
+
+
+    if (type === "malware") {
+        return "⌁";
+    }
+
+
+    return "•";
+}
+
+
+/* =========================
+   PROJECT LABEL
+========================= */
+
+function getProjectLabel(type) {
+
+    if (type === "game") {
+        return "Game";
+    }
+
+
+    if (type === "website") {
+        return "Website";
+    }
+
+
+    if (type === "malware") {
+        return "Malware Sandbox";
+    }
+
+
+    return "Project";
+}
+
+
+/* =========================
+   LOAD DASHBOARD
 ========================= */
 
 async function loadDashboard() {
@@ -48,6 +128,19 @@ async function loadDashboard() {
     currentUser =
         session.user;
 
+
+    await Promise.all([
+        loadProfile(),
+        loadProjects()
+    ]);
+}
+
+
+/* =========================
+   LOAD PROFILE
+========================= */
+
+async function loadProfile() {
 
     const {
         data: profile,
@@ -74,28 +167,22 @@ async function loadDashboard() {
             error
         );
 
+
         accountGamertag.textContent =
             "Account";
 
+
         welcomeName.textContent =
             "Developer";
+
 
         return;
     }
 
 
-    const avatar =
+    accountAvatar.src =
         profile.avatar_url ||
         "Default Apex Games Profile Picture.png";
-
-
-    const displayName =
-        profile.display_name ||
-        profile.gamertag;
-
-
-    accountAvatar.src =
-        avatar;
 
 
     accountGamertag.textContent =
@@ -103,35 +190,212 @@ async function loadDashboard() {
 
 
     welcomeName.textContent =
-        displayName;
+        profile.display_name ||
+        profile.gamertag;
 }
 
 
 /* =========================
-   ACCOUNT CARD
+   LOAD PROJECTS
 ========================= */
 
-accountCard.addEventListener(
-    "click",
-    () => {
+async function loadProjects() {
 
-        /*
-            For now this can go
-            to Settings.
+    const {
+        data: projects,
+        error
+    } =
+        await supabaseClient
+            .from("projects")
+            .select(`
+                id,
+                name,
+                type,
+                updated_at
+            `)
+            .eq(
+                "owner_id",
+                currentUser.id
+            )
+            .order(
+                "updated_at",
+                {
+                    ascending: false
+                }
+            );
 
-            Later we can give
-            ApexCoder its own
-            account/profile popup.
-        */
 
-        window.location.href =
-            "settings.html";
+    if (error) {
+
+        console.error(
+            "Unable to load projects:",
+            error
+        );
+
+
+        return;
     }
-);
+
+
+    const allProjects =
+        projects || [];
+
+
+    const games =
+        allProjects
+            .filter(
+                project =>
+                    project.type ===
+                    "game"
+            )
+            .slice(0, 3);
+
+
+    const websites =
+        allProjects
+            .filter(
+                project =>
+                    project.type ===
+                    "website"
+            )
+            .slice(0, 3);
+
+
+    const malware =
+        allProjects
+            .filter(
+                project =>
+                    project.type ===
+                    "malware"
+            )
+            .slice(0, 3);
+
+
+    renderProjects(
+        gamesProjects,
+        games
+    );
+
+
+    renderProjects(
+        websiteProjects,
+        websites
+    );
+
+
+    renderProjects(
+        malwareProjects,
+        malware
+    );
+}
 
 
 /* =========================
-   NEW PROJECT BUTTONS
+   RENDER PROJECTS
+========================= */
+
+function renderProjects(
+    container,
+    projects
+) {
+
+    if (!container) {
+        return;
+    }
+
+
+    /*
+        Keep the New Project card.
+
+        Only remove saved project
+        cards from a previous render.
+    */
+
+    container
+        .querySelectorAll(
+            ".saved-project-card"
+        )
+        .forEach(card => {
+            card.remove();
+        });
+
+
+    projects.forEach(project => {
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+
+        card.type =
+            "button";
+
+
+        card.className =
+            "project-card saved-project-card";
+
+
+        card.innerHTML = `
+            <span class="saved-project-icon">
+                ${escapeHTML(
+                    getProjectSymbol(
+                        project.type
+                    )
+                )}
+            </span>
+
+            <span class="saved-project-type">
+                ${escapeHTML(
+                    getProjectLabel(
+                        project.type
+                    )
+                )}
+            </span>
+
+            <span class="project-name">
+                ${escapeHTML(
+                    project.name
+                )}
+            </span>
+
+            <span class="project-description">
+                Continue project
+            </span>
+        `;
+
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                openProject(
+                    project.id
+                );
+            }
+        );
+
+
+        container.appendChild(
+            card
+        );
+    });
+}
+
+
+/* =========================
+   OPEN PROJECT
+========================= */
+
+function openProject(projectId) {
+
+    window.location.href =
+        `editor.html?project=${encodeURIComponent(projectId)}`;
+}
+
+
+/* =========================
+   NEW PROJECT CARDS
 ========================= */
 
 document
@@ -145,22 +409,32 @@ document
             () => {
 
                 const type =
-                    button.dataset.projectType;
+                    button.dataset
+                        .projectType;
 
-
-                /*
-                    Temporary route.
-
-                    Later these will open
-                    their own project
-                    creation screens.
-                */
 
                 window.location.href =
                     `new-project.html?type=${encodeURIComponent(type)}`;
             }
         );
     });
+
+
+/* =========================
+   ACCOUNT CARD
+========================= */
+
+if (accountCard) {
+
+    accountCard.addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "settings.html";
+        }
+    );
+}
 
 
 /* =========================
