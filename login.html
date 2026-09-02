@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Log In | ApexCoder</title>
+
+    <link rel="stylesheet" href="account.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="login.js" defer></script>
+</head>
+
+<body>
+
+    <main class="account-page">
+
+        <div class="background-grid"></div>
+        <div class="background-glow"></div>
+
+        <section class="account-card">
+
+            <a href="index.html" class="brand">
+                <div class="brand-icon">&lt;/&gt;</div>
+                <span>ApexCoder</span>
+            </a>
+
+            <div class="account-heading">
+
+                <p class="eyebrow">
+                    APEX GAMES ACCOUNT
+                </p>
+
+                <h1>
+                    Welcome back.
+                </h1>
+
+                <p>
+                    Log in with your Apex Games account
+                    to continue to ApexCoder.
+                </p>
+
+            </div>
+
+            <form
+                class="account-form"
+                id="loginForm"
+            >
+
+                <label>
+                    Email
+
+                    <input
+                        type="email"
+                        id="email"
+                        autocomplete="email"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Password
+
+                    <input
+                        type="password"
+                        id="password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </label>
+
+                <p
+                    class="form-message"
+                    id="formMessage"
+                ></p>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                    id="loginButton"
+                >
+                    Log In
+                </button>
+
+            </form>
+
+            <p class="switch-account">
+                Don't have an account?
+                <a href="signup.html">
+                    Create one
+                </a>
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
