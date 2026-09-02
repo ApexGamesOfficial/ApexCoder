@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | ApexCoder</title>
+
+    <link rel="stylesheet" href="account.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="signup.js" defer></script>
+</head>
+
+<body>
+
+    <main class="account-page">
+
+        <div class="background-grid"></div>
+        <div class="background-glow"></div>
+
+        <section class="account-card">
+
+            <a href="index.html" class="brand">
+                <div class="brand-icon">&lt;/&gt;</div>
+                <span>ApexCoder</span>
+            </a>
+
+            <div class="account-heading">
+
+                <p class="eyebrow">
+                    APEX GAMES ACCOUNT
+                </p>
+
+                <h1>
+                    Create your account.
+                </h1>
+
+                <p>
+                    One Apex Games account connects
+                    your Apex projects.
+                </p>
+
+            </div>
+
+            <form
+                class="account-form"
+                id="signupForm"
+            >
+
+                <label>
+                    Gamertag
+
+                    <input
+                        type="text"
+                        id="gamertag"
+                        maxlength="24"
+                        autocomplete="username"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Email
+
+                    <input
+                        type="email"
+                        id="email"
+                        autocomplete="email"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Password
+
+                    <input
+                        type="password"
+                        id="password"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                </label>
+
+                <label>
+                    Confirm Password
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                </label>
+
+                <p
+                    class="form-message"
+                    id="formMessage"
+                ></p>
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                    id="signupButton"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="switch-account">
+                Already have an account?
+                <a href="login.html">
+                    Log in
+                </a>
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
