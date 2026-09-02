@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ApexCoder | Projects</title>
+
+    <link rel="stylesheet" href="projects.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="projects.js" defer></script>
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <aside class="sidebar">
+
+            <button
+                class="account-card"
+                id="accountCard"
+                type="button"
+            >
+                <img
+                    src="Default Apex Games Profile Picture.png"
+                    alt="Profile Picture"
+                    class="account-avatar"
+                    id="accountAvatar"
+                >
+
+                <div class="account-info">
+                    <span
+                        class="account-gamertag"
+                        id="accountGamertag"
+                    >
+                        Loading...
+                    </span>
+
+                    <span class="account-label">
+                        Apex Games Account
+                    </span>
+                </div>
+            </button>
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="dashboard.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Home
+                </a>
+
+                <a
+                    href="projects.html"
+                    class="sidebar-link active"
+                >
+                    <span class="sidebar-dot"></span>
+                    Projects
+                </a>
+
+                <a
+                    href="discover.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Discover
+                </a>
+
+                <a
+                    href="chat.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Chat
+                </a>
+
+                <a
+                    href="subscriptions.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Subscriptions
+                </a>
+
+                <a
+                    href="settings.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Settings
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <main class="main-content">
+
+            <header class="projects-header">
+
+                <div>
+                    <p class="eyebrow">
+                        YOUR WORKSPACE
+                    </p>
+
+                    <h1>
+                        Projects
+                    </h1>
+
+                    <p class="header-description">
+                        Create, organize, and continue your ApexCoder projects.
+                    </p>
+                </div>
+
+                <button
+                    class="new-project-button"
+                    id="newProjectButton"
+                    type="button"
+                >
+                    + New Project
+                </button>
+
+            </header>
+
+            <section class="project-tools">
+
+                <div class="filter-tabs">
+
+                    <button
+                        class="filter-tab active"
+                        type="button"
+                        data-filter="all"
+                    >
+                        All
+                    </button>
+
+                    <button
+                        class="filter-tab"
+                        type="button"
+                        data-filter="game"
+                    >
+                        Games
+                    </button>
+
+                    <button
+                        class="filter-tab"
+                        type="button"
+                        data-filter="website"
+                    >
+                        Websites
+                    </button>
+
+                    <button
+                        class="filter-tab"
+                        type="button"
+                        data-filter="malware"
+                    >
+                        Malware
+                    </button>
+
+                </div>
+
+                <div class="search-wrap">
+                    <input
+                        type="search"
+                        id="projectSearch"
+                        placeholder="Search projects..."
+                        autocomplete="off"
+                    >
+                </div>
+
+            </section>
+
+            <section
+                class="projects-grid"
+                id="projectsGrid"
+            >
+
+                <button
+                    class="project-card create-card"
+                    type="button"
+                    data-create-type="game"
+                >
+                    <span class="project-icon">
+                        +
+                    </span>
+
+                    <span class="project-name">
+                        New Game
+                    </span>
+
+                    <span class="project-meta">
+                        Start a game project
+                    </span>
+                </button>
+
+                <button
+                    class="project-card create-card"
+                    type="button"
+                    data-create-type="website"
+                >
+                    <span class="project-icon">
+                        +
+                    </span>
+
+                    <span class="project-name">
+                        New Website
+                    </span>
+
+                    <span class="project-meta">
+                        Start a website project
+                    </span>
+                </button>
+
+                <button
+                    class="project-card create-card sandbox"
+                    type="button"
+                    data-create-type="malware"
+                >
+                    <span class="project-icon">
+                        +
+                    </span>
+
+                    <span class="project-name">
+                        New Malware
+                    </span>
+
+                    <span class="project-meta">
+                        Create in a safe sandbox
+                    </span>
+                </button>
+
+            </section>
+
+            <div
+                class="empty-state"
+                id="emptyState"
+                hidden
+            >
+                <h2>No projects found.</h2>
+                <p>
+                    Try another search or create something new.
+                </p>
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
