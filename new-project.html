@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>New Project | ApexCoder</title>
+
+    <link rel="stylesheet" href="new-project.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+    <script src="new-project.js" defer></script>
+</head>
+
+<body>
+
+    <main class="new-project-page">
+
+        <div class="background-grid"></div>
+        <div class="background-glow"></div>
+
+        <section class="new-project-shell">
+
+            <header class="topbar">
+
+                <a
+                    href="projects.html"
+                    class="back-button"
+                >
+                    ← Projects
+                </a>
+
+                <div class="brand">
+                    <div class="brand-icon">
+                        &lt;/&gt;
+                    </div>
+
+                    <span>
+                        ApexCoder
+                    </span>
+                </div>
+
+            </header>
+
+            <section class="project-builder">
+
+                <div class="builder-heading">
+
+                    <p class="eyebrow">
+                        CREATE PROJECT
+                    </p>
+
+                    <h1>
+                        What are you building?
+                    </h1>
+
+                    <p>
+                        Choose a project type and give it a name.
+                    </p>
+
+                </div>
+
+                <div class="project-types">
+
+                    <button
+                        class="type-card"
+                        type="button"
+                        data-type="game"
+                    >
+
+                        <span class="type-symbol">
+                            ◇
+                        </span>
+
+                        <span class="type-name">
+                            Game
+                        </span>
+
+                        <span class="type-description">
+                            Create a new game project.
+                        </span>
+
+                    </button>
+
+                    <button
+                        class="type-card"
+                        type="button"
+                        data-type="website"
+                    >
+
+                        <span class="type-symbol">
+                            &lt;/&gt;
+                        </span>
+
+                        <span class="type-name">
+                            Website
+                        </span>
+
+                        <span class="type-description">
+                            Build with HTML, CSS, and JavaScript.
+                        </span>
+
+                    </button>
+
+                    <button
+                        class="type-card sandbox-type"
+                        type="button"
+                        data-type="malware"
+                    >
+
+                        <span class="type-symbol">
+                            ⌁
+                        </span>
+
+                        <span class="type-name">
+                            Malware Sandbox
+                        </span>
+
+                        <span class="type-description">
+                            Safe isolated cybersecurity learning projects.
+                        </span>
+
+                    </button>
+
+                </div>
+
+                <form
+                    class="project-form"
+                    id="projectForm"
+                >
+
+                    <label>
+                        Project Name
+
+                        <input
+                            type="text"
+                            id="projectName"
+                            maxlength="60"
+                            placeholder="My Awesome Project"
+                            autocomplete="off"
+                            required
+                        >
+                    </label>
+
+                    <input
+                        type="hidden"
+                        id="projectType"
+                    >
+
+                    <p
+                        class="form-message"
+                        id="formMessage"
+                    ></p>
+
+                    <button
+                        type="submit"
+                        class="create-button"
+                        id="createButton"
+                        disabled
+                    >
+                        Create Project
+                    </button>
+
+                </form>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
