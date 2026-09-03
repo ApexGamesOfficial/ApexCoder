@@ -1980,7 +1980,779 @@ function runProject() {
         source;
 }
 
+/* =========================================================
+   FILE MANAGEMENT
+========================================================= */
 
+function cleanFilePath(value) {
+
+    return String(value || "")
+        .trim()
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "");
+}
+
+
+function getLanguageFromPath(path) {
+
+    const extension =
+        path
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+
+    if (extension === "html") {
+        return "html";
+    }
+
+    if (extension === "css") {
+        return "css";
+    }
+
+    if (extension === "js") {
+        return "javascript";
+    }
+
+    if (extension === "json") {
+        return "json";
+    }
+
+    return "plaintext";
+}
+
+
+function isValidFilePath(path) {
+
+    if (!path) {
+        return false;
+    }
+
+
+    if (path.length > 255) {
+        return false;
+    }
+
+
+    if (
+        path === "." ||
+        path === ".."
+    ) {
+        return false;
+    }
+
+
+    if (
+        path.includes("../") ||
+        path.includes("/../")
+    ) {
+        return false;
+    }
+
+
+    return true;
+}
+
+
+function fileAlreadyExists(
+    path,
+    ignoredFileId = null
+) {
+
+    const normalized =
+        path.toLowerCase();
+
+
+    return files.some(
+        file =>
+            file.id !== ignoredFileId &&
+            file.path.toLowerCase() === normalized
+    );
+}
+
+
+/* =========================================================
+   NEW FILE
+========================================================= */
+
+async function createNewFile() {
+
+    const enteredName =
+        prompt(
+            "New file name:",
+            "new-file.html"
+        );
+
+
+    if (enteredName === null) {
+        return;
+    }
+
+
+    const path =
+        cleanFilePath(
+            enteredName
+        );
+
+
+    if (!isValidFilePath(path)) {
+
+        alert(
+            "Enter a valid file name."
+        );
+
+        return;
+    }
+
+
+    if (fileAlreadyExists(path)) {
+
+        alert(
+            "A file with that name already exists."
+        );
+
+        return;
+    }
+
+
+    const language =
+        getLanguageFromPath(
+            path
+        );
+
+
+    saveStatus.textContent =
+        "Creating...";
+
+
+    newFileButton.disabled =
+        true;
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("project_files")
+                .insert({
+                    project_id:
+                        currentProject.id,
+
+                    path:
+                        path,
+
+                    content:
+                        "",
+
+                    language:
+                        language
+                })
+                .select(`
+                    id,
+                    project_id,
+                    path,
+                    content,
+                    language,
+                    created_at,
+                    updated_at
+                `)
+                .single();
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        const newFile = {
+            ...data,
+
+            dirty:
+                false,
+
+            model:
+                null
+        };
+
+
+        files.push(
+            newFile
+        );
+
+
+        files.sort(
+            (a, b) =>
+                a.path.localeCompare(
+                    b.path
+                )
+        );
+
+
+        renderExplorer();
+
+
+        saveStatus.textContent =
+            "Saved";
+
+
+        openFile(
+            newFile
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Create file failed:",
+            error
+        );
+
+
+        saveStatus.textContent =
+            "Create failed";
+
+
+        alert(
+            "ApexCoder couldn't create that file."
+        );
+    }
+    finally {
+
+        newFileButton.disabled =
+            false;
+    }
+}
+
+
+/* =========================================================
+   RENAME FILE
+========================================================= */
+
+async function renameFile(
+    file
+) {
+
+    if (!file) {
+        return;
+    }
+
+
+    /*
+        Save its current contents before
+        changing the path.
+    */
+
+    if (file.dirty) {
+
+        const saved =
+            await saveAllFiles(
+                false
+            );
+
+
+        if (!saved) {
+
+            alert(
+                "Save this file before renaming it."
+            );
+
+            return;
+        }
+    }
+
+
+    const enteredName =
+        prompt(
+            "Rename file:",
+            file.path
+        );
+
+
+    if (enteredName === null) {
+        return;
+    }
+
+
+    const newPath =
+        cleanFilePath(
+            enteredName
+        );
+
+
+    if (!isValidFilePath(newPath)) {
+
+        alert(
+            "Enter a valid file name."
+        );
+
+        return;
+    }
+
+
+    if (
+        newPath ===
+        file.path
+    ) {
+
+        return;
+    }
+
+
+    if (
+        fileAlreadyExists(
+            newPath,
+            file.id
+        )
+    ) {
+
+        alert(
+            "A file with that name already exists."
+        );
+
+        return;
+    }
+
+
+    const newLanguage =
+        getLanguageFromPath(
+            newPath
+        );
+
+
+    saveStatus.textContent =
+        "Renaming...";
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("project_files")
+                .update({
+                    path:
+                        newPath,
+
+                    language:
+                        newLanguage
+                })
+                .eq(
+                    "id",
+                    file.id
+                )
+                .eq(
+                    "project_id",
+                    currentProject.id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        file.path =
+            newPath;
+
+        file.language =
+            newLanguage;
+
+
+        /*
+            Monaco language may need to change
+            if the extension changed.
+        */
+
+        if (file.model) {
+
+            monaco.editor.setModelLanguage(
+                file.model,
+                monacoLanguage(
+                    newLanguage,
+                    newPath
+                )
+            );
+        }
+
+
+        files.sort(
+            (a, b) =>
+                a.path.localeCompare(
+                    b.path
+                )
+        );
+
+
+        renderExplorer();
+
+        renderTabs();
+
+
+        if (
+            activeFile?.id ===
+            file.id
+        ) {
+
+            updateProperties(
+                file
+            );
+
+
+            statusFile.textContent =
+                file.path;
+
+
+            statusLanguage.textContent =
+                languageLabel(
+                    file.language
+                );
+        }
+
+
+        saveStatus.textContent =
+            "Saved";
+
+    }
+    catch (error) {
+
+        console.error(
+            "Rename failed:",
+            error
+        );
+
+
+        saveStatus.textContent =
+            "Rename failed";
+
+
+        alert(
+            "ApexCoder couldn't rename that file."
+        );
+    }
+}
+
+
+/* =========================================================
+   DELETE FILE
+========================================================= */
+
+async function deleteFile(
+    file
+) {
+
+    if (!file) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            `Delete "${file.path}"?\n\nThis cannot be undone.`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    saveStatus.textContent =
+        "Deleting...";
+
+
+    try {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from("project_files")
+                .delete()
+                .eq(
+                    "id",
+                    file.id
+                )
+                .eq(
+                    "project_id",
+                    currentProject.id
+                );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        if (file.model) {
+
+            /*
+                If Monaco is currently displaying
+                this model, detach it first.
+            */
+
+            if (
+                editor &&
+                editor.getModel() ===
+                file.model
+            ) {
+
+                editor.setModel(
+                    null
+                );
+            }
+
+
+            file.model.dispose();
+
+            file.model =
+                null;
+        }
+
+
+        files =
+            files.filter(
+                item =>
+                    item.id !==
+                    file.id
+            );
+
+
+        openFiles =
+            openFiles.filter(
+                item =>
+                    item.id !==
+                    file.id
+            );
+
+
+        if (
+            activeFile?.id ===
+            file.id
+        ) {
+
+            activeFile =
+                null;
+
+
+            editorEmpty.hidden =
+                false;
+
+            monacoEditor.hidden =
+                true;
+
+
+            propertiesContent.hidden =
+                true;
+
+            propertiesEmpty.hidden =
+                false;
+
+
+            statusFile.textContent =
+                "No file";
+
+            statusLanguage.textContent =
+                "Website";
+
+            statusCursor.textContent =
+                "Ln 1, Col 1";
+        }
+
+
+        renderExplorer();
+
+        renderTabs();
+
+
+        saveStatus.textContent =
+            "Saved";
+
+    }
+    catch (error) {
+
+        console.error(
+            "Delete failed:",
+            error
+        );
+
+
+        saveStatus.textContent =
+            "Delete failed";
+
+
+        alert(
+            "ApexCoder couldn't delete that file."
+        );
+    }
+}
+
+
+/* =========================================================
+   FILE CONTEXT MENU
+========================================================= */
+
+function showFileMenu(
+    event,
+    file
+) {
+
+    event.preventDefault();
+
+    event.stopPropagation();
+
+
+    closeFileMenu();
+
+
+    const menu =
+        document.createElement(
+            "div"
+        );
+
+
+    menu.className =
+        "file-context-menu";
+
+
+    const renameButton =
+        document.createElement(
+            "button"
+        );
+
+
+    renameButton.type =
+        "button";
+
+    renameButton.textContent =
+        "Rename";
+
+
+    renameButton.addEventListener(
+        "click",
+        () => {
+
+            closeFileMenu();
+
+            renameFile(
+                file
+            );
+        }
+    );
+
+
+    const deleteButton =
+        document.createElement(
+            "button"
+        );
+
+
+    deleteButton.type =
+        "button";
+
+    deleteButton.textContent =
+        "Delete";
+
+    deleteButton.className =
+        "danger";
+
+
+    deleteButton.addEventListener(
+        "click",
+        () => {
+
+            closeFileMenu();
+
+            deleteFile(
+                file
+            );
+        }
+    );
+
+
+    menu.append(
+        renameButton,
+        deleteButton
+    );
+
+
+    document.body.appendChild(
+        menu
+    );
+
+
+    const menuWidth =
+        130;
+
+    const menuHeight =
+        70;
+
+
+    let x =
+        event.clientX;
+
+    let y =
+        event.clientY;
+
+
+    if (
+        x + menuWidth >
+        window.innerWidth
+    ) {
+
+        x =
+            window.innerWidth -
+            menuWidth -
+            5;
+    }
+
+
+    if (
+        y + menuHeight >
+        window.innerHeight
+    ) {
+
+        y =
+            window.innerHeight -
+            menuHeight -
+            5;
+    }
+
+
+    menu.style.left =
+        `${x}px`;
+
+    menu.style.top =
+        `${y}px`;
+}
+
+
+function closeFileMenu() {
+
+    document
+        .querySelectorAll(
+            ".file-context-menu"
+        )
+        .forEach(
+            menu =>
+                menu.remove()
+        );
+}
+
+
+document.addEventListener(
+    "click",
+    closeFileMenu
+);
+
+
+window.addEventListener(
+    "blur",
+    closeFileMenu
+);
 /* =========================================================
    EVENTS
 ========================================================= */
@@ -2054,13 +2826,7 @@ codeModeButton.addEventListener(
 
 newFileButton.addEventListener(
     "click",
-
-    () => {
-
-        alert(
-            "New File is next in ApexCoder Studio."
-        );
-    }
+    createNewFile
 );
 
 
