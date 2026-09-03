@@ -1,17 +1,58 @@
-let presenceChannel = null;
+const accountCard =
+    document.getElementById(
+        "accountCard"
+    );
 
-let presenceUser = null;
+const accountAvatar =
+    document.getElementById(
+        "accountAvatar"
+    );
 
-let manualStatus = "online";
+const accountGamertag =
+    document.getElementById(
+        "accountGamertag"
+    );
 
-let realtimeUsers = new Map();
+const newProjectButton =
+    document.getElementById(
+        "newProjectButton"
+    );
+
+const projectSearch =
+    document.getElementById(
+        "projectSearch"
+    );
+
+const projectsGrid =
+    document.getElementById(
+        "projectsGrid"
+    );
+
+const emptyState =
+    document.getElementById(
+        "emptyState"
+    );
+
+const filterTabs =
+    document.querySelectorAll(
+        ".filter-tab"
+    );
+
+
+let currentUser = null;
+
+let currentFilter =
+    "all";
+
+let loadedProjects =
+    [];
 
 
 /* =========================
-   START PRESENCE
+   ACCOUNT
 ========================= */
 
-async function startPresence() {
+async function loadAccount() {
 
     const {
         data: { session }
@@ -22,417 +63,588 @@ async function startPresence() {
 
 
     if (!session?.user) {
+
+        window.location.href =
+            "login.html";
+
         return;
     }
 
 
-    presenceUser =
+    currentUser =
         session.user;
 
 
-    await loadManualStatus();
+    const {
+        data: profile,
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select(`
+                gamertag,
+                avatar_url
+            `)
+            .eq(
+                "id",
+                currentUser.id
+            )
+            .single();
 
 
-    presenceChannel =
-        supabaseClient.channel(
-            "apex-online-users",
-            {
-                config: {
-                    presence: {
-                        key:
-                            presenceUser.id
-                    }
-                }
-            }
+    if (
+        error ||
+        !profile
+    ) {
+
+        console.error(
+            "Unable to load account:",
+            error
         );
 
 
-    presenceChannel
-        .on(
-            "presence",
-            {
-                event: "sync"
-            },
-            handlePresenceSync
-        )
-        .on(
-            "presence",
-            {
-                event: "join"
-            },
-            handlePresenceSync
-        )
-        .on(
-            "presence",
-            {
-                event: "leave"
-            },
-            handlePresenceSync
-        );
+        accountGamertag.textContent =
+            "Account";
+
+    } else {
+
+        accountGamertag.textContent =
+            profile.gamertag;
 
 
-    await presenceChannel.subscribe(
-        async status => {
+        accountAvatar.src =
+            profile.avatar_url ||
+            "Default Apex Games Profile Picture.png";
 
-            if (
-                status ===
-                "SUBSCRIBED"
-            ) {
+    }
 
-                await updatePresence();
-            }
-        }
-    );
+
+    await loadProjects();
+
 }
 
 
 /* =========================
-   MANUAL STATUS
+   LOAD PROJECTS
 ========================= */
 
-async function loadManualStatus() {
+async function loadProjects() {
 
     const {
         data,
         error
     } =
         await supabaseClient
-            .from("profiles")
-            .select("status")
+            .from("projects")
+            .select(`
+                id,
+                name,
+                type,
+                created_at,
+                updated_at
+            `)
             .eq(
-                "id",
-                presenceUser.id
+                "owner_id",
+                currentUser.id
             )
-            .single();
-
-
-    if (error || !data) {
-
-        manualStatus =
-            "online";
-
-        return;
-    }
-
-
-    manualStatus =
-        normalizeManualStatus(
-            data.status
-        );
-}
-
-
-function normalizeManualStatus(
-    status
-) {
-
-    if (
-        status === "online" ||
-        status === "away" ||
-        status === "dnd" ||
-        status === "offline"
-    ) {
-
-        return status;
-    }
-
-
-    return "online";
-}
-
-
-/* =========================
-   UPDATE PRESENCE
-========================= */
-
-async function updatePresence() {
-
-    if (
-        !presenceChannel ||
-        !presenceUser
-    ) {
-        return;
-    }
-
-
-    /*
-        "offline" means
-        Appear Offline.
-
-        They are connected,
-        but we do NOT expose
-        them as online.
-    */
-
-    if (
-        manualStatus ===
-        "offline"
-    ) {
-
-        await presenceChannel.untrack();
-
-        return;
-    }
-
-
-    await presenceChannel.track({
-        user_id:
-            presenceUser.id,
-
-        status:
-            manualStatus,
-
-        online_at:
-            new Date()
-                .toISOString()
-    });
-}
-
-
-/* =========================
-   SET STATUS
-========================= */
-
-async function setPresenceStatus(
-    newStatus
-) {
-
-    const allowed = [
-        "online",
-        "away",
-        "dnd",
-        "offline"
-    ];
-
-
-    if (
-        !allowed.includes(
-            newStatus
-        )
-    ) {
-        return false;
-    }
-
-
-    if (!presenceUser) {
-        return false;
-    }
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("profiles")
-            .update({
-                status:
-                    newStatus,
-
-                updated_at:
-                    new Date()
-                        .toISOString()
-            })
-            .eq(
-                "id",
-                presenceUser.id
+            .order(
+                "updated_at",
+                {
+                    ascending: false
+                }
             );
 
 
     if (error) {
 
         console.error(
-            "Unable to update status:",
+            "Unable to load projects:",
             error
         );
 
-        return false;
-    }
 
-
-    manualStatus =
-        newStatus;
-
-
-    await updatePresence();
-
-
-    return true;
-}
-
-
-/* =========================
-   PRESENCE SYNC
-========================= */
-
-function handlePresenceSync() {
-
-    if (!presenceChannel) {
         return;
     }
 
 
-    const state =
-        presenceChannel
-            .presenceState();
+    loadedProjects =
+        data || [];
 
 
-    realtimeUsers =
-        new Map();
+    renderProjects();
+
+}
 
 
-    Object.values(state)
-        .flat()
-        .forEach(entry => {
+/* =========================
+   SAFE TEXT
+========================= */
+
+function escapeHTML(text) {
+
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+/* =========================
+   PROJECT LABELS
+========================= */
+
+function getProjectLabel(type) {
+
+    if (
+        type ===
+        "game"
+    ) {
+        return "Game";
+    }
+
+
+    if (
+        type ===
+        "website"
+    ) {
+        return "Website";
+    }
+
+
+    if (
+        type ===
+        "malware"
+    ) {
+        return "Malware Sandbox";
+    }
+
+
+    return "Project";
+}
+
+
+function getProjectSymbol(type) {
+
+    if (
+        type ===
+        "game"
+    ) {
+        return "◇";
+    }
+
+
+    if (
+        type ===
+        "website"
+    ) {
+        return "</>";
+    }
+
+
+    if (
+        type ===
+        "malware"
+    ) {
+        return "⌁";
+    }
+
+
+    return "•";
+}
+
+
+/* =========================
+   OPEN PROJECT
+========================= */
+
+function openProject(project) {
+
+    if (!project?.id) {
+        return;
+    }
+
+
+    const projectId =
+        encodeURIComponent(
+            project.id
+        );
+
+
+    if (
+        project.type ===
+        "game"
+    ) {
+
+        window.location.href =
+            `game-editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "website"
+    ) {
+
+        window.location.href =
+            `editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "malware"
+    ) {
+
+        alert(
+            "The ApexCoder Malware Sandbox Editor is coming soon."
+        );
+
+        return;
+    }
+
+
+    alert(
+        "ApexCoder doesn't recognize this project type."
+    );
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderProjects() {
+
+    const search =
+        projectSearch.value
+            .trim()
+            .toLowerCase();
+
+
+    const visibleProjects =
+        loadedProjects.filter(
+            project => {
+
+                const matchesFilter =
+                    currentFilter ===
+                        "all" ||
+                    project.type ===
+                        currentFilter;
+
+
+                const matchesSearch =
+                    project.name
+                        .toLowerCase()
+                        .includes(
+                            search
+                        );
+
+
+                return (
+                    matchesFilter &&
+                    matchesSearch
+                );
+
+            }
+        );
+
+
+    projectsGrid.innerHTML =
+        "";
+
+
+    visibleProjects.forEach(
+        project => {
+
+            const card =
+                document.createElement(
+                    "button"
+                );
+
+
+            card.type =
+                "button";
+
+
+            card.className =
+                "project-card saved-project-card";
+
+
+            card.dataset.projectType =
+                project.type;
+
+
+            card.innerHTML = `
+                <span class="project-icon">
+                    ${escapeHTML(
+                        getProjectSymbol(
+                            project.type
+                        )
+                    )}
+                </span>
+
+                <span class="project-type-label">
+                    ${escapeHTML(
+                        getProjectLabel(
+                            project.type
+                        )
+                    )}
+                </span>
+
+                <span class="project-name">
+                    ${escapeHTML(
+                        project.name
+                    )}
+                </span>
+
+                <span class="project-meta">
+                    Open project
+                </span>
+            `;
+
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openProject(
+                        project
+                    );
+
+                }
+            );
+
+
+            projectsGrid.appendChild(
+                card
+            );
+
+        }
+    );
+
+
+    addCreateCards();
+
+
+    const hasVisibleContent =
+        visibleProjects.length > 0 ||
+        currentFilter === "all" ||
+        currentFilter === "game" ||
+        currentFilter === "website" ||
+        currentFilter === "malware";
+
+
+    emptyState.hidden =
+        hasVisibleContent;
+
+}
+
+
+/* =========================
+   CREATE CARDS
+========================= */
+
+function addCreateCards() {
+
+    const createTypes = [
+        {
+            type: "game",
+            name: "New Game",
+            meta: "Start a game project"
+        },
+
+        {
+            type: "website",
+            name: "New Website",
+            meta: "Start a website project"
+        },
+
+        {
+            type: "malware",
+            name: "New Malware",
+            meta: "Create in a safe sandbox"
+        }
+    ];
+
+
+    createTypes.forEach(
+        item => {
 
             if (
-                !entry?.user_id
+                currentFilter !==
+                    "all" &&
+                currentFilter !==
+                    item.type
             ) {
                 return;
             }
 
 
-            realtimeUsers.set(
-                entry.user_id,
-                {
-                    user_id:
-                        entry.user_id,
-
-                    status:
-                        normalizeLiveStatus(
-                            entry.status
-                        ),
-
-                    online_at:
-                        entry.online_at ||
-                        null
-                }
-            );
-        });
+            const search =
+                projectSearch.value
+                    .trim()
+                    .toLowerCase();
 
 
-    window.dispatchEvent(
-        new CustomEvent(
-            "apex-presence-updated",
-            {
-                detail: {
-                    users:
-                        realtimeUsers
-                }
+            const searchText =
+                `${item.name} ${item.meta}`
+                    .toLowerCase();
+
+
+            if (
+                search &&
+                !searchText.includes(
+                    search
+                )
+            ) {
+                return;
             }
-        )
-    );
-}
 
 
-/* =========================
-   STATUS HELPERS
-========================= */
-
-function normalizeLiveStatus(
-    status
-) {
-
-    if (
-        status === "online" ||
-        status === "away" ||
-        status === "dnd"
-    ) {
-        return status;
-    }
+            const card =
+                document.createElement(
+                    "button"
+                );
 
 
-    return "online";
-}
+            card.type =
+                "button";
 
 
-function getLiveStatus(
-    userId
-) {
-
-    const entry =
-        realtimeUsers.get(
-            userId
-        );
+            card.className =
+                item.type ===
+                "malware"
+                    ? "project-card create-card sandbox"
+                    : "project-card create-card";
 
 
-    if (!entry) {
-        return "offline";
-    }
+            card.dataset.createType =
+                item.type;
 
 
-    return entry.status;
-}
+            card.innerHTML = `
+                <span class="project-icon">
+                    +
+                </span>
+
+                <span class="project-name">
+                    ${escapeHTML(
+                        item.name
+                    )}
+                </span>
+
+                <span class="project-meta">
+                    ${escapeHTML(
+                        item.meta
+                    )}
+                </span>
+            `;
 
 
-function isUserOnline(
-    userId
-) {
+            card.addEventListener(
+                "click",
+                () => {
 
-    return realtimeUsers.has(
-        userId
-    );
-}
+                    window.location.href =
+                        `new-project.html?type=${encodeURIComponent(item.type)}`;
 
-
-/* =========================
-   CLEANUP
-========================= */
-
-async function stopPresence() {
-
-    if (!presenceChannel) {
-        return;
-    }
-
-
-    try {
-
-        await presenceChannel
-            .untrack();
-
-    } catch (error) {
-
-        console.warn(
-            "Unable to untrack presence:",
-            error
-        );
-    }
-
-
-    try {
-
-        await supabaseClient
-            .removeChannel(
-                presenceChannel
+                }
             );
 
-    } catch (error) {
 
-        console.warn(
-            "Unable to remove presence channel:",
-            error
-        );
-    }
+            projectsGrid.appendChild(
+                card
+            );
 
+        }
+    );
 
-    presenceChannel =
-        null;
-
-
-    realtimeUsers =
-        new Map();
 }
 
 
 /* =========================
-   PAGE EXIT
+   FILTERS
 ========================= */
 
-window.addEventListener(
-    "pagehide",
+filterTabs.forEach(
+    tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                filterTabs.forEach(
+                    button => {
+
+                        button.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                tab.classList.add(
+                    "active"
+                );
+
+
+                currentFilter =
+                    tab.dataset.filter;
+
+
+                renderProjects();
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================
+   SEARCH
+========================= */
+
+projectSearch.addEventListener(
+    "input",
+    renderProjects
+);
+
+
+/* =========================
+   NEW PROJECT
+========================= */
+
+newProjectButton.addEventListener(
+    "click",
     () => {
 
-        stopPresence();
+        window.location.href =
+            "new-project.html";
+
+    }
+);
+
+
+/* =========================
+   ACCOUNT CARD
+========================= */
+
+accountCard.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "settings.html";
+
     }
 );
 
@@ -441,4 +653,4 @@ window.addEventListener(
    START
 ========================= */
 
-startPresence();
+loadAccount();
