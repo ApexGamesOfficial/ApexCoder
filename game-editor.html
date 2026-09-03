@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    <script type="importmap">
-{
-    "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
-    }
-}
-</script>
+
 <head>
     <meta charset="UTF-8">
 
@@ -23,18 +16,35 @@
         href="game-editor.css?v=1"
     >
 
+    <!-- THREE.JS IMPORT MAP -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <!-- SUPABASE -->
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
         defer
     ></script>
 
+    <!-- APEX ACCOUNT SYSTEM -->
     <script
-        src="auth.js"
+        src="auth.js?v=2"
         defer
     ></script>
 
-    <script src="game-editor.js?v=2"></script>
+    <!-- GAME EDITOR -->
+    <script
+        src="game-editor.js?v=3"
+        defer
+    ></script>
 </head>
+
 
 <body>
 
@@ -46,7 +56,9 @@
         id="editorLoading"
         class="loading-screen"
     >
+
         <div class="loading-brand">
+
             <div class="loading-logo">
                 &lt;/&gt;
             </div>
@@ -54,13 +66,20 @@
             <div class="loading-name">
                 ApexCoder
             </div>
+
         </div>
+
 
         <div class="loading-spinner"></div>
 
-        <div class="loading-text">
+
+        <div
+            id="loadingText"
+            class="loading-text"
+        >
             Opening game project...
         </div>
+
     </div>
 
 
@@ -72,19 +91,23 @@
         id="errorScreen"
         class="error-screen hidden"
     >
+
         <div class="error-card">
 
             <div class="error-badge">
                 APEXCODER
             </div>
 
+
             <h1 id="errorTitle">
                 Unable to open project
             </h1>
 
+
             <p id="errorMessage">
                 Something went wrong while opening this game project.
             </p>
+
 
             <a
                 href="projects.html"
@@ -94,6 +117,7 @@
             </a>
 
         </div>
+
     </div>
 
 
@@ -119,6 +143,7 @@
                     href="dashboard.html"
                     title="Back to ApexCoder"
                 >
+
                     <span class="brand-icon">
                         &lt;/&gt;
                     </span>
@@ -126,9 +151,12 @@
                     <span class="brand-name">
                         ApexCoder
                     </span>
+
                 </a>
 
+
                 <div class="top-divider"></div>
+
 
                 <div class="project-identity">
 
@@ -156,6 +184,7 @@
                     type="button"
                     title="Select"
                 >
+
                     <span class="tool-symbol">
                         ◇
                     </span>
@@ -163,6 +192,7 @@
                     <span>
                         Select
                     </span>
+
                 </button>
 
 
@@ -170,9 +200,10 @@
                     id="moveToolButton"
                     class="tool-button"
                     type="button"
-                    title="Move — coming next"
+                    title="Move"
                     disabled
                 >
+
                     <span class="tool-symbol">
                         ↔
                     </span>
@@ -180,6 +211,7 @@
                     <span>
                         Move
                     </span>
+
                 </button>
 
 
@@ -187,9 +219,10 @@
                     id="rotateToolButton"
                     class="tool-button"
                     type="button"
-                    title="Rotate — coming next"
+                    title="Rotate"
                     disabled
                 >
+
                     <span class="tool-symbol">
                         ↻
                     </span>
@@ -197,6 +230,7 @@
                     <span>
                         Rotate
                     </span>
+
                 </button>
 
 
@@ -204,9 +238,10 @@
                     id="scaleToolButton"
                     class="tool-button"
                     type="button"
-                    title="Scale — coming next"
+                    title="Scale"
                     disabled
                 >
+
                     <span class="tool-symbol">
                         ⤢
                     </span>
@@ -214,6 +249,7 @@
                     <span>
                         Scale
                     </span>
+
                 </button>
 
 
@@ -224,9 +260,10 @@
                     id="addPartButton"
                     class="tool-button"
                     type="button"
-                    title="Add Part — coming next"
+                    title="Add Part"
                     disabled
                 >
+
                     <span class="tool-symbol">
                         ＋
                     </span>
@@ -234,6 +271,7 @@
                     <span>
                         Part
                     </span>
+
                 </button>
 
             </div>
@@ -256,6 +294,7 @@
                     title="Play Mode — coming next"
                     disabled
                 >
+
                     <span class="play-icon">
                         ▶
                     </span>
@@ -263,6 +302,7 @@
                     <span>
                         Play
                     </span>
+
                 </button>
 
             </div>
@@ -290,6 +330,7 @@
                     ◫
                 </button>
 
+
                 <button
                     class="activity-button"
                     type="button"
@@ -298,6 +339,7 @@
                 >
                     &lt;/&gt;
                 </button>
+
 
                 <button
                     class="activity-button"
@@ -308,7 +350,9 @@
                     ◈
                 </button>
 
+
                 <div class="activity-spacer"></div>
+
 
                 <button
                     id="resetCameraButton"
@@ -323,7 +367,7 @@
 
 
             <!-- =============================================
-                 VIEWPORT AREA
+                 VIEWPORT
             ============================================== -->
 
             <main class="workspace">
@@ -345,17 +389,23 @@
 
                         <span>
                             Orbit
-                            <strong>Left Drag</strong>
+                            <strong>
+                                Left Drag
+                            </strong>
                         </span>
 
                         <span>
                             Pan
-                            <strong>Right Drag</strong>
+                            <strong>
+                                Right Drag
+                            </strong>
                         </span>
 
                         <span>
                             Zoom
-                            <strong>Scroll</strong>
+                            <strong>
+                                Scroll
+                            </strong>
                         </span>
 
                     </div>
@@ -371,7 +421,9 @@
                     <canvas id="gameCanvas"></canvas>
 
 
-                    <div class="viewport-corner viewport-top-left">
+                    <div
+                        class="viewport-corner viewport-top-left"
+                    >
 
                         <div class="viewport-mode-badge">
                             EDIT
@@ -380,7 +432,9 @@
                     </div>
 
 
-                    <div class="viewport-corner viewport-top-right">
+                    <div
+                        class="viewport-corner viewport-top-right"
+                    >
 
                         <button
                             id="homeCameraButton"
@@ -427,7 +481,7 @@
                         <button
                             class="panel-action"
                             type="button"
-                            title="Add object — coming next"
+                            title="Add object"
                             disabled
                         >
                             +
@@ -472,7 +526,9 @@
                                     type="button"
                                 >
 
-                                    <span class="tree-indent"></span>
+                                    <span
+                                        class="tree-indent"
+                                    ></span>
 
                                     <span class="tree-icon">
                                         ▣
@@ -491,7 +547,9 @@
                                     type="button"
                                 >
 
-                                    <span class="tree-indent"></span>
+                                    <span
+                                        class="tree-indent"
+                                    ></span>
 
                                     <span class="tree-icon">
                                         ◉
@@ -510,7 +568,9 @@
                                     type="button"
                                 >
 
-                                    <span class="tree-indent"></span>
+                                    <span
+                                        class="tree-indent"
+                                    ></span>
 
                                     <span class="tree-icon">
                                         ☀
@@ -709,5 +769,98 @@
 
     </div>
 
+
+    <!-- =====================================================
+         STARTUP DIAGNOSTIC
+    ====================================================== -->
+
+    <script>
+        window.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                const loadingText =
+                    document.getElementById(
+                        "loadingText"
+                    );
+
+
+                if (!loadingText) {
+                    return;
+                }
+
+
+                setTimeout(
+                    () => {
+
+                        const editor =
+                            document.getElementById(
+                                "gameEditor"
+                            );
+
+
+                        const error =
+                            document.getElementById(
+                                "errorScreen"
+                            );
+
+
+                        if (
+                            editor.classList.contains(
+                                "hidden"
+                            ) &&
+                            error.classList.contains(
+                                "hidden"
+                            )
+                        ) {
+
+                            loadingText.textContent =
+                                "Still loading... checking the 3D engine.";
+
+                        }
+
+                    },
+                    5000
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        const editor =
+                            document.getElementById(
+                                "gameEditor"
+                            );
+
+
+                        const error =
+                            document.getElementById(
+                                "errorScreen"
+                            );
+
+
+                        if (
+                            editor.classList.contains(
+                                "hidden"
+                            ) &&
+                            error.classList.contains(
+                                "hidden"
+                            )
+                        ) {
+
+                            loadingText.textContent =
+                                "Startup is taking too long. The 3D engine or network may be blocked.";
+
+                        }
+
+                    },
+                    12000
+                );
+
+            }
+        );
+    </script>
+
 </body>
+
 </html>
