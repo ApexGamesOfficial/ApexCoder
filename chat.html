@@ -1,0 +1,40 @@
+drop policy if exists
+"Friends can send messages"
+on public.messages;
+
+create policy "Friends can send messages"
+on public.messages
+for insert
+to authenticated
+with check (
+    auth.uid() = sender_id
+
+    and sender_id <> receiver_id
+
+    and exists (
+        select 1
+        from public.friend_requests
+        where
+            status = 'accepted'
+
+            and (
+                (
+                    friend_requests.sender_id =
+                        messages.sender_id
+                    and
+                    friend_requests.receiver_id =
+                        messages.receiver_id
+                )
+
+                or
+
+                (
+                    friend_requests.sender_id =
+                        messages.receiver_id
+                    and
+                    friend_requests.receiver_id =
+                        messages.sender_id
+                )
+            )
+    )
+);
