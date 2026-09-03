@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -12,46 +14,44 @@
 
     <link
         rel="stylesheet"
-        href="chat.css?v=1"
+        href="chat.css?v=4"
     >
 
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
-    <script
-        src="auth.js"
-        defer
-    ></script>
-
-    <script
-        src="chat.js?v=1"
-        defer
-    ></script>
 </head>
+
 
 <body>
 
     <div class="app-shell">
 
-        <aside class="sidebar">
+
+        <!-- =====================================
+             APEXCODER SIDEBAR
+        ====================================== -->
+
+        <aside class="main-sidebar">
 
             <button
                 class="account-card"
                 id="accountCard"
                 type="button"
             >
+
                 <img
-                    src="Default Apex Games Profile Picture.png"
-                    alt="Profile Picture"
-                    class="account-avatar"
                     id="accountAvatar"
+                    class="account-avatar"
+                    src="Default Apex Games Profile Picture.png"
+                    alt="Profile"
                 >
 
                 <div class="account-info">
 
                     <span
-                        class="account-gamertag"
+                        class="account-name"
                         id="accountGamertag"
                     >
                         Loading...
@@ -62,180 +62,400 @@
                     </span>
 
                 </div>
+
             </button>
 
 
-            <nav class="sidebar-nav">
+            <nav class="main-nav">
 
                 <a
                     href="dashboard.html"
-                    class="sidebar-link"
+                    class="nav-item"
                 >
-                    <span class="sidebar-dot"></span>
-                    Home
+                    <span class="nav-icon">⌂</span>
+                    <span>Home</span>
                 </a>
+
 
                 <a
                     href="projects.html"
-                    class="sidebar-link"
+                    class="nav-item"
                 >
-                    <span class="sidebar-dot"></span>
-                    Projects
+                    <span class="nav-icon">□</span>
+                    <span>Projects</span>
                 </a>
+
 
                 <a
                     href="discover.html"
-                    class="sidebar-link"
+                    class="nav-item"
                 >
-                    <span class="sidebar-dot"></span>
-                    Discover
+                    <span class="nav-icon">◇</span>
+                    <span>Discover</span>
                 </a>
+
 
                 <a
                     href="chat.html"
-                    class="sidebar-link active"
+                    class="nav-item active"
                 >
-                    <span class="sidebar-dot"></span>
-                    Chat
+                    <span class="nav-icon">○</span>
+                    <span>Chat</span>
                 </a>
+
 
                 <a
                     href="subscriptions.html"
-                    class="sidebar-link"
+                    class="nav-item"
                 >
-                    <span class="sidebar-dot"></span>
-                    Subscriptions
+                    <span class="nav-icon">☆</span>
+                    <span>Subscriptions</span>
                 </a>
+
 
                 <a
                     href="settings.html"
-                    class="sidebar-link"
+                    class="nav-item"
                 >
-                    <span class="sidebar-dot"></span>
-                    Settings
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
                 </a>
 
             </nav>
 
+
+            <div class="sidebar-brand">
+
+                <div class="sidebar-brand-logo">
+                    &lt;/&gt;
+                </div>
+
+                <div>
+                    <strong>ApexCoder</strong>
+                    <span>Build without boundaries.</span>
+                </div>
+
+            </div>
+
         </aside>
 
 
-        <main class="chat-page">
 
-            <aside class="chat-list-panel">
+        <!-- =====================================
+             FRIEND SIDEBAR
+        ====================================== -->
 
-                <div class="chat-list-header">
+        <aside class="friends-sidebar">
 
-                    <div>
-                        <p class="eyebrow">
-                            APEXCODER
-                        </p>
+            <div class="friends-header">
 
-                        <h1>
-                            Chat
-                        </h1>
-                    </div>
+                <div>
 
-                </div>
-
-
-                <div class="friend-search-wrap">
-
-                    <input
-                        type="search"
-                        id="friendSearch"
-                        placeholder="Search friends..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-
-                <div
-                    class="friends-list"
-                    id="friendsList"
-                >
-                    <p class="loading-text">
-                        Loading friends...
+                    <p class="section-label">
+                        APEXCODER
                     </p>
+
+                    <h1>
+                        Chat
+                    </h1>
+
                 </div>
 
-            </aside>
-
-
-            <section class="conversation-panel">
-
-                <div
-                    class="conversation-empty"
-                    id="conversationEmpty"
+                <button
+                    class="header-action"
+                    type="button"
+                    id="newChatButton"
+                    title="New conversation"
                 >
-                    <div class="empty-icon">
+                    +
+                </button>
+
+            </div>
+
+
+            <div class="friend-search">
+
+                <span class="search-icon">
+                    ⌕
+                </span>
+
+                <input
+                    type="search"
+                    id="friendSearch"
+                    placeholder="Search friends..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="friends-section-title">
+
+                <span>
+                    Friends
+                </span>
+
+                <span
+                    id="friendCount"
+                    class="friend-count"
+                >
+                    0
+                </span>
+
+            </div>
+
+
+            <div
+                class="friends-list"
+                id="friendsList"
+            >
+
+                <div class="sidebar-loading">
+                    Loading friends...
+                </div>
+
+            </div>
+
+        </aside>
+
+
+
+        <!-- =====================================
+             CONVERSATION AREA
+        ====================================== -->
+
+        <main class="conversation-area">
+
+
+            <!-- EMPTY STATE -->
+
+            <section
+                class="conversation-empty"
+                id="conversationEmpty"
+            >
+
+                <div class="empty-glow">
+
+                    <div class="empty-logo">
                         &lt;/&gt;
                     </div>
 
-                    <h2>
-                        Your conversations
-                    </h2>
-
-                    <p>
-                        Choose a friend to start chatting.
-                    </p>
                 </div>
 
 
-                <div
-                    class="conversation"
-                    id="conversation"
-                    hidden
-                >
+                <h2>
+                    Your conversations
+                </h2>
 
-                    <header class="conversation-header">
+                <p>
+                    Choose a friend from the sidebar to start chatting.
+                </p>
 
-                        <div class="conversation-user">
+                <div class="empty-feature-row">
 
-                            <div class="avatar-wrap">
+                    <div>
+                        <span>💬</span>
+                        Messages
+                    </div>
 
-                                <img
-                                    src="Default Apex Games Profile Picture.png"
-                                    alt="Friend"
-                                    class="conversation-avatar"
-                                    id="conversationAvatar"
-                                >
+                    <div>
+                        <span>😀</span>
+                        Emoji
+                    </div>
 
-                                <span
-                                    class="status-dot offline"
-                                    id="conversationStatus"
-                                ></span>
+                    <div>
+                        <span>GIF</span>
+                        GIFs
+                    </div>
 
-                            </div>
+                    <div>
+                        <span>🎙</span>
+                        Voice
+                    </div>
+
+                </div>
+
+            </section>
 
 
-                            <div>
 
-                                <h2
-                                    id="conversationName"
-                                >
-                                    Friend
-                                </h2>
+            <!-- ACTIVE CONVERSATION -->
 
-                                <span
-                                    class="conversation-status-text"
-                                    id="conversationStatusText"
-                                >
-                                    Offline
-                                </span>
+            <section
+                class="conversation"
+                id="conversation"
+                hidden
+            >
 
-                            </div>
+
+                <!-- HEADER -->
+
+                <header class="conversation-header">
+
+                    <div class="conversation-person">
+
+                        <div class="conversation-avatar-wrap">
+
+                            <img
+                                id="conversationAvatar"
+                                class="conversation-avatar"
+                                src="Default Apex Games Profile Picture.png"
+                                alt="Friend"
+                            >
+
+                            <span
+                                id="conversationStatus"
+                                class="presence-dot offline"
+                            ></span>
 
                         </div>
 
-                    </header>
+
+                        <div class="conversation-person-info">
+
+                            <h2
+                                id="conversationName"
+                            >
+                                Friend
+                            </h2>
+
+                            <span
+                                id="conversationStatusText"
+                                class="conversation-presence"
+                            >
+                                Offline
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="conversation-actions">
+
+                        <button
+                            id="voiceCallButton"
+                            class="conversation-action"
+                            type="button"
+                            title="Voice call"
+                        >
+                            ☎
+                        </button>
+
+
+                        <button
+                            id="conversationMoreButton"
+                            class="conversation-action"
+                            type="button"
+                            title="More options"
+                        >
+                            •••
+                        </button>
+
+                    </div>
+
+                </header>
+
+
+
+                <!-- MESSAGES -->
+
+                <div
+                    class="messages"
+                    id="messages"
+                ></div>
+
+
+
+                <!-- FEATURE NOTICE -->
+
+                <div
+                    class="feature-notice"
+                    id="featureNotice"
+                    hidden
+                >
+
+                    <span
+                        id="featureNoticeText"
+                    ></span>
+
+                    <button
+                        id="closeFeatureNotice"
+                        type="button"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+
+                <!-- EMOJI PICKER -->
+
+                <div
+                    class="emoji-picker"
+                    id="emojiPicker"
+                    hidden
+                >
+
+                    <div class="emoji-picker-header">
+
+                        <strong>
+                            Emoji
+                        </strong>
+
+                        <span>
+                            Pick one
+                        </span>
+
+                    </div>
 
 
                     <div
-                        class="messages"
-                        id="messages"
+                        class="emoji-grid"
+                        id="emojiGrid"
                     ></div>
+
+                </div>
+
+
+
+                <!-- MESSAGE BAR -->
+
+                <div class="message-composer">
+
+                    <div class="composer-tools">
+
+                        <button
+                            id="emojiButton"
+                            class="composer-tool"
+                            type="button"
+                            title="Emoji"
+                        >
+                            😀
+                        </button>
+
+
+                        <button
+                            id="gifButton"
+                            class="composer-tool gif-tool"
+                            type="button"
+                            title="GIF"
+                        >
+                            GIF
+                        </button>
+
+
+                        <button
+                            id="voiceButton"
+                            class="composer-tool"
+                            type="button"
+                            title="Voice message"
+                        >
+                            🎙
+                        </button>
+
+                    </div>
 
 
                     <form
@@ -245,16 +465,16 @@
 
                         <textarea
                             id="messageInput"
-                            maxlength="2000"
                             rows="1"
+                            maxlength="2000"
                             placeholder="Message..."
-                            autocomplete="off"
                         ></textarea>
 
+
                         <button
-                            type="submit"
-                            class="send-button"
                             id="sendButton"
+                            class="send-button"
+                            type="submit"
                             disabled
                         >
                             Send
@@ -264,20 +484,29 @@
 
                 </div>
 
+
             </section>
 
         </main>
 
     </div>
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- ApexCoder -->
-    <script src="auth.js" defer></script>
-<script src="presence.js?v=1" defer></script>
-<script src="chat.js?v=3" defer></script>
+
+    <script
+        src="auth.js"
+        defer
+    ></script>
+
+    <script
+        src="presence.js?v=1"
+        defer
+    ></script>
+
+    <script
+        src="chat.js?v=4"
+        defer
+    ></script>
 
 </body>
-</html>
-</body>
+
 </html>
