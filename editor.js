@@ -1152,17 +1152,24 @@ function openFile(
 
 
     updateProperties(
-        file
-    );
+    file
+);
 
 
-    renderExplorer();
+renderExplorer();
 
-    renderTabs();
+renderTabs();
+
+
+showCode();
+
+editor.focus();
+}
+
+
 /* =========================================================
    PROPERTIES
 ========================================================= */
-
 function updateProperties(
     file
 ) {
