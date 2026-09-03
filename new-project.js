@@ -69,12 +69,11 @@ async function loadUser() {
 
 function setProjectType(type) {
 
-    const validTypes =
-        [
-            "game",
-            "website",
-            "malware"
-        ];
+    const validTypes = [
+        "game",
+        "website",
+        "malware"
+    ];
 
 
     if (
@@ -88,31 +87,39 @@ function setProjectType(type) {
         type;
 
 
-    typeCards.forEach(card => {
+    typeCards.forEach(
+        card => {
 
-        card.classList.toggle(
-            "selected",
-            card.dataset.type === type
-        );
-    });
+            card.classList.toggle(
+                "selected",
+                card.dataset.type ===
+                type
+            );
+
+        }
+    );
 
 
     updateCreateButton();
 }
 
 
-typeCards.forEach(card => {
+typeCards.forEach(
+    card => {
 
-    card.addEventListener(
-        "click",
-        () => {
+        card.addEventListener(
+            "click",
+            () => {
 
-            setProjectType(
-                card.dataset.type
-            );
-        }
-    );
-});
+                setProjectType(
+                    card.dataset.type
+                );
+
+            }
+        );
+
+    }
+);
 
 
 function selectTypeFromURL() {
@@ -124,11 +131,17 @@ function selectTypeFromURL() {
 
 
     const type =
-        params.get("type");
+        params.get(
+            "type"
+        );
 
 
     if (type) {
-        setProjectType(type);
+
+        setProjectType(
+            type
+        );
+
     }
 }
 
@@ -146,11 +159,15 @@ function updateCreateButton() {
 
 
     const hasType =
-        projectType.value !== "";
+        projectType.value !==
+        "";
 
 
     createButton.disabled =
-        !(hasName && hasType);
+        !(
+            hasName &&
+            hasType
+        );
 }
 
 
@@ -161,23 +178,115 @@ projectName.addEventListener(
 
 
 /* =========================
+   PROJECT ROUTING
+========================= */
+
+function openCreatedProject(
+    project
+) {
+
+    if (
+        !project ||
+        !project.id
+    ) {
+
+        return;
+    }
+
+
+    const projectId =
+        encodeURIComponent(
+            project.id
+        );
+
+
+    if (
+        project.type ===
+        "game"
+    ) {
+
+        window.location.href =
+            `game-editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "website"
+    ) {
+
+        window.location.href =
+            `editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "malware"
+    ) {
+
+        formMessage.textContent =
+            "Malware Sandbox editor is coming soon.";
+
+
+        formMessage.className =
+            "form-message success";
+
+
+        createButton.disabled =
+            false;
+
+
+        createButton.textContent =
+            "Create Project";
+
+
+        return;
+    }
+
+
+    formMessage.textContent =
+        "Unknown project type.";
+
+
+    formMessage.className =
+        "form-message error";
+
+
+    createButton.disabled =
+        false;
+
+
+    createButton.textContent =
+        "Create Project";
+}
+
+
+/* =========================
    CREATE PROJECT
 ========================= */
 
 projectForm.addEventListener(
     "submit",
-    async (event) => {
+    async event => {
 
         event.preventDefault();
 
 
         if (!currentUser) {
+
             return;
         }
 
 
         const name =
-            projectName.value.trim();
+            projectName.value
+                .trim();
+
 
         const type =
             projectType.value;
@@ -187,6 +296,7 @@ projectForm.addEventListener(
             !name ||
             !type
         ) {
+
             return;
         }
 
@@ -194,12 +304,14 @@ projectForm.addEventListener(
         createButton.disabled =
             true;
 
+
         createButton.textContent =
             "Creating...";
 
 
         formMessage.textContent =
             "";
+
 
         formMessage.className =
             "form-message";
@@ -210,7 +322,9 @@ projectForm.addEventListener(
             error
         } =
             await supabaseClient
-                .from("projects")
+                .from(
+                    "projects"
+                )
                 .insert({
                     owner_id:
                         currentUser.id,
@@ -221,7 +335,12 @@ projectForm.addEventListener(
                     type:
                         type
                 })
-                .select()
+                .select(`
+                    id,
+                    name,
+                    type,
+                    owner_id
+                `)
                 .single();
 
 
@@ -245,6 +364,7 @@ projectForm.addEventListener(
             createButton.disabled =
                 false;
 
+
             createButton.textContent =
                 "Create Project";
 
@@ -261,13 +381,9 @@ projectForm.addEventListener(
             "form-message success";
 
 
-        /*
-            Next step:
-            this becomes the editor.
-        */
-
-        window.location.href =
-            `editor.html?project=${encodeURIComponent(project.id)}`;
+        openCreatedProject(
+            project
+        );
     }
 );
 
