@@ -344,35 +344,33 @@
 
     async function loadThree() {
 
-        rendererStatus.textContent =
-            "Loading 3D Engine";
+    rendererStatus.textContent =
+        "Loading 3D Engine";
 
 
-        const threeModule =
-            await import(
-                "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
-            );
+    const threeModule =
+        await import(
+            "three"
+        );
 
 
-        const controlsModule =
-            await import(
-                "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js"
-            );
+    const controlsModule =
+        await import(
+            "three/addons/controls/OrbitControls.js"
+        );
 
 
-        THREE =
-            threeModule;
+    THREE =
+        threeModule;
 
 
-        OrbitControls =
-            controlsModule.OrbitControls;
+    OrbitControls =
+        controlsModule.OrbitControls;
 
 
-        rendererStatus.textContent =
-            "Three.js";
-
-    }
-
+    rendererStatus.textContent =
+        "Three.js";
+}
 
     /* =====================================================
        CREATE SCENE
