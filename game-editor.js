@@ -1,6 +1,6 @@
 /* =========================================================
    APEXCODER GAME EDITOR
-   V0.2 — SELECTION + PARTS + TRANSFORM GIZMOS
+   V0.2 — WORLD EDITING FOUNDATION
 ========================================================= */
 
 (() => {
@@ -13,133 +13,219 @@
     ====================================================== */
 
     const editorLoading =
-        document.getElementById("editorLoading");
+        document.getElementById(
+            "editorLoading"
+        );
 
     const errorScreen =
-        document.getElementById("errorScreen");
+        document.getElementById(
+            "errorScreen"
+        );
 
     const errorTitle =
-        document.getElementById("errorTitle");
+        document.getElementById(
+            "errorTitle"
+        );
 
     const errorMessage =
-        document.getElementById("errorMessage");
+        document.getElementById(
+            "errorMessage"
+        );
 
     const gameEditor =
-        document.getElementById("gameEditor");
+        document.getElementById(
+            "gameEditor"
+        );
 
     const projectName =
-        document.getElementById("projectName");
+        document.getElementById(
+            "projectName"
+        );
 
     const explorerProjectName =
-        document.getElementById("explorerProjectName");
+        document.getElementById(
+            "explorerProjectName"
+        );
 
     const statusProject =
-        document.getElementById("statusProject");
+        document.getElementById(
+            "statusProject"
+        );
 
     const rendererStatus =
-        document.getElementById("rendererStatus");
+        document.getElementById(
+            "rendererStatus"
+        );
 
     const objectCountStatus =
-        document.getElementById("objectCountStatus");
+        document.getElementById(
+            "objectCountStatus"
+        );
 
     const viewportContainer =
-        document.getElementById("viewportContainer");
+        document.getElementById(
+            "viewportContainer"
+        );
 
     const canvas =
-        document.getElementById("gameCanvas");
+        document.getElementById(
+            "gameCanvas"
+        );
 
     const resetCameraButton =
-        document.getElementById("resetCameraButton");
+        document.getElementById(
+            "resetCameraButton"
+        );
 
     const homeCameraButton =
-        document.getElementById("homeCameraButton");
+        document.getElementById(
+            "homeCameraButton"
+        );
 
     const workspaceTreeItem =
-        document.getElementById("workspaceTreeItem");
-
-    const baseplateTreeItem =
-        document.getElementById("baseplateTreeItem");
-
-    const cameraTreeItem =
-        document.getElementById("cameraTreeItem");
-
-    const lightingTreeItem =
-        document.getElementById("lightingTreeItem");
+        document.getElementById(
+            "workspaceTreeItem"
+        );
 
     const propertiesEmpty =
-        document.getElementById("propertiesEmpty");
+        document.getElementById(
+            "propertiesEmpty"
+        );
 
     const propertiesContent =
-        document.getElementById("propertiesContent");
+        document.getElementById(
+            "propertiesContent"
+        );
 
     const propertyName =
-        document.getElementById("propertyName");
+        document.getElementById(
+            "propertyName"
+        );
 
     const propertyType =
-        document.getElementById("propertyType");
+        document.getElementById(
+            "propertyType"
+        );
 
     const propertyPosition =
-        document.getElementById("propertyPosition");
+        document.getElementById(
+            "propertyPosition"
+        );
 
     const propertyRotation =
-        document.getElementById("propertyRotation");
+        document.getElementById(
+            "propertyRotation"
+        );
 
     const propertyScale =
-        document.getElementById("propertyScale");
+        document.getElementById(
+            "propertyScale"
+        );
 
     const selectToolButton =
-        document.getElementById("selectToolButton");
+        document.getElementById(
+            "selectToolButton"
+        );
 
     const moveToolButton =
-        document.getElementById("moveToolButton");
+        document.getElementById(
+            "moveToolButton"
+        );
 
     const rotateToolButton =
-        document.getElementById("rotateToolButton");
+        document.getElementById(
+            "rotateToolButton"
+        );
 
     const scaleToolButton =
-        document.getElementById("scaleToolButton");
+        document.getElementById(
+            "scaleToolButton"
+        );
 
     const addPartButton =
-        document.getElementById("addPartButton");
+        document.getElementById(
+            "addPartButton"
+        );
 
 
     /* =====================================================
        STATE
     ====================================================== */
 
-    let currentSession = null;
-    let currentProject = null;
+    let currentSession =
+        null;
 
-    let THREE = null;
-    let OrbitControls = null;
-    let TransformControls = null;
+    let currentProject =
+        null;
 
-    let renderer = null;
-    let scene = null;
-    let camera = null;
-    let controls = null;
-    let transformControls = null;
 
-    let baseplate = null;
-    let selectedSceneObject = null;
+    let THREE =
+        null;
 
-    let resizeObserver = null;
-    let animationFrame = null;
+    let OrbitControls =
+        null;
 
-    let raycaster = null;
-    let pointer = null;
+    let TransformControls =
+        null;
 
-    let selectionHelper = null;
 
-    let currentTool = "select";
+    let renderer =
+        null;
 
-    const sceneObjects = [];
+    let scene =
+        null;
 
-    let partCounter = 1;
+    let camera =
+        null;
+
+    let controls =
+        null;
+
+    let transformControls =
+        null;
+
+    let transformHelper =
+        null;
+
+
+    let baseplate =
+        null;
+
+    let selectedSceneObject =
+        null;
+
+    let selectionHelper =
+        null;
+
+
+    let raycaster =
+        null;
+
+    let pointer =
+        null;
+
+
+    let resizeObserver =
+        null;
+
+    let animationFrame =
+        null;
+
+
+    let currentTool =
+        "select";
+
+
+    let partCounter =
+        1;
+
+
+    const sceneObjects =
+        [];
 
 
     /* =====================================================
-       BOOT
+       START
     ====================================================== */
 
     document.addEventListener(
@@ -168,12 +254,15 @@
 
             showEditor();
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
             console.error(
                 "ApexCoder Game Editor startup error:",
                 error
             );
+
 
             showError(
                 "Unable to open Game Editor",
@@ -187,12 +276,14 @@
 
 
     /* =====================================================
-       HELPERS
+       WAIT FOR SUPABASE
     ====================================================== */
 
     async function waitForSupabase() {
 
-        const maxAttempts = 100;
+        const maxAttempts =
+            100;
+
 
         for (
             let attempt = 0;
@@ -204,12 +295,18 @@
                 typeof supabaseClient !==
                 "undefined"
             ) {
+
                 return;
+
             }
 
-            await sleep(50);
+
+            await sleep(
+                50
+            );
 
         }
+
 
         throw new Error(
             "ApexCoder could not connect to the account system."
@@ -218,14 +315,18 @@
     }
 
 
-    function sleep(milliseconds) {
+    function sleep(
+        milliseconds
+    ) {
 
         return new Promise(
             resolve => {
+
                 setTimeout(
                     resolve,
                     milliseconds
                 );
+
             }
         );
 
@@ -242,19 +343,28 @@
             data,
             error
         } =
-            await supabaseClient.auth.getSession();
+            await supabaseClient
+                .auth
+                .getSession();
+
 
         if (error) {
+
             throw error;
+
         }
 
+
         currentSession =
-            data?.session || null;
+            data?.session ||
+            null;
+
 
         if (!currentSession) {
 
             window.location.href =
                 "login.html";
+
 
             throw new Error(
                 "No active Apex Games Account session."
@@ -276,8 +386,12 @@
                 window.location.search
             );
 
+
         const projectId =
-            parameters.get("project");
+            parameters.get(
+                "project"
+            );
+
 
         if (!projectId) {
 
@@ -293,10 +407,17 @@
             error
         } =
             await supabaseClient
-                .from("projects")
-                .select(
-                    "id, owner_id, name, type, created_at, updated_at"
+                .from(
+                    "projects"
                 )
+                .select(`
+                    id,
+                    owner_id,
+                    name,
+                    type,
+                    created_at,
+                    updated_at
+                `)
                 .eq(
                     "id",
                     projectId
@@ -305,7 +426,9 @@
 
 
         if (error) {
+
             throw error;
+
         }
 
 
@@ -349,11 +472,14 @@
         projectName.textContent =
             currentProject.name;
 
+
         explorerProjectName.textContent =
             currentProject.name;
 
+
         statusProject.textContent =
             currentProject.name;
+
 
         document.title =
             `${currentProject.name} — ApexCoder Game Editor`;
@@ -362,7 +488,7 @@
 
 
     /* =====================================================
-       LOAD THREE.JS
+       THREE.JS
     ====================================================== */
 
     async function loadThree() {
@@ -372,12 +498,16 @@
 
 
         const threeModule =
-            await import("three");
+            await import(
+                "three"
+            );
+
 
         const orbitModule =
             await import(
                 "three/addons/controls/OrbitControls.js"
             );
+
 
         const transformModule =
             await import(
@@ -388,11 +518,15 @@
         THREE =
             threeModule;
 
+
         OrbitControls =
-            orbitModule.OrbitControls;
+            orbitModule
+                .OrbitControls;
+
 
         TransformControls =
-            transformModule.TransformControls;
+            transformModule
+                .TransformControls;
 
 
         rendererStatus.textContent =
@@ -402,21 +536,29 @@
 
 
     /* =====================================================
-       CREATE SCENE
+       SCENE CREATION
     ====================================================== */
 
     function createStudioScene() {
 
         renderer =
             new THREE.WebGLRenderer({
-                canvas,
-                antialias: true
+                canvas:
+                    canvas,
+
+                antialias:
+                    true,
+
+                alpha:
+                    false
             });
 
 
         renderer.setPixelRatio(
             Math.min(
-                window.devicePixelRatio || 1,
+                window.devicePixelRatio ||
+                1,
+
                 2
             )
         );
@@ -452,6 +594,10 @@
             );
 
 
+        /* =============================
+           CAMERA
+        ============================= */
+
         camera =
             new THREE.PerspectiveCamera(
                 55,
@@ -463,6 +609,10 @@
 
         resetCamera();
 
+
+        /* =============================
+           ORBIT CONTROLS
+        ============================= */
 
         controls =
             new OrbitControls(
@@ -505,6 +655,10 @@
         controls.update();
 
 
+        /* =============================
+           RAYCASTING
+        ============================= */
+
         raycaster =
             new THREE.Raycaster();
 
@@ -513,7 +667,9 @@
             new THREE.Vector2();
 
 
-        /* GRID */
+        /* =============================
+           GRID
+        ============================= */
 
         const grid =
             new THREE.GridHelper(
@@ -532,10 +688,14 @@
             true;
 
 
-        scene.add(grid);
+        scene.add(
+            grid
+        );
 
 
-        /* BASEPLATE */
+        /* =============================
+           BASEPLATE
+        ============================= */
 
         const baseplateGeometry =
             new THREE.BoxGeometry(
@@ -547,9 +707,14 @@
 
         const baseplateMaterial =
             new THREE.MeshStandardMaterial({
-                color: 0x64666b,
-                roughness: 0.9,
-                metalness: 0
+                color:
+                    0x64666b,
+
+                roughness:
+                    0.9,
+
+                metalness:
+                    0
             });
 
 
@@ -587,7 +752,9 @@
             true;
 
 
-        scene.add(baseplate);
+        scene.add(
+            baseplate
+        );
 
 
         registerSceneObject(
@@ -595,7 +762,9 @@
         );
 
 
-        /* LIGHTING */
+        /* =============================
+           ENVIRONMENT LIGHT
+        ============================= */
 
         const hemisphereLight =
             new THREE.HemisphereLight(
@@ -603,6 +772,10 @@
                 0x35363a,
                 1.45
             );
+
+
+        hemisphereLight.name =
+            "Environment Light";
 
 
         hemisphereLight.userData.editorOnly =
@@ -614,11 +787,19 @@
         );
 
 
+        /* =============================
+           SUN
+        ============================= */
+
         const sunLight =
             new THREE.DirectionalLight(
                 0xffffff,
                 2.35
             );
+
+
+        sunLight.name =
+            "Sun";
 
 
         sunLight.position.set(
@@ -640,6 +821,22 @@
             2048;
 
 
+        sunLight.shadow.camera.left =
+            -45;
+
+
+        sunLight.shadow.camera.right =
+            45;
+
+
+        sunLight.shadow.camera.top =
+            45;
+
+
+        sunLight.shadow.camera.bottom =
+            -45;
+
+
         sunLight.userData.editorOnly =
             true;
 
@@ -649,7 +846,9 @@
         );
 
 
-        /* DEFAULT PART */
+        /* =============================
+           STARTING PART
+        ============================= */
 
         const starterPart =
             createPartObject(
@@ -659,7 +858,7 @@
 
         starterPart.position.set(
             0,
-            0.5,
+            1,
             0
         );
 
@@ -674,7 +873,9 @@
         );
 
 
-        /* TRANSFORM CONTROLS */
+        /* =============================
+           TRANSFORM CONTROLS
+        ============================= */
 
         transformControls =
             new TransformControls(
@@ -683,43 +884,73 @@
             );
 
 
-        transformControls.addEventListener(
-            "dragging-changed",
-            event => {
+        /*
+            Newer Three.js versions expose
+            the visible gizmo through getHelper().
+        */
 
-                controls.enabled =
-                    !event.value;
+        if (
+            typeof transformControls
+                .getHelper ===
+            "function"
+        ) {
 
-            }
-        );
+            transformHelper =
+                transformControls
+                    .getHelper();
 
 
-        transformControls.addEventListener(
-            "objectChange",
-            () => {
+            scene.add(
+                transformHelper
+            );
 
-                if (
-                    selectedSceneObject
-                ) {
+        }
+
+
+        transformControls
+            .addEventListener(
+                "dragging-changed",
+                event => {
+
+                    if (controls) {
+
+                        controls.enabled =
+                            !event.value;
+
+                    }
+
+                }
+            );
+
+
+        transformControls
+            .addEventListener(
+                "objectChange",
+                () => {
+
+                    if (
+                        !selectedSceneObject
+                    ) {
+
+                        return;
+
+                    }
+
 
                     updateProperties(
                         selectedSceneObject
                     );
 
+
                     updateSelectionHelper();
 
                 }
-
-            }
-        );
+            );
 
 
-        scene.add(
-            transformControls
-        );
-
-
-        /* RESIZE */
+        /* =============================
+           RESIZE
+        ============================= */
 
         resizeRenderer();
 
@@ -741,6 +972,10 @@
         );
 
 
+        /* =============================
+           START LOOP
+        ============================= */
+
         animate();
 
 
@@ -750,11 +985,11 @@
 
 
     /* =====================================================
-       PART CREATION
+       PARTS
     ====================================================== */
 
     function createPartObject(
-        name = null
+        requestedName = null
     ) {
 
         const geometry =
@@ -767,9 +1002,14 @@
 
         const material =
             new THREE.MeshStandardMaterial({
-                color: 0xb7b9bd,
-                roughness: 0.72,
-                metalness: 0
+                color:
+                    0xb7b9bd,
+
+                roughness:
+                    0.72,
+
+                metalness:
+                    0
             });
 
 
@@ -780,9 +1020,22 @@
             );
 
 
-        part.name =
-            name ||
-            `Part${partCounter++}`;
+        if (requestedName) {
+
+            part.name =
+                requestedName;
+
+        }
+
+        else {
+
+            part.name =
+                `Part${partCounter}`;
+
+
+            partCounter++;
+
+        }
 
 
         part.castShadow =
@@ -812,6 +1065,16 @@
 
     function addPart() {
 
+        if (
+            !scene ||
+            !camera
+        ) {
+
+            return;
+
+        }
+
+
         const part =
             createPartObject();
 
@@ -829,9 +1092,10 @@
             camera.position
                 .clone()
                 .add(
-                    direction.multiplyScalar(
-                        8
-                    )
+                    direction
+                        .multiplyScalar(
+                            8
+                        )
                 );
 
 
@@ -876,24 +1140,55 @@
 
 
     /* =====================================================
-       REGISTER OBJECT
+       OBJECT REGISTRATION
     ====================================================== */
 
     function registerSceneObject(
         object
     ) {
 
+        if (!object) {
+            return;
+        }
+
+
         if (
-            !sceneObjects.includes(
+            sceneObjects.includes(
                 object
             )
         ) {
 
-            sceneObjects.push(
-                object
-            );
+            return;
 
         }
+
+
+        sceneObjects.push(
+            object
+        );
+
+    }
+
+
+    /* =====================================================
+       TREE SELECTION
+    ====================================================== */
+
+    function clearTreeSelection() {
+
+        document
+            .querySelectorAll(
+                ".tree-item.selected"
+            )
+            .forEach(
+                item => {
+
+                    item.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
 
     }
 
@@ -907,14 +1202,28 @@
     ) {
 
         if (
-            transformControls?.dragging
+            event.button !==
+            0
         ) {
+
             return;
+
+        }
+
+
+        if (
+            transformControls
+                ?.dragging
+        ) {
+
+            return;
+
         }
 
 
         const rect =
-            renderer.domElement
+            renderer
+                .domElement
                 .getBoundingClientRect();
 
 
@@ -925,7 +1234,9 @@
                     rect.left
                 ) /
                 rect.width
-            ) * 2 - 1;
+            ) *
+            2 -
+            1;
 
 
         pointer.y =
@@ -935,7 +1246,9 @@
                     rect.top
                 ) /
                 rect.height
-            ) * 2 + 1;
+            ) *
+            2 +
+            1;
 
 
         raycaster.setFromCamera(
@@ -952,7 +1265,8 @@
 
 
         if (
-            intersections.length === 0
+            intersections.length ===
+            0
         ) {
 
             clearSelection();
@@ -962,19 +1276,20 @@
         }
 
 
-        const hit =
-            intersections[0].object;
+        const hitObject =
+            intersections[0]
+                .object;
 
 
         selectSceneObject(
-            hit
+            hitObject
         );
 
     }
 
 
     /* =====================================================
-       SELECTION
+       SELECT OBJECT
     ====================================================== */
 
     function selectSceneObject(
@@ -1010,20 +1325,27 @@
 
 
         if (
-            object.userData?.locked
+            object.userData
+                ?.locked
         ) {
 
-            transformControls.detach();
+            transformControls
+                ?.detach();
 
-            setTool(
-                "select"
-            );
 
-        } else {
+            currentTool =
+                "select";
 
-            attachTransformForCurrentTool();
+
+            updateToolButtons();
+
+
+            return;
 
         }
+
+
+        attachTransformForCurrentTool();
 
     }
 
@@ -1034,7 +1356,8 @@
             null;
 
 
-        transformControls.detach();
+        transformControls
+            ?.detach();
 
 
         removeSelectionHelper();
@@ -1049,7 +1372,7 @@
 
 
     /* =====================================================
-       SELECTION HELPER
+       SELECTION OUTLINE
     ====================================================== */
 
     function createSelectionHelper(
@@ -1063,7 +1386,9 @@
             !object ||
             !object.geometry
         ) {
+
             return;
+
         }
 
 
@@ -1074,16 +1399,25 @@
             );
 
 
-        selectionHelper.material.depthTest =
-            false;
+        if (
+            selectionHelper.material
+        ) {
+
+            selectionHelper.material
+                .depthTest =
+                false;
 
 
-        selectionHelper.material.transparent =
-            true;
+            selectionHelper.material
+                .transparent =
+                true;
 
 
-        selectionHelper.material.opacity =
-            0.8;
+            selectionHelper.material
+                .opacity =
+                0.85;
+
+        }
 
 
         selectionHelper.renderOrder =
@@ -1100,21 +1434,28 @@
     function updateSelectionHelper() {
 
         if (
-            selectionHelper &&
-            selectedSceneObject
+            !selectionHelper ||
+            !selectedSceneObject
         ) {
 
-            selectionHelper.update();
+            return;
 
         }
+
+
+        selectionHelper.update();
 
     }
 
 
     function removeSelectionHelper() {
 
-        if (!selectionHelper) {
+        if (
+            !selectionHelper
+        ) {
+
             return;
+
         }
 
 
@@ -1123,10 +1464,33 @@
         );
 
 
-        selectionHelper.geometry?.dispose();
+        selectionHelper.geometry
+            ?.dispose();
 
 
-        selectionHelper.material?.dispose();
+        if (
+            Array.isArray(
+                selectionHelper.material
+            )
+        ) {
+
+            selectionHelper.material
+                .forEach(
+                    material => {
+
+                        material.dispose();
+
+                    }
+                );
+
+        }
+
+        else {
+
+            selectionHelper.material
+                ?.dispose();
+
+        }
 
 
         selectionHelper =
@@ -1157,60 +1521,79 @@
 
     function updateToolButtons() {
 
-        [
+        const buttons = [
             selectToolButton,
             moveToolButton,
             rotateToolButton,
             scaleToolButton
-        ].forEach(
+        ];
+
+
+        buttons.forEach(
             button => {
-                button.classList.remove(
-                    "active"
-                );
+
+                button
+                    ?.classList
+                    .remove(
+                        "active"
+                    );
+
             }
         );
 
 
         if (
-            currentTool === "select"
+            currentTool ===
+            "select"
         ) {
 
-            selectToolButton.classList.add(
-                "active"
-            );
+            selectToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
 
         }
 
 
         if (
-            currentTool === "move"
+            currentTool ===
+            "move"
         ) {
 
-            moveToolButton.classList.add(
-                "active"
-            );
+            moveToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
 
         }
 
 
         if (
-            currentTool === "rotate"
+            currentTool ===
+            "rotate"
         ) {
 
-            rotateToolButton.classList.add(
-                "active"
-            );
+            rotateToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
 
         }
 
 
         if (
-            currentTool === "scale"
+            currentTool ===
+            "scale"
         ) {
 
-            scaleToolButton.classList.add(
-                "active"
-            );
+            scaleToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
 
         }
 
@@ -1220,8 +1603,16 @@
     function attachTransformForCurrentTool() {
 
         if (
-            !selectedSceneObject ||
-            selectedSceneObject.userData?.locked
+            !transformControls
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !selectedSceneObject
         ) {
 
             transformControls.detach();
@@ -1232,7 +1623,21 @@
 
 
         if (
-            currentTool === "select"
+            selectedSceneObject
+                .userData
+                ?.locked
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        if (
+            currentTool ===
+            "select"
         ) {
 
             transformControls.detach();
@@ -1248,7 +1653,8 @@
 
 
         if (
-            currentTool === "move"
+            currentTool ===
+            "move"
         ) {
 
             transformControls.setMode(
@@ -1258,8 +1664,9 @@
         }
 
 
-        if (
-            currentTool === "rotate"
+        else if (
+            currentTool ===
+            "rotate"
         ) {
 
             transformControls.setMode(
@@ -1269,8 +1676,9 @@
         }
 
 
-        if (
-            currentTool === "scale"
+        else if (
+            currentTool ===
+            "scale"
         ) {
 
             transformControls.setMode(
@@ -1281,22 +1689,7 @@
 
     }
 
-function clearTreeSelection() {
 
-    document
-        .querySelectorAll(
-            ".tree-item.selected"
-        )
-        .forEach(
-            item => {
-
-                item.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-}
     /* =====================================================
        EXPLORER
     ====================================================== */
@@ -1309,7 +1702,15 @@ function clearTreeSelection() {
             );
 
 
-        treeChildren.innerHTML = "";
+        if (!treeChildren) {
+
+            return;
+
+        }
+
+
+        treeChildren.innerHTML =
+            "";
 
 
         sceneObjects.forEach(
@@ -1321,40 +1722,45 @@ function clearTreeSelection() {
                     );
 
 
-                button.className =
-                    "tree-item child-item";
-
-
                 button.type =
                     "button";
 
 
-                button.dataset.objectName =
-                    object.name;
+                button.className =
+                    "tree-item child-item";
+
+
+                button.dataset
+                    .objectUuid =
+                    object.uuid;
+
+
+                const icon =
+                    object.userData
+                        ?.objectType ===
+                    "Baseplate"
+                        ? "▣"
+                        : "■";
 
 
                 button.innerHTML = `
                     <span class="tree-indent"></span>
 
                     <span class="tree-icon">
-                        ${
-                            object.userData
-                                ?.objectType ===
-                            "Baseplate"
-                                ? "▣"
-                                : "■"
-                        }
+                        ${icon}
                     </span>
 
                     <span class="tree-name"></span>
                 `;
 
 
-                button
-                    .querySelector(
+                const nameElement =
+                    button.querySelector(
                         ".tree-name"
-                    )
-                    .textContent =
+                    );
+
+
+                nameElement.textContent =
                     object.name;
 
 
@@ -1378,7 +1784,9 @@ function clearTreeSelection() {
         );
 
 
-        /* CAMERA */
+        /* =============================
+           CAMERA
+        ============================= */
 
         const cameraButton =
             createSpecialTreeItem(
@@ -1393,16 +1801,24 @@ function clearTreeSelection() {
 
                 clearTreeSelection();
 
-                cameraButton.classList.add(
-                    "selected"
-                );
+
+                cameraButton
+                    .classList
+                    .add(
+                        "selected"
+                    );
+
 
                 selectedSceneObject =
                     camera;
 
-                transformControls.detach();
+
+                transformControls
+                    ?.detach();
+
 
                 removeSelectionHelper();
+
 
                 updateProperties(
                     camera,
@@ -1418,7 +1834,9 @@ function clearTreeSelection() {
         );
 
 
-        /* LIGHTING */
+        /* =============================
+           LIGHTING
+        ============================= */
 
         const lightingButton =
             createSpecialTreeItem(
@@ -1433,16 +1851,24 @@ function clearTreeSelection() {
 
                 clearTreeSelection();
 
-                lightingButton.classList.add(
-                    "selected"
-                );
+
+                lightingButton
+                    .classList
+                    .add(
+                        "selected"
+                    );
+
 
                 selectedSceneObject =
                     null;
 
-                transformControls.detach();
+
+                transformControls
+                    ?.detach();
+
 
                 removeSelectionHelper();
+
 
                 showLightingProperties();
 
@@ -1453,6 +1879,20 @@ function clearTreeSelection() {
         treeChildren.appendChild(
             lightingButton
         );
+
+
+        if (
+            selectedSceneObject &&
+            sceneObjects.includes(
+                selectedSceneObject
+            )
+        ) {
+
+            highlightExplorerObject(
+                selectedSceneObject
+            );
+
+        }
 
     }
 
@@ -1468,12 +1908,12 @@ function clearTreeSelection() {
             );
 
 
-        button.className =
-            "tree-item child-item";
-
-
         button.type =
             "button";
+
+
+        button.className =
+            "tree-item child-item";
 
 
         button.innerHTML = `
@@ -1507,28 +1947,26 @@ function clearTreeSelection() {
         clearTreeSelection();
 
 
-        const items =
-            document.querySelectorAll(
-                ".tree-item"
+        if (!object) {
+
+            return;
+
+        }
+
+
+        const item =
+            document.querySelector(
+                `.tree-item[data-object-uuid="${object.uuid}"]`
             );
 
 
-        items.forEach(
-            item => {
+        if (item) {
 
-                if (
-                    item.dataset.objectName ===
-                    object.name
-                ) {
+            item.classList.add(
+                "selected"
+            );
 
-                    item.classList.add(
-                        "selected"
-                    );
-
-                }
-
-            }
-        );
+        }
 
     }
 
@@ -1540,7 +1978,9 @@ function clearTreeSelection() {
     function resetCamera() {
 
         if (!camera) {
+
             return;
+
         }
 
 
@@ -1562,7 +2002,9 @@ function clearTreeSelection() {
 
             controls.update();
 
-        } else {
+        }
+
+        else {
 
             camera.lookAt(
                 0,
@@ -1587,20 +2029,25 @@ function clearTreeSelection() {
             );
 
 
-        if (controls) {
-
-            controls.update();
-
-        }
+        controls
+            ?.update();
 
 
         updateSelectionHelper();
 
 
-        renderer.render(
-            scene,
+        if (
+            renderer &&
+            scene &&
             camera
-        );
+        ) {
+
+            renderer.render(
+                scene,
+                camera
+            );
+
+        }
 
     }
 
@@ -1616,23 +2063,29 @@ function clearTreeSelection() {
             !camera ||
             !viewportContainer
         ) {
+
             return;
+
         }
 
 
         const width =
-            viewportContainer.clientWidth;
+            viewportContainer
+                .clientWidth;
 
 
         const height =
-            viewportContainer.clientHeight;
+            viewportContainer
+                .clientHeight;
 
 
         if (
             width <= 0 ||
             height <= 0
         ) {
+
             return;
+
         }
 
 
@@ -1644,124 +2097,182 @@ function clearTreeSelection() {
 
 
         camera.aspect =
-            width / height;
+            width /
+            height;
 
 
-        camera.updateProjectionMatrix();
+        camera
+            .updateProjectionMatrix();
 
     }
 
 
     /* =====================================================
-       UI EVENTS
+       UI
     ====================================================== */
 
     function connectInterface() {
 
-        resetCameraButton.addEventListener(
-            "click",
-            resetCamera
-        );
+        resetCameraButton
+            ?.addEventListener(
+                "click",
+                resetCamera
+            );
 
 
-        homeCameraButton.addEventListener(
-            "click",
-            resetCamera
-        );
+        homeCameraButton
+            ?.addEventListener(
+                "click",
+                resetCamera
+            );
 
 
-        workspaceTreeItem.addEventListener(
-            "click",
-            () => {
+        workspaceTreeItem
+            ?.addEventListener(
+                "click",
+                () => {
 
-                clearTreeSelection();
+                    clearTreeSelection();
 
-                workspaceTreeItem.classList.add(
-                    "selected"
-                );
 
-                selectedSceneObject =
-                    null;
+                    workspaceTreeItem
+                        .classList
+                        .add(
+                            "selected"
+                        );
 
-                transformControls.detach();
 
-                removeSelectionHelper();
+                    selectedSceneObject =
+                        null;
 
-                showWorkspaceProperties();
 
-            }
-        );
+                    transformControls
+                        ?.detach();
 
+
+                    removeSelectionHelper();
+
+
+                    showWorkspaceProperties();
+
+                }
+            );
+
+
+        /* =============================
+           ENABLE TOOLS
+        ============================= */
 
         selectToolButton.disabled =
             false;
 
+
         moveToolButton.disabled =
             false;
+
 
         rotateToolButton.disabled =
             false;
 
+
         scaleToolButton.disabled =
             false;
+
 
         addPartButton.disabled =
             false;
 
 
-        selectToolButton.addEventListener(
-            "click",
-            () => {
-                setTool("select");
-            }
-        );
+        /* =============================
+           TOOL EVENTS
+        ============================= */
+
+        selectToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "select"
+                    );
+
+                }
+            );
 
 
-        moveToolButton.addEventListener(
-            "click",
-            () => {
-                setTool("move");
-            }
-        );
+        moveToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "move"
+                    );
+
+                }
+            );
 
 
-        rotateToolButton.addEventListener(
-            "click",
-            () => {
-                setTool("rotate");
-            }
-        );
+        rotateToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "rotate"
+                    );
+
+                }
+            );
 
 
-        scaleToolButton.addEventListener(
-            "click",
-            () => {
-                setTool("scale");
-            }
-        );
+        scaleToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "scale"
+                    );
+
+                }
+            );
 
 
-        addPartButton.addEventListener(
-            "click",
-            addPart
-        );
+        addPartButton
+            .addEventListener(
+                "click",
+                addPart
+            );
 
 
-        renderer.domElement.addEventListener(
-            "pointerdown",
-            handleViewportPointerDown
-        );
+        /* =============================
+           VIEWPORT
+        ============================= */
+
+        renderer
+            .domElement
+            .addEventListener(
+                "pointerdown",
+                handleViewportPointerDown
+            );
 
 
-        renderer.domElement.addEventListener(
-            "contextmenu",
-            event => {
+        renderer
+            .domElement
+            .addEventListener(
+                "contextmenu",
+                event => {
 
-                event.preventDefault();
+                    event.preventDefault();
 
-            }
-        );
+                }
+            );
 
+
+        /* =============================
+           KEYBOARD
+        ============================= */
 
         window.addEventListener(
             "keydown",
@@ -1778,7 +2289,7 @@ function clearTreeSelection() {
 
 
     /* =====================================================
-       SHORTCUTS
+       KEYBOARD SHORTCUTS
     ====================================================== */
 
     function handleKeyboardShortcuts(
@@ -1786,19 +2297,27 @@ function clearTreeSelection() {
     ) {
 
         if (
-            event.target instanceof
-            HTMLInputElement
+            event.target
+                instanceof
+                HTMLInputElement ||
+            event.target
+                instanceof
+                HTMLTextAreaElement
         ) {
+
             return;
+
         }
 
 
         const key =
-            event.key.toLowerCase();
+            event.key
+                .toLowerCase();
 
 
         if (
-            key === "q"
+            key ===
+            "q"
         ) {
 
             setTool(
@@ -1808,8 +2327,9 @@ function clearTreeSelection() {
         }
 
 
-        if (
-            key === "w"
+        else if (
+            key ===
+            "w"
         ) {
 
             setTool(
@@ -1819,8 +2339,9 @@ function clearTreeSelection() {
         }
 
 
-        if (
-            key === "e"
+        else if (
+            key ===
+            "e"
         ) {
 
             setTool(
@@ -1830,8 +2351,9 @@ function clearTreeSelection() {
         }
 
 
-        if (
-            key === "r"
+        else if (
+            key ===
+            "r"
         ) {
 
             setTool(
@@ -1861,14 +2383,18 @@ function clearTreeSelection() {
         }
 
 
-        propertiesEmpty.classList.add(
-            "hidden"
-        );
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        propertiesContent.classList.remove(
-            "hidden"
-        );
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
 
 
         propertyName.textContent =
@@ -1878,7 +2404,8 @@ function clearTreeSelection() {
 
         propertyType.textContent =
             forcedType ||
-            object.userData?.objectType ||
+            object.userData
+                ?.objectType ||
             object.type ||
             "Object";
 
@@ -1905,14 +2432,18 @@ function clearTreeSelection() {
 
     function showWorkspaceProperties() {
 
-        propertiesEmpty.classList.add(
-            "hidden"
-        );
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        propertiesContent.classList.remove(
-            "hidden"
-        );
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
 
 
         propertyName.textContent =
@@ -1940,14 +2471,18 @@ function clearTreeSelection() {
 
     function showLightingProperties() {
 
-        propertiesEmpty.classList.add(
-            "hidden"
-        );
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        propertiesContent.classList.remove(
-            "hidden"
-        );
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
 
 
         propertyName.textContent =
@@ -1974,14 +2509,18 @@ function clearTreeSelection() {
 
     function hideProperties() {
 
-        propertiesContent.classList.add(
-            "hidden"
-        );
+        propertiesContent
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        propertiesEmpty.classList.remove(
-            "hidden"
-        );
+        propertiesEmpty
+            .classList
+            .remove(
+                "hidden"
+            );
 
     }
 
@@ -1991,15 +2530,27 @@ function clearTreeSelection() {
     ) {
 
         if (!vector) {
+
             return "—";
+
         }
 
 
         return [
-            cleanNumber(vector.x),
-            cleanNumber(vector.y),
-            cleanNumber(vector.z)
-        ].join(", ");
+            cleanNumber(
+                vector.x
+            ),
+
+            cleanNumber(
+                vector.y
+            ),
+
+            cleanNumber(
+                vector.z
+            )
+        ].join(
+            ", "
+        );
 
     }
 
@@ -2009,29 +2560,36 @@ function clearTreeSelection() {
     ) {
 
         if (!rotation) {
+
             return "—";
+
         }
 
 
         return [
             cleanNumber(
-                THREE.MathUtils.radToDeg(
-                    rotation.x
-                )
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.x
+                    )
             ),
 
             cleanNumber(
-                THREE.MathUtils.radToDeg(
-                    rotation.y
-                )
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.y
+                    )
             ),
 
             cleanNumber(
-                THREE.MathUtils.radToDeg(
-                    rotation.z
-                )
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.z
+                    )
             )
-        ].join(", ");
+        ].join(
+            ", "
+        );
 
     }
 
@@ -2045,14 +2603,18 @@ function clearTreeSelection() {
                 number
             )
         ) {
+
             return "0";
+
         }
 
 
         const rounded =
             Math.round(
-                number * 100
-            ) / 100;
+                number *
+                100
+            ) /
+            100;
 
 
         if (
@@ -2061,7 +2623,9 @@ function clearTreeSelection() {
                 -0
             )
         ) {
+
             return "0";
+
         }
 
 
@@ -2078,9 +2642,19 @@ function clearTreeSelection() {
 
     function updateObjectCount() {
 
+        if (
+            !objectCountStatus
+        ) {
+
+            return;
+
+        }
+
+
         objectCountStatus.textContent =
             `${sceneObjects.length} ${
-                sceneObjects.length === 1
+                sceneObjects.length ===
+                1
                     ? "Object"
                     : "Objects"
             }`;
@@ -2094,19 +2668,25 @@ function clearTreeSelection() {
 
     function showEditor() {
 
-        editorLoading.classList.add(
-            "hidden"
-        );
+        editorLoading
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        errorScreen.classList.add(
-            "hidden"
-        );
+        errorScreen
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        gameEditor.classList.remove(
-            "hidden"
-        );
+        gameEditor
+            .classList
+            .remove(
+                "hidden"
+            );
 
 
         requestAnimationFrame(
@@ -2114,16 +2694,36 @@ function clearTreeSelection() {
         );
 
 
-        selectSceneObject(
-            sceneObjects[1] ||
-            baseplate
-        );
+        const starterPart =
+            sceneObjects.find(
+                object =>
+                    object.userData
+                        ?.objectType ===
+                    "Part"
+            );
+
+
+        if (starterPart) {
+
+            selectSceneObject(
+                starterPart
+            );
+
+        }
+
+        else {
+
+            selectSceneObject(
+                baseplate
+            );
+
+        }
 
     }
 
 
     /* =====================================================
-       ERROR
+       ERROR SCREEN
     ====================================================== */
 
     function showError(
@@ -2131,19 +2731,25 @@ function clearTreeSelection() {
         message
     ) {
 
-        editorLoading.classList.add(
-            "hidden"
-        );
+        editorLoading
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        gameEditor.classList.add(
-            "hidden"
-        );
+        gameEditor
+            .classList
+            .add(
+                "hidden"
+            );
 
 
-        errorScreen.classList.remove(
-            "hidden"
-        );
+        errorScreen
+            .classList
+            .remove(
+                "hidden"
+            );
 
 
         errorTitle.textContent =
@@ -2173,7 +2779,8 @@ function clearTreeSelection() {
 
         if (resizeObserver) {
 
-            resizeObserver.disconnect();
+            resizeObserver
+                .disconnect();
 
         }
 
