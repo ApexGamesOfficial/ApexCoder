@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ApexCoder | Editor</title>
+
+    <link
+        rel="stylesheet"
+        href="editor.css?v=1"
+    >
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"
+    ></script>
+
+    <script
+        src="auth.js"
+        defer
+    ></script>
+
+    <script
+        src="editor.js?v=1"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <div
+        class="editor-loading"
+        id="editorLoading"
+    >
+        <div class="loading-mark">
+            &lt;/&gt;
+        </div>
+
+        <strong>
+            Opening project
+        </strong>
+
+        <span>
+            Preparing ApexCoder...
+        </span>
+    </div>
+
+
+    <div
+        class="editor-app"
+        id="editorApp"
+        hidden
+    >
+
+        <!-- =========================
+             TOP BAR
+        ========================== -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <a
+                    href="projects.html"
+                    class="back-button"
+                    title="Back to Projects"
+                >
+                    ←
+                </a>
+
+
+                <div class="brand-mark">
+                    &lt;/&gt;
+                </div>
+
+
+                <div class="project-info">
+
+                    <span class="project-platform">
+                        APEXCODER
+                    </span>
+
+                    <strong id="projectName">
+                        Project
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <span
+                    class="save-status"
+                    id="saveStatus"
+                >
+                    Ready
+                </span>
+
+                <button
+                    class="toolbar-button"
+                    id="saveButton"
+                    type="button"
+                >
+                    Save
+                </button>
+
+                <button
+                    class="run-button"
+                    id="runButton"
+                    type="button"
+                >
+                    Run
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             WORKSPACE
+        ========================== -->
+
+        <div class="workspace">
+
+            <!-- EXPLORER -->
+
+            <aside class="explorer">
+
+                <div class="panel-header">
+
+                    <span>
+                        EXPLORER
+                    </span>
+
+                    <button
+                        id="newFileButton"
+                        type="button"
+                        title="New file"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+
+                <div class="project-root">
+
+                    <span class="root-arrow">
+                        ▾
+                    </span>
+
+                    <span
+                        class="root-name"
+                        id="explorerProjectName"
+                    >
+                        Project
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="file-list"
+                    id="fileList"
+                ></div>
+
+            </aside>
+
+
+            <!-- CENTER -->
+
+            <section class="editor-center">
+
+                <div
+                    class="editor-tabs"
+                    id="editorTabs"
+                ></div>
+
+
+                <div
+                    class="editor-empty"
+                    id="editorEmpty"
+                >
+
+                    <div class="empty-mark">
+                        &lt;/&gt;
+                    </div>
+
+                    <strong>
+                        ApexCoder
+                    </strong>
+
+                    <span>
+                        Select a file to begin editing.
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="monacoEditor"
+                    class="monaco-container"
+                    hidden
+                ></div>
+
+            </section>
+
+
+            <!-- RIGHT PANEL -->
+
+            <aside class="preview-panel">
+
+                <div class="panel-header preview-header">
+
+                    <span>
+                        PREVIEW
+                    </span>
+
+                    <span class="preview-state">
+                        Website
+                    </span>
+
+                </div>
+
+
+                <div class="preview-empty">
+
+                    <div class="preview-icon">
+                        ▶
+                    </div>
+
+                    <strong>
+                        Ready to run
+                    </strong>
+
+                    <span>
+                        Your website preview will appear here.
+                    </span>
+
+                    <button
+                        id="previewRunButton"
+                        type="button"
+                    >
+                        Run Project
+                    </button>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+
+        <!-- =========================
+             STATUS BAR
+        ========================== -->
+
+        <footer class="statusbar">
+
+            <div>
+                <span id="statusFile">
+                    No file selected
+                </span>
+            </div>
+
+
+            <div class="statusbar-right">
+
+                <span id="statusLanguage">
+                    Plain Text
+                </span>
+
+                <span id="statusCursor">
+                    Ln 1, Col 1
+                </span>
+
+                <span>
+                    ApexCoder
+                </span>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+
+    <div
+        class="error-screen"
+        id="errorScreen"
+        hidden
+    >
+
+        <div class="error-mark">
+            !
+        </div>
+
+        <h1 id="errorTitle">
+            Project unavailable
+        </h1>
+
+        <p id="errorMessage">
+            ApexCoder couldn't open this project.
+        </p>
+
+        <a href="projects.html">
+            Return to Projects
+        </a>
+
+    </div>
+
+</body>
+
+</html>
