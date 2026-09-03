@@ -363,42 +363,111 @@
                 </section>
 
 
-                <!-- BOTTOM PANEL -->
+     <!-- BOTTOM PANEL -->
 
-                <section class="bottom-panel">
+<section class="bottom-panel">
 
-                    <div class="bottom-tabs">
+    <div class="bottom-tabs">
 
-                        <button
-                            class="bottom-tab active"
-                            type="button"
-                        >
-                            Output
-                        </button>
+        <button
+            class="bottom-tab active"
+            id="outputTabButton"
+            type="button"
+        >
+            Output
+        </button>
 
-                        <button
-                            class="bottom-tab"
-                            type="button"
-                            disabled
-                        >
-                            Problems
-                        </button>
+        <button
+            class="bottom-tab"
+            id="problemsTabButton"
+            type="button"
+        >
+            Problems
 
-                        <button
-                            class="bottom-tab"
-                            type="button"
-                            disabled
-                        >
-                            Console
-                        </button>
+            <span
+                class="bottom-tab-count"
+                id="problemsCount"
+                hidden
+            >
+                0
+            </span>
+        </button>
 
-                    </div>
+        <button
+            class="bottom-tab"
+            id="consoleTabButton"
+            type="button"
+        >
+            Console
+        </button>
 
-                    <div class="output-content">
-                        ApexCoder Studio ready.
-                    </div>
+        <div class="bottom-tab-spacer"></div>
 
-                </section>
+        <button
+            class="bottom-clear-button"
+            id="clearPanelButton"
+            type="button"
+            title="Clear"
+        >
+            Clear
+        </button>
+
+    </div>
+
+
+    <div
+        class="bottom-content active"
+        id="outputPanel"
+    >
+
+        <div
+            class="panel-message muted"
+            id="outputEmpty"
+        >
+            ApexCoder Studio ready.
+        </div>
+
+        <div id="outputMessages"></div>
+
+    </div>
+
+
+    <div
+        class="bottom-content"
+        id="problemsPanel"
+        hidden
+    >
+
+        <div
+            class="panel-message muted"
+            id="problemsEmpty"
+        >
+            No problems detected.
+        </div>
+
+        <div id="problemMessages"></div>
+
+    </div>
+
+
+    <div
+        class="bottom-content"
+        id="consolePanel"
+        hidden
+    >
+
+        <div
+            class="panel-message muted"
+            id="consoleEmpty"
+        >
+            Run your website to view console output.
+        </div>
+
+        <div id="consoleMessages"></div>
+
+    </div>
+
+</section>
 
             </main>
 
