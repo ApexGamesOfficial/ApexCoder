@@ -1,892 +1,512 @@
-* {
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
 
-html,
-body {
-    margin: 0;
-    height: 100%;
-}
+<head>
 
-body {
-    min-height: 100vh;
+    <meta charset="UTF-8">
 
-    overflow: hidden;
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    background: #050505;
-    color: #ffffff;
+    <title>ApexCoder | Chat</title>
 
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-}
+    <link
+        rel="stylesheet"
+        href="chat.css?v=4"
+    >
 
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
 
-/* =========================
-   APP
-========================= */
+</head>
 
-.app-shell {
-    height: 100vh;
 
-    display: grid;
+<body>
 
-    grid-template-columns:
-        260px 1fr;
-}
+    <div class="app-shell">
 
 
-/* =========================
-   MAIN SIDEBAR
-========================= */
+        <!-- =====================================
+             APEXCODER SIDEBAR
+        ====================================== -->
 
-.sidebar {
-    position: relative;
+        <aside class="main-sidebar">
 
-    width: 260px;
-    height: 100vh;
+            <button
+                class="account-card"
+                id="accountCard"
+                type="button"
+            >
 
-    padding: 20px 18px;
+                <img
+                    id="accountAvatar"
+                    class="account-avatar"
+                    src="Default Apex Games Profile Picture.png"
+                    alt="Profile"
+                >
 
-    background: #080808;
+                <div class="account-info">
 
-    border-right:
-        1px solid #1d1d1d;
-}
+                    <span
+                        class="account-name"
+                        id="accountGamertag"
+                    >
+                        Loading...
+                    </span>
 
+                    <span class="account-label">
+                        Apex Games Account
+                    </span>
 
-.account-card {
-    width: 100%;
+                </div>
 
-    display: flex;
-    align-items: center;
+            </button>
 
-    gap: 12px;
 
-    padding: 10px;
+            <nav class="main-nav">
 
-    border:
-        1px solid transparent;
+                <a
+                    href="dashboard.html"
+                    class="nav-item"
+                >
+                    <span class="nav-icon">⌂</span>
+                    <span>Home</span>
+                </a>
 
-    border-radius: 9px;
 
-    background: transparent;
-    color: white;
+                <a
+                    href="projects.html"
+                    class="nav-item"
+                >
+                    <span class="nav-icon">□</span>
+                    <span>Projects</span>
+                </a>
 
-    text-align: left;
 
-    cursor: pointer;
-}
+                <a
+                    href="discover.html"
+                    class="nav-item"
+                >
+                    <span class="nav-icon">◇</span>
+                    <span>Discover</span>
+                </a>
 
 
-.account-card:hover {
-    background: #111111;
+                <a
+                    href="chat.html"
+                    class="nav-item active"
+                >
+                    <span class="nav-icon">○</span>
+                    <span>Chat</span>
+                </a>
 
-    border-color: #252525;
-}
 
+                <a
+                    href="subscriptions.html"
+                    class="nav-item"
+                >
+                    <span class="nav-icon">☆</span>
+                    <span>Subscriptions</span>
+                </a>
 
-.account-avatar {
-    width: 42px;
-    height: 42px;
 
-    flex-shrink: 0;
+                <a
+                    href="settings.html"
+                    class="nav-item"
+                >
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
 
-    object-fit: cover;
+            </nav>
 
-    border-radius: 50%;
 
-    border:
-        1px solid #333333;
-}
+            <div class="sidebar-brand">
 
+                <div class="sidebar-brand-logo">
+                    &lt;/&gt;
+                </div>
 
-.account-info {
-    min-width: 0;
+                <div>
+                    <strong>ApexCoder</strong>
+                    <span>Build without boundaries.</span>
+                </div>
 
-    display: flex;
-    flex-direction: column;
+            </div>
 
-    gap: 3px;
-}
+        </aside>
 
 
-.account-gamertag {
-    overflow: hidden;
 
-    font-size: 13px;
-    font-weight: 850;
+        <!-- =====================================
+             FRIEND SIDEBAR
+        ====================================== -->
 
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
+        <aside class="friends-sidebar">
 
+            <div class="friends-header">
 
-.account-label {
-    color: #666666;
+                <div>
 
-    font-size: 10px;
-    font-weight: 700;
-}
+                    <p class="section-label">
+                        APEXCODER
+                    </p>
 
+                    <h1>
+                        Chat
+                    </h1>
 
-/* =========================
-   NAV
-========================= */
+                </div>
 
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
+                <button
+                    class="header-action"
+                    type="button"
+                    id="newChatButton"
+                    title="New conversation"
+                >
+                    +
+                </button>
 
-    gap: 5px;
+            </div>
 
-    margin-top: 38px;
-}
 
+            <div class="friend-search">
 
-.sidebar-link {
-    min-height: 44px;
+                <span class="search-icon">
+                    ⌕
+                </span>
 
-    display: flex;
-    align-items: center;
+                <input
+                    type="search"
+                    id="friendSearch"
+                    placeholder="Search friends..."
+                    autocomplete="off"
+                >
 
-    gap: 12px;
+            </div>
 
-    padding:
-        0 13px;
 
-    border:
-        1px solid transparent;
+            <div class="friends-section-title">
 
-    border-radius: 7px;
+                <span>
+                    Friends
+                </span>
 
-    color: #777777;
+                <span
+                    id="friendCount"
+                    class="friend-count"
+                >
+                    0
+                </span>
 
-    text-decoration: none;
+            </div>
 
-    font-size: 13px;
-    font-weight: 800;
-}
 
+            <div
+                class="friends-list"
+                id="friendsList"
+            >
 
-.sidebar-link:hover {
-    background: #111111;
-    color: white;
-}
+                <div class="sidebar-loading">
+                    Loading friends...
+                </div>
 
+            </div>
 
-.sidebar-link.active {
-    background: #171717;
-    color: white;
+        </aside>
 
-    border-color: #292929;
-}
 
 
-.sidebar-dot {
-    width: 6px;
-    height: 6px;
+        <!-- =====================================
+             CONVERSATION AREA
+        ====================================== -->
 
-    border-radius: 50%;
+        <main class="conversation-area">
 
-    background: #343434;
-}
 
+            <!-- EMPTY STATE -->
 
-.sidebar-link.active .sidebar-dot {
-    background: white;
-}
+            <section
+                class="conversation-empty"
+                id="conversationEmpty"
+            >
 
+                <div class="empty-glow">
 
-/* =========================
-   CHAT LAYOUT
-========================= */
+                    <div class="empty-logo">
+                        &lt;/&gt;
+                    </div>
 
-.chat-page {
-    min-width: 0;
-    height: 100vh;
+                </div>
 
-    display: grid;
 
-    grid-template-columns:
-        310px minmax(0, 1fr);
-}
+                <h2>
+                    Your conversations
+                </h2>
 
+                <p>
+                    Choose a friend from the sidebar to start chatting.
+                </p>
 
-/* =========================
-   FRIEND PANEL
-========================= */
+                <div class="empty-feature-row">
 
-.chat-list-panel {
-    min-width: 0;
+                    <div>
+                        <span>💬</span>
+                        Messages
+                    </div>
 
-    display: flex;
-    flex-direction: column;
+                    <div>
+                        <span>😀</span>
+                        Emoji
+                    </div>
 
-    background: #090909;
+                    <div>
+                        <span>GIF</span>
+                        GIFs
+                    </div>
 
-    border-right:
-        1px solid #1d1d1d;
-}
+                    <div>
+                        <span>🎙</span>
+                        Voice
+                    </div>
 
+                </div>
 
-.chat-list-header {
-    padding:
-        30px 22px 18px;
-}
+            </section>
 
 
-.eyebrow {
-    margin:
-        0 0 5px;
 
-    color: #555555;
+            <!-- ACTIVE CONVERSATION -->
 
-    font-size: 9px;
-    font-weight: 900;
+            <section
+                class="conversation"
+                id="conversation"
+                hidden
+            >
 
-    letter-spacing: .18em;
-}
 
+                <!-- HEADER -->
 
-.chat-list-header h1 {
-    margin: 0;
+                <header class="conversation-header">
 
-    font-size: 28px;
-    font-weight: 900;
+                    <div class="conversation-person">
 
-    letter-spacing: -.04em;
-}
+                        <div class="conversation-avatar-wrap">
 
+                            <img
+                                id="conversationAvatar"
+                                class="conversation-avatar"
+                                src="Default Apex Games Profile Picture.png"
+                                alt="Friend"
+                            >
 
-/* =========================
-   SEARCH
-========================= */
+                            <span
+                                id="conversationStatus"
+                                class="presence-dot offline"
+                            ></span>
 
-.friend-search-wrap {
-    padding:
-        0 16px 16px;
-}
+                        </div>
 
 
-.friend-search-wrap input {
-    width: 100%;
-    height: 40px;
+                        <div class="conversation-person-info">
 
-    padding:
-        0 12px;
+                            <h2
+                                id="conversationName"
+                            >
+                                Friend
+                            </h2>
 
-    border:
-        1px solid #242424;
+                            <span
+                                id="conversationStatusText"
+                                class="conversation-presence"
+                            >
+                                Offline
+                            </span>
 
-    border-radius: 7px;
+                        </div>
 
-    outline: none;
+                    </div>
 
-    background: #101010;
-    color: white;
 
-    font-size: 12px;
-}
+                    <div class="conversation-actions">
 
+                        <button
+                            id="voiceCallButton"
+                            class="conversation-action"
+                            type="button"
+                            title="Voice call"
+                        >
+                            ☎
+                        </button>
 
-.friend-search-wrap input:focus {
-    border-color: #555555;
-}
 
+                        <button
+                            id="conversationMoreButton"
+                            class="conversation-action"
+                            type="button"
+                            title="More options"
+                        >
+                            •••
+                        </button>
 
-.friend-search-wrap input::placeholder {
-    color: #555555;
-}
+                    </div>
 
+                </header>
 
-/* =========================
-   FRIEND LIST
-========================= */
 
-.friends-list {
-    flex: 1;
 
-    overflow-y: auto;
+                <!-- MESSAGES -->
 
-    padding:
-        0 10px 18px;
-}
+                <div
+                    class="messages"
+                    id="messages"
+                ></div>
 
 
-.friend-item {
-    width: 100%;
 
-    display: flex;
-    align-items: center;
+                <!-- FEATURE NOTICE -->
 
-    gap: 11px;
+                <div
+                    class="feature-notice"
+                    id="featureNotice"
+                    hidden
+                >
 
-    padding: 10px;
+                    <span
+                        id="featureNoticeText"
+                    ></span>
 
-    border:
-        1px solid transparent;
+                    <button
+                        id="closeFeatureNotice"
+                        type="button"
+                    >
+                        ×
+                    </button>
 
-    border-radius: 8px;
+                </div>
 
-    background: transparent;
-    color: white;
 
-    text-align: left;
 
-    cursor: pointer;
-}
+                <!-- EMOJI PICKER -->
 
+                <div
+                    class="emoji-picker"
+                    id="emojiPicker"
+                    hidden
+                >
 
-.friend-item:hover {
-    background: #111111;
-}
+                    <div class="emoji-picker-header">
 
+                        <strong>
+                            Emoji
+                        </strong>
 
-.friend-item.active {
-    background: #171717;
+                        <span>
+                            Pick one
+                        </span>
 
-    border-color: #292929;
-}
+                    </div>
 
 
-.friend-avatar-wrap {
-    position: relative;
+                    <div
+                        class="emoji-grid"
+                        id="emojiGrid"
+                    ></div>
 
-    width: 42px;
-    height: 42px;
+                </div>
 
-    flex-shrink: 0;
-}
 
 
-.friend-avatar {
-    width: 100%;
-    height: 100%;
+                <!-- MESSAGE BAR -->
 
-    object-fit: cover;
+                <div class="message-composer">
 
-    border-radius: 50%;
+                    <div class="composer-tools">
 
-    border:
-        1px solid #333333;
-}
+                        <button
+                            id="emojiButton"
+                            class="composer-tool"
+                            type="button"
+                            title="Emoji"
+                        >
+                            😀
+                        </button>
 
 
-.friend-status {
-    position: absolute;
+                        <button
+                            id="gifButton"
+                            class="composer-tool gif-tool"
+                            type="button"
+                            title="GIF"
+                        >
+                            GIF
+                        </button>
 
-    right: -1px;
-    bottom: -1px;
 
-    width: 12px;
-    height: 12px;
+                        <button
+                            id="voiceButton"
+                            class="composer-tool"
+                            type="button"
+                            title="Voice message"
+                        >
+                            🎙
+                        </button>
 
-    border:
-        3px solid #090909;
+                    </div>
 
-    border-radius: 50%;
-}
 
+                    <form
+                        class="message-form"
+                        id="messageForm"
+                    >
 
-.friend-info {
-    min-width: 0;
+                        <textarea
+                            id="messageInput"
+                            rows="1"
+                            maxlength="2000"
+                            placeholder="Message..."
+                        ></textarea>
 
-    display: flex;
-    flex-direction: column;
 
-    gap: 4px;
-}
+                        <button
+                            id="sendButton"
+                            class="send-button"
+                            type="submit"
+                            disabled
+                        >
+                            Send
+                        </button>
 
+                    </form>
 
-.friend-name {
-    overflow: hidden;
+                </div>
 
-    font-size: 12px;
-    font-weight: 850;
 
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
+            </section>
 
+        </main>
 
-.friend-presence {
-    color: #555555;
+    </div>
 
-    font-size: 9px;
-    font-weight: 700;
 
-    text-transform: capitalize;
-}
+    <script
+        src="auth.js"
+        defer
+    ></script>
 
+    <script
+        src="presence.js?v=1"
+        defer
+    ></script>
 
-.loading-text,
-.no-friends {
-    padding: 25px 12px;
+    <script
+        src="chat.js?v=4"
+        defer
+    ></script>
 
-    color: #555555;
+</body>
 
-    font-size: 11px;
-
-    text-align: center;
-}
-
-
-/* =========================
-   STATUS
-========================= */
-
-.status-dot,
-.friend-status {
-    background: #59616d;
-}
-
-
-.status-dot.online,
-.friend-status.online {
-    background: #33d17a;
-}
-
-
-.status-dot.away,
-.friend-status.away {
-    background: #f5b942;
-}
-
-
-.status-dot.dnd,
-.friend-status.dnd {
-    background: #ff5c5c;
-}
-
-
-.status-dot.offline,
-.friend-status.offline {
-    background: #59616d;
-}
-
-
-/* =========================
-   CONVERSATION PANEL
-========================= */
-
-.conversation-panel {
-    min-width: 0;
-
-    position: relative;
-
-    background:
-        radial-gradient(
-            circle at 50% 20%,
-            rgba(255,255,255,.025),
-            transparent 45%
-        ),
-        #060606;
-}
-
-
-/* =========================
-   EMPTY CHAT
-========================= */
-
-.conversation-empty {
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    padding: 30px;
-
-    text-align: center;
-}
-
-
-.empty-icon {
-    width: 55px;
-    height: 55px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 20px;
-
-    border:
-        1px solid #333333;
-
-    border-radius: 10px;
-
-    color: #777777;
-
-    font-size: 13px;
-    font-weight: 800;
-}
-
-
-.conversation-empty h2 {
-    margin: 0;
-
-    font-size: 21px;
-}
-
-
-.conversation-empty p {
-    margin:
-        8px 0 0;
-
-    color: #606060;
-
-    font-size: 12px;
-}
-
-
-/* =========================
-   ACTIVE CONVERSATION
-========================= */
-
-.conversation {
-    height: 100%;
-
-    display: grid;
-
-    grid-template-rows:
-        72px minmax(0, 1fr) auto;
-}
-
-
-/* =========================
-   HEADER
-========================= */
-
-.conversation-header {
-    display: flex;
-    align-items: center;
-
-    padding:
-        0 22px;
-
-    border-bottom:
-        1px solid #1d1d1d;
-
-    background:
-        rgba(8,8,8,.92);
-}
-
-
-.conversation-user {
-    display: flex;
-    align-items: center;
-
-    gap: 11px;
-}
-
-
-.avatar-wrap {
-    position: relative;
-
-    width: 40px;
-    height: 40px;
-}
-
-
-.conversation-avatar {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    border-radius: 50%;
-
-    border:
-        1px solid #333333;
-}
-
-
-.status-dot {
-    position: absolute;
-
-    right: -1px;
-    bottom: -1px;
-
-    width: 12px;
-    height: 12px;
-
-    border:
-        3px solid #080808;
-
-    border-radius: 50%;
-}
-
-
-.conversation-user h2 {
-    margin: 0;
-
-    font-size: 13px;
-    font-weight: 900;
-}
-
-
-.conversation-status-text {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #5e5e5e;
-
-    font-size: 9px;
-
-    text-transform: capitalize;
-}
-
-
-/* =========================
-   MESSAGES
-========================= */
-
-.messages {
-    min-height: 0;
-
-    overflow-y: auto;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 5px;
-
-    padding:
-        24px 24px 16px;
-}
-
-
-.message-row {
-    display: flex;
-
-    width: 100%;
-}
-
-
-.message-row.mine {
-    justify-content: flex-end;
-}
-
-
-.message-row.theirs {
-    justify-content: flex-start;
-}
-
-
-.message {
-    max-width:
-        min(72%, 620px);
-
-    padding:
-        10px 12px;
-
-    border-radius: 10px;
-
-    font-size: 12px;
-
-    line-height: 1.45;
-
-    word-break: break-word;
-
-    white-space: pre-wrap;
-}
-
-
-.message-row.mine .message {
-    background: #f2f2f2;
-    color: #050505;
-
-    border-bottom-right-radius: 3px;
-}
-
-
-.message-row.theirs .message {
-    background: #151515;
-    color: #eeeeee;
-
-    border:
-        1px solid #232323;
-
-    border-bottom-left-radius: 3px;
-}
-
-
-.message-time {
-    display: block;
-
-    margin-top: 5px;
-
-    font-size: 8px;
-
-    opacity: .45;
-}
-
-
-/* =========================
-   MESSAGE FORM
-========================= */
-
-.message-form {
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr) auto;
-
-    gap: 10px;
-
-    padding: 16px;
-
-    border-top:
-        1px solid #1d1d1d;
-
-    background: #080808;
-}
-
-
-.message-form textarea {
-    width: 100%;
-
-    min-height: 44px;
-    max-height: 140px;
-
-    resize: none;
-
-    padding:
-        12px 13px;
-
-    border:
-        1px solid #292929;
-
-    border-radius: 8px;
-
-    outline: none;
-
-    background: #101010;
-    color: white;
-
-    font-family: inherit;
-    font-size: 12px;
-
-    line-height: 1.45;
-}
-
-
-.message-form textarea:focus {
-    border-color: #555555;
-}
-
-
-.message-form textarea::placeholder {
-    color: #555555;
-}
-
-
-.send-button {
-    min-width: 72px;
-
-    padding:
-        0 18px;
-
-    border: 0;
-
-    border-radius: 8px;
-
-    background: white;
-    color: black;
-
-    font-size: 11px;
-    font-weight: 900;
-
-    cursor: pointer;
-}
-
-
-.send-button:disabled {
-    opacity: .3;
-
-    cursor: default;
-}
-
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 900px) {
-
-    .app-shell {
-        grid-template-columns:
-            210px 1fr;
-    }
-
-
-    .sidebar {
-        width: 210px;
-    }
-
-
-    .chat-page {
-        grid-template-columns:
-            250px minmax(0, 1fr);
-    }
-}
-
-
-@media (max-width: 700px) {
-
-    body {
-        overflow: auto;
-    }
-
-
-    .app-shell {
-        display: block;
-
-        height: auto;
-    }
-
-
-    .sidebar {
-        width: 100%;
-        height: auto;
-
-        border-right: 0;
-
-        border-bottom:
-            1px solid #1d1d1d;
-    }
-
-
-    .sidebar-nav {
-        flex-direction: row;
-
-        overflow-x: auto;
-
-        margin-top: 18px;
-    }
-
-
-    .sidebar-link {
-        flex-shrink: 0;
-    }
-
-
-    .chat-page {
-        height:
-            calc(100vh - 180px);
-
-        grid-template-columns:
-            200px minmax(0, 1fr);
-    }
-
-
-    .message {
-        max-width: 86%;
-    }
-}
+</html>
