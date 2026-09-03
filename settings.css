@@ -1,0 +1,763 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+
+    background: #050505;
+    color: #ffffff;
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+button,
+select,
+input {
+    font: inherit;
+}
+
+
+/* =========================
+   APP
+========================= */
+
+.app-shell {
+    min-height: 100vh;
+
+    display: grid;
+
+    grid-template-columns:
+        260px 1fr;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    padding: 20px 18px;
+
+    background: #080808;
+
+    border-right:
+        1px solid #1d1d1d;
+}
+
+
+.account-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 10px;
+
+    border:
+        1px solid transparent;
+
+    border-radius: 9px;
+
+    background: transparent;
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease;
+}
+
+
+.account-card:hover {
+    background: #111111;
+
+    border-color: #252525;
+}
+
+
+.account-avatar {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+
+    border:
+        1px solid #333333;
+}
+
+
+.account-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.account-gamertag {
+    overflow: hidden;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 850;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.account-label {
+    color: #666666;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-top: 38px;
+}
+
+
+.sidebar-link {
+    min-height: 44px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid transparent;
+
+    border-radius: 7px;
+
+    color: #777777;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    transition:
+        background .18s ease,
+        color .18s ease,
+        border-color .18s ease;
+}
+
+
+.sidebar-link:hover {
+    background: #111111;
+    color: white;
+}
+
+
+.sidebar-link.active {
+    background: #171717;
+    color: white;
+
+    border-color: #292929;
+}
+
+
+.sidebar-dot {
+    width: 6px;
+    height: 6px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #343434;
+}
+
+
+.sidebar-link.active .sidebar-dot {
+    background: white;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.main-content {
+    grid-column: 2;
+
+    width: 100%;
+
+    padding:
+        58px
+        clamp(42px, 6vw, 90px)
+        100px;
+}
+
+
+.page-header {
+    width: min(100%, 1000px);
+
+    margin:
+        0 auto 52px;
+}
+
+
+.page-label {
+    margin:
+        0 0 7px;
+
+    color: #555555;
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: .18em;
+}
+
+
+.page-header h1 {
+    margin: 0;
+
+    font-size:
+        clamp(
+            42px,
+            5vw,
+            60px
+        );
+
+    font-weight: 900;
+
+    letter-spacing: -.055em;
+}
+
+
+.page-description {
+    max-width: 540px;
+
+    margin:
+        13px 0 0;
+
+    color: #666666;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+.settings-layout {
+    width: min(100%, 1000px);
+
+    margin: 0 auto;
+}
+
+
+.settings-section {
+    margin-bottom: 42px;
+}
+
+
+.section-heading {
+    margin-bottom: 14px;
+}
+
+
+.section-label {
+    margin:
+        0 0 5px;
+
+    color: #4d4d4d;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: .18em;
+}
+
+
+.section-heading h2 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    letter-spacing: -.02em;
+}
+
+
+.settings-card {
+    padding:
+        17px 18px;
+
+    border:
+        1px solid #202020;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0d0d0d,
+            #090909
+        );
+}
+
+
+.stacked-card {
+    padding:
+        0 18px;
+}
+
+
+.setting-row {
+    min-height: 80px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+
+.setting-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+
+.setting-copy strong {
+    color: #eeeeee;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+
+.setting-copy span {
+    max-width: 540px;
+
+    color: #5f5f5f;
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+.setting-divider {
+    height: 1px;
+
+    background: #1b1b1b;
+}
+
+
+/* =========================
+   ACCOUNT
+========================= */
+
+.account-settings-card,
+.session-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+
+.account-profile {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.profile-avatar {
+    width: 54px;
+    height: 54px;
+
+    object-fit: cover;
+
+    border:
+        1px solid #303030;
+
+    border-radius: 50%;
+}
+
+
+.profile-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.profile-info strong {
+    overflow: hidden;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 900;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.profile-info span {
+    overflow: hidden;
+
+    color: #626262;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================
+   SELECT
+========================= */
+
+.setting-select {
+    min-width: 150px;
+    height: 38px;
+
+    padding:
+        0 11px;
+
+    border:
+        1px solid #292929;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #101010;
+    color: #d6d6d6;
+
+    font-size: 10px;
+    font-weight: 750;
+
+    cursor: pointer;
+}
+
+
+.setting-select:focus {
+    border-color: #484848;
+}
+
+
+/* =========================
+   SWITCH
+========================= */
+
+.switch {
+    position: relative;
+
+    width: 42px;
+    height: 24px;
+
+    flex:
+        0 0 42px;
+}
+
+
+.switch input {
+    width: 0;
+    height: 0;
+
+    opacity: 0;
+}
+
+
+.switch-slider {
+    position: absolute;
+
+    inset: 0;
+
+    border:
+        1px solid #292929;
+
+    border-radius: 999px;
+
+    background: #111111;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease;
+}
+
+
+.switch-slider::before {
+    content: "";
+
+    position: absolute;
+
+    top: 4px;
+    left: 4px;
+
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+
+    background: #5a5a5a;
+
+    transition:
+        transform .18s ease,
+        background .18s ease;
+}
+
+
+.switch input:checked +
+.switch-slider {
+    background: #eeeeee;
+
+    border-color: #eeeeee;
+}
+
+
+.switch input:checked +
+.switch-slider::before {
+    transform:
+        translateX(18px);
+
+    background: #060606;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.secondary-button,
+.danger-button {
+    min-height: 38px;
+
+    padding:
+        0 14px;
+
+    border-radius: 8px;
+
+    font-size: 9px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+
+.secondary-button {
+    border:
+        1px solid #2a2a2a;
+
+    background: #111111;
+    color: #8a8a8a;
+}
+
+
+.secondary-button:hover {
+    color: white;
+
+    border-color: #3b3b3b;
+}
+
+
+.danger-button {
+    border:
+        1px solid #4c2525;
+
+    background: #1b0d0d;
+    color: #d87979;
+}
+
+
+.danger-button:hover {
+    background: #251010;
+
+    color: #ff9b9b;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.save-toast {
+    position: fixed;
+
+    right: 22px;
+    bottom: 22px;
+
+    z-index: 40;
+
+    padding:
+        11px 14px;
+
+    border:
+        1px solid #292929;
+
+    border-radius: 8px;
+
+    background: #101010;
+    color: #9a9a9a;
+
+    box-shadow:
+        0 18px 60px
+        rgba(0,0,0,.55);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+.save-toast[hidden] {
+    display: none;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+    .app-shell {
+        grid-template-columns:
+            210px 1fr;
+    }
+
+
+    .sidebar {
+        width: 210px;
+    }
+
+
+    .main-content {
+        padding:
+            48px 30px 80px;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .app-shell {
+        display: block;
+    }
+
+
+    .sidebar {
+        position: relative;
+
+        width: 100%;
+
+        border-right: 0;
+
+        border-bottom:
+            1px solid #1d1d1d;
+    }
+
+
+    .sidebar-nav {
+        flex-direction: row;
+
+        overflow-x: auto;
+
+        margin-top: 18px;
+    }
+
+
+    .sidebar-link {
+        flex-shrink: 0;
+    }
+
+
+    .main-content {
+        padding:
+            35px 20px 70px;
+    }
+
+
+    .page-header {
+        margin-bottom: 38px;
+    }
+
+
+    .setting-row,
+    .account-settings-card,
+    .session-card {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 17px;
+    }
+
+
+    .setting-row {
+        padding:
+            18px 0;
+    }
+
+
+    .setting-select {
+        width: 100%;
+    }
+}
