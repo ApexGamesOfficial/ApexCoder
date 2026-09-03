@@ -1,3 +1,11 @@
+const DEFAULT_AVATAR =
+    "Default Apex Games Profile Picture.png";
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
 const accountCard =
     document.getElementById(
         "accountCard"
@@ -13,6 +21,7 @@ const accountGamertag =
         "accountGamertag"
     );
 
+
 const friendSearch =
     document.getElementById(
         "friendSearch"
@@ -22,6 +31,17 @@ const friendsList =
     document.getElementById(
         "friendsList"
     );
+
+const friendCount =
+    document.getElementById(
+        "friendCount"
+    );
+
+const newChatButton =
+    document.getElementById(
+        "newChatButton"
+    );
+
 
 const conversationEmpty =
     document.getElementById(
@@ -53,10 +73,12 @@ const conversationStatusText =
         "conversationStatusText"
     );
 
+
 const messages =
     document.getElementById(
         "messages"
     );
+
 
 const messageForm =
     document.getElementById(
@@ -74,6 +96,63 @@ const sendButton =
     );
 
 
+const emojiButton =
+    document.getElementById(
+        "emojiButton"
+    );
+
+const emojiPicker =
+    document.getElementById(
+        "emojiPicker"
+    );
+
+const emojiGrid =
+    document.getElementById(
+        "emojiGrid"
+    );
+
+
+const gifButton =
+    document.getElementById(
+        "gifButton"
+    );
+
+const voiceButton =
+    document.getElementById(
+        "voiceButton"
+    );
+
+const voiceCallButton =
+    document.getElementById(
+        "voiceCallButton"
+    );
+
+const conversationMoreButton =
+    document.getElementById(
+        "conversationMoreButton"
+    );
+
+
+const featureNotice =
+    document.getElementById(
+        "featureNotice"
+    );
+
+const featureNoticeText =
+    document.getElementById(
+        "featureNoticeText"
+    );
+
+const closeFeatureNotice =
+    document.getElementById(
+        "closeFeatureNotice"
+    );
+
+
+/* ==========================================
+   STATE
+========================================== */
+
 let currentUser = null;
 
 let friends = [];
@@ -85,14 +164,71 @@ let messageRefreshTimer = null;
 let lastMessageSignature = "";
 
 
-/* =========================
-   ACCOUNT
-========================= */
+/* ==========================================
+   EMOJIS
+========================================== */
+
+const EMOJIS = [
+    "😀",
+    "😃",
+    "😄",
+    "😁",
+    "😂",
+    "🤣",
+    "😭",
+
+    "😊",
+    "😎",
+    "🤨",
+    "🫡",
+    "🤔",
+    "😴",
+    "💀",
+
+    "🔥",
+    "❤️",
+    "💙",
+    "💯",
+    "✨",
+    "⚡",
+    "🎉",
+
+    "👍",
+    "👎",
+    "👏",
+    "🙏",
+    "🤝",
+    "💪",
+    "✌️",
+
+    "👀",
+    "🗿",
+    "🤯",
+    "😱",
+    "😤",
+    "🥶",
+    "🤖",
+
+    "🎮",
+    "💻",
+    "⌨️",
+    "🖱️",
+    "🎧",
+    "🎙️",
+    "🚀"
+];
+
+
+/* ==========================================
+   START
+========================================== */
 
 async function startChat() {
 
     const {
-        data: { session }
+        data: {
+            session
+        }
     } =
         await supabaseClient
             .auth
@@ -112,6 +248,9 @@ async function startChat() {
         session.user;
 
 
+    buildEmojiPicker();
+
+
     await Promise.all([
         loadAccount(),
         loadFriends()
@@ -122,9 +261,9 @@ async function startChat() {
 }
 
 
-/* =========================
-   LOAD ACCOUNT
-========================= */
+/* ==========================================
+   ACCOUNT
+========================================== */
 
 async function loadAccount() {
 
@@ -145,7 +284,10 @@ async function loadAccount() {
             .single();
 
 
-    if (error || !profile) {
+    if (
+        error ||
+        !profile
+    ) {
 
         console.error(
             "Unable to load account:",
@@ -157,25 +299,66 @@ async function loadAccount() {
             "Account";
 
 
+        setAvatar(
+            accountAvatar,
+            null
+        );
+
+
         return;
     }
 
 
     accountGamertag.textContent =
-        profile.gamertag;
+        profile.gamertag ||
+        "Account";
 
 
-    accountAvatar.src =
-        profile.avatar_url ||
-        "Default Apex Games Profile Picture.png";
+    setAvatar(
+        accountAvatar,
+        profile.avatar_url
+    );
 }
 
 
-/* =========================
+/* ==========================================
+   AVATAR HELPER
+========================================== */
+
+function setAvatar(
+    image,
+    url
+) {
+
+    image.onerror =
+        () => {
+
+            image.onerror =
+                null;
+
+            image.src =
+                DEFAULT_AVATAR;
+        };
+
+
+    image.src =
+        url ||
+        DEFAULT_AVATAR;
+}
+
+
+/* ==========================================
    LOAD FRIENDS
-========================= */
+========================================== */
 
 async function loadFriends() {
+
+    friendsList.innerHTML = `
+        <div class="sidebar-loading">
+            Loading friends...
+        </div>
+    `;
+
 
     const {
         data: relationships,
@@ -206,9 +389,9 @@ async function loadFriends() {
 
 
         friendsList.innerHTML = `
-            <p class="no-friends">
+            <div class="no-friends">
                 Unable to load friends.
-            </p>
+            </div>
         `;
 
 
@@ -216,28 +399,31 @@ async function loadFriends() {
     }
 
 
-    const friendIds =
+    const ids =
         (relationships || [])
-            .map(relationship => {
+            .map(
+                relationship => {
 
-                if (
-                    relationship.sender_id ===
-                    currentUser.id
-                ) {
-                    return relationship.receiver_id;
+                    if (
+                        relationship.sender_id ===
+                        currentUser.id
+                    ) {
+
+                        return relationship.receiver_id;
+                    }
+
+
+                    return relationship.sender_id;
                 }
+            );
 
 
-                return relationship.sender_id;
-            });
-
-
-    const uniqueFriendIds =
-        [...new Set(friendIds)];
+    const uniqueIds =
+        [...new Set(ids)];
 
 
     if (
-        uniqueFriendIds.length === 0
+        uniqueIds.length === 0
     ) {
 
         friends = [];
@@ -258,12 +444,11 @@ async function loadFriends() {
                 id,
                 gamertag,
                 display_name,
-                avatar_url,
-                status
+                avatar_url
             `)
             .in(
                 "id",
-                uniqueFriendIds
+                uniqueIds
             );
 
 
@@ -275,6 +460,13 @@ async function loadFriends() {
         );
 
 
+        friendsList.innerHTML = `
+            <div class="no-friends">
+                Unable to load friend profiles.
+            </div>
+        `;
+
+
         return;
     }
 
@@ -283,9 +475,10 @@ async function loadFriends() {
         (profiles || [])
             .sort(
                 (a, b) =>
-                    a.gamertag.localeCompare(
-                        b.gamertag
-                    )
+                    (a.gamertag || "")
+                        .localeCompare(
+                            b.gamertag || ""
+                        )
             );
 
 
@@ -293,36 +486,119 @@ async function loadFriends() {
 }
 
 
-/* =========================
-   FRIEND LIST
-========================= */
+/* ==========================================
+   LIVE STATUS
+========================================== */
+
+function liveStatus(
+    userId
+) {
+
+    if (
+        typeof getLiveStatus ===
+        "function"
+    ) {
+
+        return normalizeStatus(
+            getLiveStatus(
+                userId
+            )
+        );
+    }
+
+
+    return "offline";
+}
+
+
+function normalizeStatus(
+    status
+) {
+
+    if (
+        status === "online" ||
+        status === "away" ||
+        status === "dnd"
+    ) {
+
+        return status;
+    }
+
+
+    return "offline";
+}
+
+
+function statusText(
+    status
+) {
+
+    if (
+        status === "online"
+    ) {
+
+        return "Online";
+    }
+
+
+    if (
+        status === "away"
+    ) {
+
+        return "Away";
+    }
+
+
+    if (
+        status === "dnd"
+    ) {
+
+        return "Do Not Disturb";
+    }
+
+
+    return "Offline";
+}
+
+
+/* ==========================================
+   RENDER FRIENDS
+========================================== */
 
 function renderFriends() {
 
     const search =
-        friendSearch.value
+        friendSearch
+            .value
             .trim()
             .toLowerCase();
 
 
     const filtered =
-        friends.filter(friend => {
+        friends.filter(
+            friend => {
 
-            const searchText =
-                `
-                    ${friend.gamertag || ""}
-                    ${friend.display_name || ""}
-                `
-                    .toLowerCase();
-
-
-            return searchText.includes(
-                search
-            );
-        });
+                const text =
+                    `
+                        ${friend.gamertag || ""}
+                        ${friend.display_name || ""}
+                    `
+                        .toLowerCase();
 
 
-    friendsList.innerHTML = "";
+                return text.includes(
+                    search
+                );
+            }
+        );
+
+
+    friendCount.textContent =
+        friends.length;
+
+
+    friendsList.innerHTML =
+        "";
 
 
     if (
@@ -331,7 +607,7 @@ function renderFriends() {
 
         const empty =
             document.createElement(
-                "p"
+                "div"
             );
 
 
@@ -354,198 +630,166 @@ function renderFriends() {
     }
 
 
-    filtered.forEach(friend => {
+    filtered.forEach(
+        friend => {
 
-        const button =
-            document.createElement(
-                "button"
+            const item =
+                document.createElement(
+                    "button"
+                );
+
+
+            item.type =
+                "button";
+
+
+            item.className =
+                "friend-item";
+
+
+            if (
+                selectedFriend?.id ===
+                friend.id
+            ) {
+
+                item.classList.add(
+                    "active"
+                );
+            }
+
+
+            const avatarWrap =
+                document.createElement(
+                    "div"
+                );
+
+
+            avatarWrap.className =
+                "friend-avatar-wrap";
+
+
+            const avatar =
+                document.createElement(
+                    "img"
+                );
+
+
+            avatar.className =
+                "friend-avatar";
+
+
+            avatar.alt =
+                friend.gamertag ||
+                "Friend";
+
+
+            setAvatar(
+                avatar,
+                friend.avatar_url
             );
 
 
-        button.type =
-            "button";
+            const status =
+                liveStatus(
+                    friend.id
+                );
 
 
-        button.className =
-            "friend-item";
+            const dot =
+                document.createElement(
+                    "span"
+                );
 
 
-        if (
-            selectedFriend?.id ===
-            friend.id
-        ) {
-            button.classList.add(
-                "active"
-            );
-        }
+            dot.className =
+                `friend-status ${status}`;
 
 
-        const avatarWrap =
-            document.createElement(
-                "div"
+            avatarWrap.append(
+                avatar,
+                dot
             );
 
 
-        avatarWrap.className =
-            "friend-avatar-wrap";
+            const info =
+                document.createElement(
+                    "div"
+                );
 
 
-        const avatar =
-            document.createElement(
-                "img"
-            );
+            info.className =
+                "friend-info";
 
 
-        avatar.className =
-            "friend-avatar";
+            const name =
+                document.createElement(
+                    "span"
+                );
 
 
-        avatar.src =
-            friend.avatar_url ||
-            "Default Apex Games Profile Picture.png";
+            name.className =
+                "friend-name";
 
 
-        avatar.alt =
-            friend.gamertag;
+            name.textContent =
+                friend.gamertag ||
+                "Unknown User";
 
 
-        const status =
-            document.createElement(
-                "span"
-            );
+            const presence =
+                document.createElement(
+                    "span"
+                );
 
 
-        const presence =
-            normalizeStatus(
-                friend.status
-            );
+            presence.className =
+                "friend-presence";
 
 
-        status.className =
-            `friend-status ${presence}`;
+            presence.textContent =
+                statusText(
+                    status
+                );
 
 
-        avatarWrap.append(
-            avatar,
-            status
-        );
-
-
-        const info =
-            document.createElement(
-                "div"
-            );
-
-
-        info.className =
-            "friend-info";
-
-
-        const name =
-            document.createElement(
-                "span"
-            );
-
-
-        name.className =
-            "friend-name";
-
-
-        name.textContent =
-            friend.gamertag;
-
-
-        const statusText =
-            document.createElement(
-                "span"
-            );
-
-
-        statusText.className =
-            "friend-presence";
-
-
-        statusText.textContent =
-            getStatusText(
+            info.append(
+                name,
                 presence
             );
 
 
-        info.append(
-            name,
-            statusText
-        );
+            item.append(
+                avatarWrap,
+                info
+            );
 
 
-        button.append(
-            avatarWrap,
-            info
-        );
+            item.addEventListener(
+                "click",
+                () => {
+
+                    selectFriend(
+                        friend
+                    );
+                }
+            );
 
 
-        button.addEventListener(
-            "click",
-            () => {
-
-                selectFriend(
-                    friend
-                );
-            }
-        );
-
-
-        friendsList.appendChild(
-            button
-        );
-    });
+            friendsList.appendChild(
+                item
+            );
+        }
+    );
 }
 
 
-/* =========================
-   STATUS
-========================= */
-
-function normalizeStatus(status) {
-
-    if (
-        status === "online" ||
-        status === "away" ||
-        status === "dnd"
-    ) {
-        return status;
-    }
-
-
-    return "offline";
-}
-
-
-function getStatusText(status) {
-
-    if (status === "dnd") {
-        return "Do Not Disturb";
-    }
-
-
-    if (status === "away") {
-        return "Away";
-    }
-
-
-    if (status === "online") {
-        return "Online";
-    }
-
-
-    return "Offline";
-}
-
-
-/* =========================
+/* ==========================================
    SELECT FRIEND
-========================= */
+========================================== */
 
-async function selectFriend(friend) {
+async function selectFriend(
+    friend
+) {
 
     selectedFriend =
         friend;
@@ -553,6 +797,10 @@ async function selectFriend(friend) {
 
     lastMessageSignature =
         "";
+
+
+    emojiPicker.hidden =
+        true;
 
 
     conversationEmpty.hidden =
@@ -563,29 +811,18 @@ async function selectFriend(friend) {
         false;
 
 
-    conversationAvatar.src =
-        friend.avatar_url ||
-        "Default Apex Games Profile Picture.png";
-
-
     conversationName.textContent =
-        friend.gamertag;
+        friend.gamertag ||
+        "Friend";
 
 
-    const status =
-        normalizeStatus(
-            friend.status
-        );
+    setAvatar(
+        conversationAvatar,
+        friend.avatar_url
+    );
 
 
-    conversationStatus.className =
-        `status-dot ${status}`;
-
-
-    conversationStatusText.textContent =
-        getStatusText(
-            status
-        );
+    updateConversationPresence();
 
 
     renderFriends();
@@ -619,12 +856,43 @@ async function selectFriend(friend) {
 
 
     messageInput.focus();
+
+
+    updateSendButton();
 }
 
 
-/* =========================
-   OPEN FROM URL
-========================= */
+/* ==========================================
+   UPDATE ACTIVE PRESENCE
+========================================== */
+
+function updateConversationPresence() {
+
+    if (!selectedFriend) {
+        return;
+    }
+
+
+    const status =
+        liveStatus(
+            selectedFriend.id
+        );
+
+
+    conversationStatus.className =
+        `presence-dot ${status}`;
+
+
+    conversationStatusText.textContent =
+        statusText(
+            status
+        );
+}
+
+
+/* ==========================================
+   URL FRIEND
+========================================== */
 
 function openFriendFromURL() {
 
@@ -662,18 +930,35 @@ function openFriendFromURL() {
 }
 
 
-/* =========================
+/* ==========================================
+   PRESENCE EVENTS
+========================================== */
+
+window.addEventListener(
+    "apex-presence-updated",
+    () => {
+
+        renderFriends();
+
+
+        updateConversationPresence();
+    }
+);
+
+
+/* ==========================================
    LOAD MESSAGES
-========================= */
+========================================== */
 
 async function loadMessages(
     forceScroll = false
 ) {
 
     if (
-        !selectedFriend ||
-        !currentUser
+        !currentUser ||
+        !selectedFriend
     ) {
+
         return;
     }
 
@@ -722,13 +1007,15 @@ async function loadMessages(
 
 
     const conversationMessages =
-        data || [];
+        data ||
+        [];
 
 
     const signature =
         conversationMessages
-            .map(message =>
-                `${message.id}:${message.created_at}`
+            .map(
+                message =>
+                    `${message.id}:${message.created_at}`
             )
             .join("|");
 
@@ -738,15 +1025,16 @@ async function loadMessages(
         signature ===
         lastMessageSignature
     ) {
+
         return;
     }
 
 
-    const wasNearBottom =
+    const nearBottom =
         messages.scrollHeight -
-            messages.scrollTop -
-            messages.clientHeight <
-        100;
+        messages.scrollTop -
+        messages.clientHeight <
+        120;
 
 
     lastMessageSignature =
@@ -760,26 +1048,29 @@ async function loadMessages(
 
     if (
         forceScroll ||
-        wasNearBottom
+        nearBottom
     ) {
+
         scrollToBottom();
     }
 }
 
 
-/* =========================
+/* ==========================================
    RENDER MESSAGES
-========================= */
+========================================== */
 
 function renderMessages(
     conversationMessages
 ) {
 
-    messages.innerHTML = "";
+    messages.innerHTML =
+        "";
 
 
     if (
-        conversationMessages.length === 0
+        conversationMessages.length ===
+        0
     ) {
 
         const empty =
@@ -789,11 +1080,33 @@ function renderMessages(
 
 
         empty.className =
-            "no-friends";
+            "messages-empty";
 
 
-        empty.textContent =
-            "No messages yet. Say hello 👋";
+        const title =
+            document.createElement(
+                "strong"
+            );
+
+
+        title.textContent =
+            "No messages yet";
+
+
+        const text =
+            document.createElement(
+                "span"
+            );
+
+
+        text.textContent =
+            "Start the conversation 👋";
+
+
+        empty.append(
+            title,
+            text
+        );
 
 
         messages.appendChild(
@@ -808,15 +1121,15 @@ function renderMessages(
     conversationMessages.forEach(
         message => {
 
+            const mine =
+                message.sender_id ===
+                currentUser.id;
+
+
             const row =
                 document.createElement(
                     "div"
                 );
-
-
-            const mine =
-                message.sender_id ===
-                currentUser.id;
 
 
             row.className =
@@ -880,11 +1193,13 @@ function renderMessages(
 }
 
 
-/* =========================
+/* ==========================================
    TIME
-========================= */
+========================================== */
 
-function formatTime(timestamp) {
+function formatTime(
+    timestamp
+) {
 
     const date =
         new Date(
@@ -895,16 +1210,19 @@ function formatTime(timestamp) {
     return date.toLocaleTimeString(
         [],
         {
-            hour: "numeric",
-            minute: "2-digit"
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit"
         }
     );
 }
 
 
-/* =========================
+/* ==========================================
    SEND MESSAGE
-========================= */
+========================================== */
 
 messageForm.addEventListener(
     "submit",
@@ -914,15 +1232,18 @@ messageForm.addEventListener(
 
 
         if (
-            !selectedFriend ||
-            !currentUser
+            !currentUser ||
+            !selectedFriend
         ) {
+
             return;
         }
 
 
         const content =
-            messageInput.value.trim();
+            messageInput
+                .value
+                .trim();
 
 
         if (!content) {
@@ -931,8 +1252,14 @@ messageForm.addEventListener(
 
 
         if (
-            content.length > 2000
+            content.length >
+            2000
         ) {
+
+            showFeatureNotice(
+                "Messages can be up to 2,000 characters."
+            );
+
             return;
         }
 
@@ -966,8 +1293,12 @@ messageForm.addEventListener(
             );
 
 
-            sendButton.disabled =
-                false;
+            showFeatureNotice(
+                "That message couldn't be sent."
+            );
+
+
+            updateSendButton();
 
 
             return;
@@ -978,10 +1309,14 @@ messageForm.addEventListener(
             "";
 
 
-        resizeMessageInput();
+        resizeInput();
 
 
         updateSendButton();
+
+
+        emojiPicker.hidden =
+            true;
 
 
         await loadMessages(
@@ -991,31 +1326,41 @@ messageForm.addEventListener(
 );
 
 
-/* =========================
+/* ==========================================
    MESSAGE INPUT
-========================= */
+========================================== */
 
 function updateSendButton() {
 
+    const hasText =
+        messageInput
+            .value
+            .trim()
+            .length >
+        0;
+
+
     sendButton.disabled =
         !selectedFriend ||
-        messageInput.value
-            .trim()
-            .length === 0;
+        !hasText;
 }
 
 
-function resizeMessageInput() {
+function resizeInput() {
 
     messageInput.style.height =
         "auto";
 
 
-    messageInput.style.height =
+    const newHeight =
         Math.min(
             messageInput.scrollHeight,
-            140
-        ) + "px";
+            130
+        );
+
+
+    messageInput.style.height =
+        `${newHeight}px`;
 }
 
 
@@ -1023,7 +1368,7 @@ messageInput.addEventListener(
     "input",
     () => {
 
-        resizeMessageInput();
+        resizeInput();
 
         updateSendButton();
     }
@@ -1045,6 +1390,7 @@ messageInput.addEventListener(
             if (
                 !sendButton.disabled
             ) {
+
                 messageForm.requestSubmit();
             }
         }
@@ -1052,15 +1398,273 @@ messageInput.addEventListener(
 );
 
 
-/* =========================
-   AUTO REFRESH
-========================= */
+/* ==========================================
+   EMOJI PICKER
+========================================== */
+
+function buildEmojiPicker() {
+
+    emojiGrid.innerHTML =
+        "";
+
+
+    EMOJIS.forEach(
+        emoji => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "emoji-item";
+
+
+            button.textContent =
+                emoji;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    insertEmoji(
+                        emoji
+                    );
+                }
+            );
+
+
+            emojiGrid.appendChild(
+                button
+            );
+        }
+    );
+}
+
+
+function insertEmoji(
+    emoji
+) {
+
+    const start =
+        messageInput.selectionStart;
+
+
+    const end =
+        messageInput.selectionEnd;
+
+
+    const value =
+        messageInput.value;
+
+
+    messageInput.value =
+        value.slice(
+            0,
+            start
+        ) +
+        emoji +
+        value.slice(
+            end
+        );
+
+
+    const cursor =
+        start +
+        emoji.length;
+
+
+    messageInput.focus();
+
+
+    messageInput.setSelectionRange(
+        cursor,
+        cursor
+    );
+
+
+    resizeInput();
+
+    updateSendButton();
+}
+
+
+emojiButton.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedFriend) {
+            return;
+        }
+
+
+        emojiPicker.hidden =
+            !emojiPicker.hidden;
+    }
+);
+
+
+/* ==========================================
+   FUTURE FEATURE NOTICE
+========================================== */
+
+function showFeatureNotice(
+    text
+) {
+
+    featureNoticeText.textContent =
+        text;
+
+
+    featureNotice.hidden =
+        false;
+}
+
+
+closeFeatureNotice.addEventListener(
+    "click",
+    () => {
+
+        featureNotice.hidden =
+            true;
+    }
+);
+
+
+/* ==========================================
+   GIF
+========================================== */
+
+gifButton.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedFriend) {
+            return;
+        }
+
+
+        emojiPicker.hidden =
+            true;
+
+
+        showFeatureNotice(
+            "GIF search is ready for the next Chat upgrade."
+        );
+    }
+);
+
+
+/* ==========================================
+   VOICE MESSAGE
+========================================== */
+
+voiceButton.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedFriend) {
+            return;
+        }
+
+
+        emojiPicker.hidden =
+            true;
+
+
+        showFeatureNotice(
+            "Voice messages need the secure audio-storage system we're building next."
+        );
+    }
+);
+
+
+/* ==========================================
+   CALLING
+========================================== */
+
+voiceCallButton.addEventListener(
+    "click",
+    () => {
+
+        if (!selectedFriend) {
+            return;
+        }
+
+
+        showFeatureNotice(
+            "Calling needs the ApexCoder WebRTC call system before this button can place real calls."
+        );
+    }
+);
+
+
+/* ==========================================
+   OTHER BUTTONS
+========================================== */
+
+conversationMoreButton.addEventListener(
+    "click",
+    () => {
+
+        showFeatureNotice(
+            "Conversation options are coming next."
+        );
+    }
+);
+
+
+newChatButton.addEventListener(
+    "click",
+    () => {
+
+        friendSearch.focus();
+
+        friendSearch.select();
+    }
+);
+
+
+/* ==========================================
+   SEARCH
+========================================== */
+
+friendSearch.addEventListener(
+    "input",
+    renderFriends
+);
+
+
+/* ==========================================
+   ACCOUNT
+========================================== */
+
+accountCard.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "settings.html";
+    }
+);
+
+
+/* ==========================================
+   MESSAGE REFRESH
+========================================== */
 
 function startMessageRefresh() {
 
     if (
         messageRefreshTimer
     ) {
+
         clearInterval(
             messageRefreshTimer
         );
@@ -1074,6 +1678,7 @@ function startMessageRefresh() {
                 if (
                     selectedFriend
                 ) {
+
                     loadMessages();
                 }
             },
@@ -1082,9 +1687,9 @@ function startMessageRefresh() {
 }
 
 
-/* =========================
+/* ==========================================
    SCROLL
-========================= */
+========================================== */
 
 function scrollToBottom() {
 
@@ -1098,33 +1703,41 @@ function scrollToBottom() {
 }
 
 
-/* =========================
-   SEARCH
-========================= */
+/* ==========================================
+   CLOSE EMOJI PICKER
+========================================== */
 
-friendSearch.addEventListener(
-    "input",
-    renderFriends
-);
-
-
-/* =========================
-   ACCOUNT
-========================= */
-
-accountCard.addEventListener(
+document.addEventListener(
     "click",
-    () => {
+    event => {
 
-        window.location.href =
-            "settings.html";
+        const clickedPicker =
+            emojiPicker.contains(
+                event.target
+            );
+
+
+        const clickedButton =
+            emojiButton.contains(
+                event.target
+            );
+
+
+        if (
+            !clickedPicker &&
+            !clickedButton
+        ) {
+
+            emojiPicker.hidden =
+                true;
+        }
     }
 );
 
 
-/* =========================
+/* ==========================================
    CLEANUP
-========================= */
+========================================== */
 
 window.addEventListener(
     "beforeunload",
@@ -1133,6 +1746,7 @@ window.addEventListener(
         if (
             messageRefreshTimer
         ) {
+
             clearInterval(
                 messageRefreshTimer
             );
@@ -1141,8 +1755,8 @@ window.addEventListener(
 );
 
 
-/* =========================
-   START
-========================= */
+/* ==========================================
+   GO
+========================================== */
 
 startChat();
