@@ -1281,7 +1281,22 @@
 
     }
 
+function clearTreeSelection() {
 
+    document
+        .querySelectorAll(
+            ".tree-item.selected"
+        )
+        .forEach(
+            item => {
+
+                item.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+}
     /* =====================================================
        EXPLORER
     ====================================================== */
