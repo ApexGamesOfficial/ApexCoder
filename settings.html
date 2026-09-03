@@ -1,606 +1,685 @@
-* {
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ApexCoder | Settings</title>
+
+    <link
+        rel="stylesheet"
+        href="settings.css?v=1"
+    >
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
+    <script
+        src="auth.js"
+        defer
+    ></script>
+
+    <script
+        src="settings.js?v=1"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <!-- =========================
+             SIDEBAR
+        ========================== -->
+
+        <aside class="sidebar">
+
+            <button
+                class="account-card"
+                id="accountCard"
+                type="button"
+            >
+                <img
+                    src="Default Apex Games Profile Picture.png"
+                    alt="Profile Picture"
+                    class="account-avatar"
+                    id="accountAvatar"
+                >
+
+                <div class="account-info">
 
-html,
-body {
-    margin: 0;
-    min-height: 100%;
-}
+                    <span
+                        class="account-gamertag"
+                        id="accountGamertag"
+                    >
+                        Loading...
+                    </span>
 
-body {
-    min-height: 100vh;
+                    <span class="account-label">
+                        Apex Games Account
+                    </span>
 
-    background: #050505;
-    color: #ffffff;
+                </div>
 
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-}
+            </button>
 
 
-/* =========================
-   APP
-========================= */
+            <nav class="sidebar-nav">
 
-.app-shell {
-    min-height: 100vh;
+                <a
+                    href="dashboard.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Home
+                </a>
 
-    display: grid;
+                <a
+                    href="projects.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Projects
+                </a>
 
-    grid-template-columns:
-        260px 1fr;
-}
+                <a
+                    href="discover.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Discover
+                </a>
 
+                <a
+                    href="chat.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Chat
+                </a>
 
-/* =========================
-   SIDEBAR
-========================= */
+                <a
+                    href="subscriptions.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Subscriptions
+                </a>
 
-.sidebar {
-    position: fixed;
+                <a
+                    href="settings.html"
+                    class="sidebar-link active"
+                >
+                    <span class="sidebar-dot"></span>
+                    Settings
+                </a>
 
-    top: 0;
-    left: 0;
-    bottom: 0;
+            </nav>
 
-    width: 260px;
+        </aside>
 
-    padding: 20px 18px;
 
-    background: #080808;
+        <!-- =========================
+             MAIN
+        ========================== -->
 
-    border-right:
-        1px solid #1d1d1d;
-}
+        <main class="main-content">
 
+            <header class="page-header">
 
-.account-card {
-    width: 100%;
+                <div>
 
-    display: flex;
-    align-items: center;
+                    <p class="page-label">
+                        APEXCODER
+                    </p>
 
-    gap: 12px;
+                    <h1>
+                        Settings
+                    </h1>
 
-    padding: 10px;
+                    <p class="page-description">
+                        Manage your ApexCoder experience,
+                        editor preferences, and account settings.
+                    </p>
 
-    border:
-        1px solid transparent;
+                </div>
 
-    border-radius: 9px;
+            </header>
 
-    background: transparent;
-    color: white;
 
-    text-align: left;
+            <div class="settings-layout">
 
-    cursor: pointer;
+                <!-- =========================
+                     ACCOUNT
+                ========================== -->
 
-    transition:
-        background .18s ease,
-        border-color .18s ease;
-}
+                <section class="settings-section">
 
+                    <div class="section-heading">
 
-.account-card:hover {
-    background: #111111;
+                        <div>
 
-    border-color: #252525;
-}
+                            <p class="section-label">
+                                ACCOUNT
+                            </p>
 
+                            <h2>
+                                Apex Games Account
+                            </h2>
 
-.account-avatar {
-    width: 42px;
-    height: 42px;
+                        </div>
 
-    flex-shrink: 0;
+                    </div>
 
-    object-fit: cover;
 
-    border-radius: 50%;
+                    <div class="settings-card account-settings-card">
 
-    border:
-        1px solid #333333;
-}
+                        <div class="account-profile">
 
+                            <img
+                                src="Default Apex Games Profile Picture.png"
+                                alt="Profile"
+                                id="profileAvatar"
+                                class="profile-avatar"
+                            >
 
-.account-info {
-    min-width: 0;
+                            <div class="profile-info">
 
-    display: flex;
-    flex-direction: column;
+                                <strong id="profileGamertag">
+                                    Loading...
+                                </strong>
 
-    gap: 3px;
-}
+                                <span id="profileDisplayName">
+                                    Loading account
+                                </span>
 
+                            </div>
 
-.account-gamertag {
-    overflow: hidden;
+                        </div>
 
-    color: white;
 
-    font-size: 13px;
-    font-weight: 850;
+                        <button
+                            class="secondary-button"
+                            id="manageProfileButton"
+                            type="button"
+                        >
+                            Manage Profile
+                        </button>
 
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
+                    </div>
 
+                </section>
 
-.account-label {
-    color: #666666;
 
-    font-size: 10px;
-    font-weight: 700;
-}
+                <!-- =========================
+                     PRESENCE
+                ========================== -->
 
+                <section class="settings-section">
 
-/* =========================
-   NAVIGATION
-========================= */
+                    <div class="section-heading">
 
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
+                        <div>
 
-    gap: 5px;
+                            <p class="section-label">
+                                PRESENCE
+                            </p>
 
-    margin-top: 38px;
-}
+                            <h2>
+                                Online Status
+                            </h2>
 
+                        </div>
 
-.sidebar-link {
-    min-height: 44px;
+                    </div>
 
-    display: flex;
-    align-items: center;
 
-    gap: 12px;
+                    <div class="settings-card">
 
-    padding:
-        0 13px;
+                        <div class="setting-row">
 
-    border:
-        1px solid transparent;
+                            <div class="setting-copy">
 
-    border-radius: 7px;
+                                <strong>
+                                    Status
+                                </strong>
 
-    color: #777777;
+                                <span>
+                                    Choose how you appear to friends.
+                                </span>
 
-    text-decoration: none;
+                            </div>
 
-    font-size: 13px;
-    font-weight: 800;
 
-    transition:
-        background .18s ease,
-        color .18s ease,
-        border-color .18s ease;
-}
+                            <select
+                                id="statusSelect"
+                                class="setting-select"
+                            >
+                                <option value="online">
+                                    Online
+                                </option>
 
+                                <option value="away">
+                                    Away
+                                </option>
 
-.sidebar-link:hover {
-    background: #111111;
-    color: white;
-}
+                                <option value="dnd">
+                                    Do Not Disturb
+                                </option>
 
+                                <option value="offline">
+                                    Offline
+                                </option>
+                            </select>
 
-.sidebar-link.active {
-    background: #171717;
-    color: white;
+                        </div>
 
-    border-color: #292929;
-}
+                    </div>
 
+                </section>
 
-.sidebar-dot {
-    width: 6px;
-    height: 6px;
 
-    flex-shrink: 0;
+                <!-- =========================
+                     CHAT
+                ========================== -->
 
-    border-radius: 50%;
+                <section class="settings-section">
 
-    background: #343434;
-}
+                    <div class="section-heading">
 
+                        <div>
 
-.sidebar-link.active .sidebar-dot {
-    background: white;
-}
+                            <p class="section-label">
+                                CHAT
+                            </p>
 
+                            <h2>
+                                Messaging
+                            </h2>
 
-/* =========================
-   MAIN
-========================= */
+                        </div>
 
-.main-content {
-    grid-column: 2;
+                    </div>
 
-    width: 100%;
 
-    padding:
-        58px
-        clamp(42px, 6vw, 90px)
-        100px;
-}
+                    <div class="settings-card stacked-card">
 
+                        <div class="setting-row">
 
-/* =========================
-   BRAND
-========================= */
+                            <div class="setting-copy">
 
-.brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+                                <strong>
+                                    Device Notifications
+                                </strong>
 
-    gap: 13px;
+                                <span>
+                                    Allow ApexCoder to notify you about
+                                    new messages when supported.
+                                </span>
 
-    font-size: 22px;
-    font-weight: 900;
-}
+                            </div>
 
 
-.brand-icon {
-    width: 48px;
-    height: 48px;
+                            <label class="switch">
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+                                <input
+                                    type="checkbox"
+                                    id="notificationsToggle"
+                                >
 
-    border:
-        1px solid white;
+                                <span class="switch-slider"></span>
 
-    border-radius: 8px;
+                            </label>
 
-    font-size: 13px;
-}
+                        </div>
 
 
-/* =========================
-   WELCOME
-========================= */
+                        <div class="setting-divider"></div>
 
-.welcome {
-    margin:
-        56px auto 76px;
 
-    text-align: center;
-}
+                        <div class="setting-row">
 
+                            <div class="setting-copy">
 
-.welcome h1 {
-    margin: 0;
+                                <strong>
+                                    Message Sounds
+                                </strong>
 
-    font-size:
-        clamp(
-            40px,
-            5vw,
-            62px
-        );
+                                <span>
+                                    Play sounds for new chat messages.
+                                </span>
 
-    font-weight: 900;
+                            </div>
 
-    letter-spacing: -.055em;
-}
 
+                            <label class="switch">
 
-.welcome h1 span {
-    color: #777777;
-}
+                                <input
+                                    type="checkbox"
+                                    id="messageSoundsToggle"
+                                >
 
+                                <span class="switch-slider"></span>
 
-.welcome p {
-    margin:
-        14px 0 0;
+                            </label>
 
-    color: #707070;
+                        </div>
 
-    font-size: 14px;
-}
+                    </div>
 
+                </section>
 
-/* =========================
-   PROJECT SECTIONS
-========================= */
 
-.project-section {
-    width: min(100%, 1200px);
+                <!-- =========================
+                     EDITOR
+                ========================== -->
 
-    margin:
-        0 auto 58px;
-}
+                <section class="settings-section">
 
+                    <div class="section-heading">
 
-.section-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+                        <div>
 
-    gap: 20px;
+                            <p class="section-label">
+                                EDITOR
+                            </p>
 
-    margin-bottom: 18px;
-}
+                            <h2>
+                                Editor Preferences
+                            </h2>
 
+                        </div>
 
-.section-label {
-    margin:
-        0 0 6px;
+                    </div>
 
-    color: #555555;
 
-    font-size: 9px;
-    font-weight: 900;
+                    <div class="settings-card stacked-card">
 
-    letter-spacing: .18em;
-}
+                        <div class="setting-row">
 
+                            <div class="setting-copy">
 
-.section-heading h2 {
-    margin: 0;
+                                <strong>
+                                    Autosave
+                                </strong>
 
-    font-size: 20px;
-    font-weight: 900;
+                                <span>
+                                    Automatically save project files
+                                    while you work.
+                                </span>
 
-    letter-spacing: -.025em;
-}
+                            </div>
 
 
-.view-all {
-    color: #666666;
+                            <label class="switch">
 
-    text-decoration: none;
+                                <input
+                                    type="checkbox"
+                                    id="autosaveToggle"
+                                >
 
-    font-size: 11px;
-    font-weight: 850;
-}
+                                <span class="switch-slider"></span>
 
+                            </label>
 
-.view-all:hover {
-    color: white;
-}
+                        </div>
 
 
-/* =========================
-   PROJECT ROW
-========================= */
+                        <div class="setting-divider"></div>
 
-.project-row {
-    display: grid;
 
-    grid-template-columns:
-        repeat(
-            auto-fill,
-            minmax(210px, 230px)
-        );
+                        <div class="setting-row">
 
-    gap: 14px;
-}
+                            <div class="setting-copy">
 
+                                <strong>
+                                    Word Wrap
+                                </strong>
 
-/* =========================
-   PROJECT CARDS
-========================= */
+                                <span>
+                                    Wrap long lines inside the editor.
+                                </span>
 
-.project-card {
-    min-height: 160px;
+                            </div>
 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
 
-    padding: 20px;
+                            <label class="switch">
 
-    border:
-        1px solid #252525;
+                                <input
+                                    type="checkbox"
+                                    id="wordWrapToggle"
+                                >
 
-    border-radius: 9px;
+                                <span class="switch-slider"></span>
 
-    background:
-        linear-gradient(
-            145deg,
-            #101010,
-            #090909
-        );
+                            </label>
 
-    color: white;
+                        </div>
 
-    text-align: left;
 
-    cursor: pointer;
+                        <div class="setting-divider"></div>
 
-    transition:
-        transform .18s ease,
-        border-color .18s ease,
-        background .18s ease,
-        box-shadow .18s ease;
-}
 
+                        <div class="setting-row">
 
-.project-card:hover {
-    transform:
-        translateY(-2px);
+                            <div class="setting-copy">
 
-    border-color: #4a4a4a;
+                                <strong>
+                                    Font Size
+                                </strong>
 
-    background: #121212;
+                                <span>
+                                    Choose your editor text size.
+                                </span>
 
-    box-shadow:
-        0 16px 40px
-        rgba(0,0,0,.28);
-}
+                            </div>
 
 
-.project-plus {
-    margin-bottom: auto;
+                            <select
+                                id="fontSizeSelect"
+                                class="setting-select"
+                            >
+                                <option value="12">
+                                    12px
+                                </option>
 
-    color: #666666;
+                                <option value="13">
+                                    13px
+                                </option>
 
-    font-size: 30px;
-    font-weight: 300;
-}
+                                <option value="14">
+                                    14px
+                                </option>
 
+                                <option value="15">
+                                    15px
+                                </option>
 
-.project-name {
-    display: block;
+                                <option value="16">
+                                    16px
+                                </option>
 
-    max-width: 100%;
+                                <option value="18">
+                                    18px
+                                </option>
+                            </select>
 
-    overflow: hidden;
+                        </div>
 
-    font-size: 13px;
-    font-weight: 900;
 
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
+                        <div class="setting-divider"></div>
 
 
-.project-description {
-    display: block;
+                        <div class="setting-row">
 
-    margin-top: 7px;
+                            <div class="setting-copy">
 
-    color: #626262;
+                                <strong>
+                                    Tab Size
+                                </strong>
 
-    font-size: 10px;
+                                <span>
+                                    Number of spaces used for indentation.
+                                </span>
 
-    line-height: 1.45;
-}
+                            </div>
 
 
-.sandbox-card {
-    border-style: dashed;
-}
+                            <select
+                                id="tabSizeSelect"
+                                class="setting-select"
+                            >
+                                <option value="2">
+                                    2 spaces
+                                </option>
 
+                                <option value="4">
+                                    4 spaces
+                                </option>
 
-/* =========================
-   SAVED PROJECTS
-========================= */
+                                <option value="8">
+                                    8 spaces
+                                </option>
+                            </select>
 
-.saved-project-card {
-    position: relative;
-}
+                        </div>
 
+                    </div>
 
-.saved-project-icon {
-    margin-bottom: auto;
+                </section>
 
-    color: #777777;
 
-    font-size: 25px;
-    font-weight: 700;
-}
+                <!-- =========================
+                     APPEARANCE
+                ========================== -->
 
+                <section class="settings-section">
 
-.saved-project-type {
-    margin-bottom: 7px;
+                    <div class="section-heading">
 
-    color: #555555;
+                        <div>
 
-    font-size: 8px;
-    font-weight: 900;
+                            <p class="section-label">
+                                APPEARANCE
+                            </p>
 
-    letter-spacing: .14em;
+                            <h2>
+                                Interface
+                            </h2>
 
-    text-transform: uppercase;
-}
+                        </div>
 
+                    </div>
 
-/* =========================
-   LOADING
-========================= */
 
-.projects-loading {
-    min-height: 160px;
+                    <div class="settings-card stacked-card">
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+                        <div class="setting-row">
 
-    color: #555555;
+                            <div class="setting-copy">
 
-    font-size: 11px;
-}
+                                <strong>
+                                    Compact Interface
+                                </strong>
 
+                                <span>
+                                    Reduce spacing throughout ApexCoder.
+                                </span>
 
-/* =========================
-   RESPONSIVE
-========================= */
+                            </div>
 
-@media (max-width: 900px) {
 
-    .app-shell {
-        grid-template-columns:
-            210px 1fr;
-    }
+                            <label class="switch">
 
+                                <input
+                                    type="checkbox"
+                                    id="compactToggle"
+                                >
 
-    .sidebar {
-        width: 210px;
-    }
+                                <span class="switch-slider"></span>
 
+                            </label>
 
-    .main-content {
-        padding:
-            48px 30px 80px;
-    }
-}
+                        </div>
 
+                    </div>
 
-@media (max-width: 700px) {
+                </section>
 
-    .app-shell {
-        display: block;
-    }
 
+                <!-- =========================
+                     SESSION
+                ========================== -->
 
-    .sidebar {
-        position: relative;
+                <section class="settings-section">
 
-        width: 100%;
+                    <div class="section-heading">
 
-        border-right: 0;
+                        <div>
 
-        border-bottom:
-            1px solid #1d1d1d;
-    }
+                            <p class="section-label">
+                                SESSION
+                            </p>
 
+                            <h2>
+                                Account Session
+                            </h2>
 
-    .sidebar-nav {
-        flex-direction: row;
+                        </div>
 
-        overflow-x: auto;
+                    </div>
 
-        margin-top: 18px;
-    }
 
+                    <div class="settings-card session-card">
 
-    .sidebar-link {
-        flex-shrink: 0;
-    }
+                        <div class="setting-copy">
 
+                            <strong>
+                                Sign Out
+                            </strong>
 
-    .main-content {
-        padding:
-            35px 20px 70px;
-    }
+                            <span>
+                                Sign out of your Apex Games Account
+                                on this device.
+                            </span>
 
+                        </div>
 
-    .welcome {
-        margin:
-            45px auto 60px;
-    }
 
+                        <button
+                            class="danger-button"
+                            id="signOutButton"
+                            type="button"
+                        >
+                            Sign Out
+                        </button>
 
-    .project-row {
-        grid-template-columns:
-            1fr;
-    }
-}
+                    </div>
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <div
+        class="save-toast"
+        id="saveToast"
+        hidden
+    >
+        Settings saved
+    </div>
+
+</body>
+
+</html>
