@@ -66,9 +66,9 @@ h1 {
 ];
 
 
-/* =========================
+/* =========================================================
    ELEMENTS
-========================= */
+========================================================= */
 
 const editorLoading =
     document.getElementById(
@@ -121,6 +121,11 @@ const editorTabs =
 const previewWorkspace =
     document.getElementById(
         "previewWorkspace"
+    );
+
+const previewStage =
+    document.getElementById(
+        "previewStage"
     );
 
 const codeWorkspace =
@@ -234,9 +239,9 @@ const propertyLanguage =
     );
 
 
-/* =========================
+/* =========================================================
    STATE
-========================= */
+========================================================= */
 
 let currentUser = null;
 
@@ -258,13 +263,31 @@ let currentMode =
     "preview";
 
 
-/* =========================
+let saveInProgress =
+    false;
+
+let saveRequestedAgain =
+    false;
+
+let autosaveTimer =
+    null;
+
+let previewFrame =
+    null;
+
+
+/* =========================================================
    SETTINGS
-========================= */
+========================================================= */
 
 function getEditorSettings() {
 
     return {
+        autosave:
+            localStorage.getItem(
+                "apexcoder_editor_autosave"
+            ) !== "false",
+
         wordWrap:
             localStorage.getItem(
                 "apexcoder_editor_word_wrap"
@@ -289,9 +312,9 @@ function getEditorSettings() {
 }
 
 
-/* =========================
+/* =========================================================
    START
-========================= */
+========================================================= */
 
 async function startEditor() {
 
@@ -350,6 +373,7 @@ async function startEditor() {
 
 
         if (!loaded) {
+
             return;
         }
 
@@ -388,9 +412,9 @@ async function startEditor() {
 }
 
 
-/* =========================
+/* =========================================================
    PROJECT
-========================= */
+========================================================= */
 
 async function loadProject(
     projectId
@@ -401,7 +425,9 @@ async function loadProject(
         error
     } =
         await supabaseClient
-            .from("projects")
+            .from(
+                "projects"
+            )
             .select(`
                 id,
                 name,
@@ -483,9 +509,9 @@ async function loadProject(
 }
 
 
-/* =========================
+/* =========================================================
    LOAD FILES
-========================= */
+========================================================= */
 
 async function loadProjectFiles() {
 
@@ -494,7 +520,9 @@ async function loadProjectFiles() {
         error
     } =
         await supabaseClient
-            .from("project_files")
+            .from(
+                "project_files"
+            )
             .select(`
                 id,
                 project_id,
@@ -511,12 +539,14 @@ async function loadProjectFiles() {
             .order(
                 "path",
                 {
-                    ascending: true
+                    ascending:
+                        true
                 }
             );
 
 
     if (error) {
+
         throw error;
     }
 
@@ -547,9 +577,9 @@ async function loadProjectFiles() {
 }
 
 
-/* =========================
+/* =========================================================
    DEFAULT FILES
-========================= */
+========================================================= */
 
 async function createDefaultFiles() {
 
@@ -576,7 +606,9 @@ async function createDefaultFiles() {
         error
     } =
         await supabaseClient
-            .from("project_files")
+            .from(
+                "project_files"
+            )
             .insert(
                 rows
             )
@@ -584,6 +616,7 @@ async function createDefaultFiles() {
 
 
     if (error) {
+
         throw error;
     }
 
@@ -602,7 +635,10 @@ async function createDefaultFiles() {
                 })
             )
             .sort(
-                (a, b) =>
+                (
+                    a,
+                    b
+                ) =>
                     a.path.localeCompare(
                         b.path
                     )
@@ -610,9 +646,9 @@ async function createDefaultFiles() {
 }
 
 
-/* =========================
+/* =========================================================
    MONACO
-========================= */
+========================================================= */
 
 function initializeMonaco() {
 
@@ -634,6 +670,7 @@ function initializeMonaco() {
                 [
                     "vs/editor/editor.main"
                 ],
+
                 () => {
 
                     const settings =
@@ -649,7 +686,8 @@ function initializeMonaco() {
                             inherit:
                                 true,
 
-                            rules: [],
+                            rules:
+                                [],
 
                             colors: {
                                 "editor.background":
@@ -769,6 +807,7 @@ function initializeMonaco() {
                     editor.addCommand(
                         monaco.KeyMod.CtrlCmd |
                         monaco.KeyCode.KeyS,
+
                         () => {
 
                             saveAllFiles();
@@ -782,6 +821,7 @@ function initializeMonaco() {
 
                     resolve();
                 },
+
                 reject
             );
         }
@@ -789,9 +829,9 @@ function initializeMonaco() {
 }
 
 
-/* =========================
+/* =========================================================
    EXPLORER
-========================= */
+========================================================= */
 
 function renderExplorer() {
 
@@ -865,6 +905,7 @@ function renderExplorer() {
 
             button.addEventListener(
                 "click",
+
                 () => {
 
                     openFile(
@@ -882,9 +923,9 @@ function renderExplorer() {
 }
 
 
-/* =========================
-   FILE ICONS
-========================= */
+/* =========================================================
+   FILE ICON
+========================================================= */
 
 function fileIcon(
     path
@@ -897,22 +938,38 @@ function fileIcon(
             .toLowerCase();
 
 
-    if (extension === "html") {
+    if (
+        extension ===
+        "html"
+    ) {
+
         return "<>";
     }
 
 
-    if (extension === "css") {
+    if (
+        extension ===
+        "css"
+    ) {
+
         return "#";
     }
 
 
-    if (extension === "js") {
+    if (
+        extension ===
+        "js"
+    ) {
+
         return "JS";
     }
 
 
-    if (extension === "json") {
+    if (
+        extension ===
+        "json"
+    ) {
+
         return "{}";
     }
 
@@ -921,9 +978,9 @@ function fileIcon(
 }
 
 
-/* =========================
+/* =========================================================
    OPEN FILE
-========================= */
+========================================================= */
 
 function openFile(
     file
@@ -1016,9 +1073,9 @@ function openFile(
 }
 
 
-/* =========================
+/* =========================================================
    PROPERTIES
-========================= */
+========================================================= */
 
 function updateProperties(
     file
@@ -1056,7 +1113,10 @@ function fileExtension(
         path.split(".");
 
 
-    if (parts.length < 2) {
+    if (
+        parts.length <
+        2
+    ) {
 
         return "File";
     }
@@ -1068,9 +1128,9 @@ function fileExtension(
 }
 
 
-/* =========================
-   LANGUAGES
-========================= */
+/* =========================================================
+   LANGUAGE
+========================================================= */
 
 function monacoLanguage(
     language,
@@ -1111,7 +1171,10 @@ function monacoLanguage(
     }
 
 
-    if (extension === "json") {
+    if (
+        extension === "json"
+    ) {
+
         return "json";
     }
 
@@ -1124,17 +1187,29 @@ function languageLabel(
     language
 ) {
 
-    if (language === "html") {
+    if (
+        language ===
+        "html"
+    ) {
+
         return "HTML";
     }
 
 
-    if (language === "css") {
+    if (
+        language ===
+        "css"
+    ) {
+
         return "CSS";
     }
 
 
-    if (language === "javascript") {
+    if (
+        language ===
+        "javascript"
+    ) {
+
         return "JavaScript";
     }
 
@@ -1143,9 +1218,9 @@ function languageLabel(
 }
 
 
-/* =========================
+/* =========================================================
    TABS
-========================= */
+========================================================= */
 
 function renderTabs() {
 
@@ -1235,6 +1310,7 @@ function renderTabs() {
 
             tab.addEventListener(
                 "click",
+
                 () => {
 
                     openFile(
@@ -1252,9 +1328,9 @@ function renderTabs() {
 }
 
 
-/* =========================
-   MODE
-========================= */
+/* =========================================================
+   MODES
+========================================================= */
 
 function showPreview() {
 
@@ -1340,9 +1416,9 @@ function showCode() {
 }
 
 
-/* =========================
-   CHANGE
-========================= */
+/* =========================================================
+   EDITOR CHANGES
+========================================================= */
 
 function handleEditorChange() {
 
@@ -1369,52 +1445,555 @@ function handleEditorChange() {
 
 
     renderTabs();
+
+
+    scheduleAutosave();
 }
 
 
-/* =========================
-   SAVE
-========================= */
+/* =========================================================
+   AUTOSAVE
+========================================================= */
 
-async function saveAllFiles() {
+function scheduleAutosave() {
+
+    const settings =
+        getEditorSettings();
+
+
+    if (!settings.autosave) {
+
+        return;
+    }
+
+
+    clearTimeout(
+        autosaveTimer
+    );
+
 
     saveStatus.textContent =
-        "Saving...";
+        "Autosave pending";
 
 
-    setTimeout(
-        () => {
+    autosaveTimer =
+        setTimeout(
+            () => {
 
-            saveStatus.textContent =
-                "Save system next";
-        },
-        300
+                saveAllFiles(
+                    true
+                );
+            },
+
+            1100
+        );
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+async function saveAllFiles(
+    fromAutosave = false
+) {
+
+    clearTimeout(
+        autosaveTimer
+    );
+
+
+    const dirtyFiles =
+        files.filter(
+            file =>
+                file.dirty
+        );
+
+
+    if (
+        dirtyFiles.length ===
+        0
+    ) {
+
+        saveStatus.textContent =
+            "Saved";
+
+        return true;
+    }
+
+
+    if (saveInProgress) {
+
+        saveRequestedAgain =
+            true;
+
+        return false;
+    }
+
+
+    saveInProgress =
+        true;
+
+
+    saveButton.disabled =
+        true;
+
+
+    saveStatus.textContent =
+        fromAutosave
+            ? "Autosaving..."
+            : "Saving...";
+
+
+    try {
+
+        const results =
+            await Promise.all(
+                dirtyFiles.map(
+                    file => {
+
+                        return supabaseClient
+                            .from(
+                                "project_files"
+                            )
+                            .update({
+                                content:
+                                    file.content,
+
+                                language:
+                                    file.language
+                            })
+                            .eq(
+                                "id",
+                                file.id
+                            )
+                            .eq(
+                                "project_id",
+                                currentProject.id
+                            )
+                            .select(
+                                "id"
+                            )
+                            .single();
+                    }
+                )
+            );
+
+
+        const failed =
+            results.find(
+                result =>
+                    result.error
+            );
+
+
+        if (failed) {
+
+            throw failed.error;
+        }
+
+
+        dirtyFiles.forEach(
+            file => {
+
+                file.dirty =
+                    false;
+            }
+        );
+
+
+        const {
+            error: projectUpdateError
+        } =
+            await supabaseClient
+                .from(
+                    "projects"
+                )
+                .update({
+                    updated_at:
+                        new Date()
+                            .toISOString()
+                })
+                .eq(
+                    "id",
+                    currentProject.id
+                )
+                .eq(
+                    "owner_id",
+                    currentUser.id
+                );
+
+
+        if (projectUpdateError) {
+
+            console.warn(
+                "Project timestamp couldn't update:",
+                projectUpdateError
+            );
+        }
+
+
+        saveStatus.textContent =
+            "Saved";
+
+
+        renderTabs();
+
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Save failed:",
+            error
+        );
+
+
+        saveStatus.textContent =
+            "Save failed";
+
+
+        return false;
+
+    }
+    finally {
+
+        saveInProgress =
+            false;
+
+
+        saveButton.disabled =
+            false;
+
+
+        if (saveRequestedAgain) {
+
+            saveRequestedAgain =
+                false;
+
+
+            if (
+                files.some(
+                    file =>
+                        file.dirty
+                )
+            ) {
+
+                saveAllFiles(
+                    true
+                );
+            }
+        }
+    }
+}
+
+
+/* =========================================================
+   PREVIEW BUILDING
+========================================================= */
+
+function getFileByPath(
+    path
+) {
+
+    const normalizedPath =
+        normalizePath(
+            path
+        );
+
+
+    return files.find(
+        file =>
+            normalizePath(
+                file.path
+            ) ===
+            normalizedPath
     );
 }
 
 
-/* =========================
-   RUN
-========================= */
+function normalizePath(
+    path
+) {
+
+    return String(
+        path || ""
+    )
+        .replace(
+            /^\.?\//,
+            ""
+        )
+        .split("?")[0]
+        .split("#")[0];
+}
+
+
+/* =========================================================
+   BUILD WEBSITE DOCUMENT
+========================================================= */
+
+function buildPreviewDocument() {
+
+    const htmlFile =
+        getFileByPath(
+            "index.html"
+        );
+
+
+    if (!htmlFile) {
+
+        return `
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <style>
+
+        body {
+            margin: 0;
+            padding: 40px;
+
+            background: #ffffff;
+            color: #222222;
+
+            font-family:
+                Arial,
+                sans-serif;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h2>
+        No index.html file found
+    </h2>
+
+    <p>
+        ApexCoder needs an index.html file
+        to run this website.
+    </p>
+
+</body>
+
+</html>
+        `;
+    }
+
+
+    let html =
+        htmlFile.content;
+
+
+    /*
+        Replace local stylesheet links
+        with the matching project CSS.
+    */
+
+    html =
+        html.replace(
+            /<link\b([^>]*?)href=["']([^"']+)["']([^>]*?)>/gi,
+
+            (
+                fullMatch,
+                beforeHref,
+                href,
+                afterHref
+            ) => {
+
+                const linkedFile =
+                    getFileByPath(
+                        href
+                    );
+
+
+                if (
+                    !linkedFile ||
+                    monacoLanguage(
+                        linkedFile.language,
+                        linkedFile.path
+                    ) !==
+                    "css"
+                ) {
+
+                    return fullMatch;
+                }
+
+
+                return `
+<style data-apexcoder-file="${escapeAttribute(
+                    linkedFile.path
+                )}">
+${linkedFile.content}
+</style>
+                `;
+            }
+        );
+
+
+    /*
+        Replace local JavaScript script files
+        with the matching project JS.
+    */
+
+    html =
+        html.replace(
+            /<script\b([^>]*?)src=["']([^"']+)["']([^>]*)>\s*<\/script>/gi,
+
+            (
+                fullMatch,
+                beforeSrc,
+                src,
+                afterSrc
+            ) => {
+
+                const linkedFile =
+                    getFileByPath(
+                        src
+                    );
+
+
+                if (
+                    !linkedFile ||
+                    monacoLanguage(
+                        linkedFile.language,
+                        linkedFile.path
+                    ) !==
+                    "javascript"
+                ) {
+
+                    return fullMatch;
+                }
+
+
+                const safeScript =
+                    linkedFile.content.replace(
+                        /<\/script/gi,
+                        "<\\/script"
+                    );
+
+
+                return `
+<script data-apexcoder-file="${escapeAttribute(
+                    linkedFile.path
+                )}">
+${safeScript}
+<\/script>
+                `;
+            }
+        );
+
+
+    return html;
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return String(
+        value
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        );
+}
+
+
+/* =========================================================
+   RUN PROJECT
+========================================================= */
 
 function runProject() {
 
     showPreview();
 
 
-    alert(
-        "Live Preview is the next editor checkpoint."
-    );
+    const source =
+        buildPreviewDocument();
+
+
+    if (!previewFrame) {
+
+        previewStage.innerHTML =
+            "";
+
+
+        previewFrame =
+            document.createElement(
+                "iframe"
+            );
+
+
+        previewFrame.className =
+            "apexcoder-preview-frame";
+
+
+        /*
+            Important:
+            scripts may run inside the website preview,
+            but the preview does NOT receive same-origin
+            access to the ApexCoder editor.
+        */
+
+        previewFrame.setAttribute(
+            "sandbox",
+            "allow-scripts allow-forms allow-modals"
+        );
+
+
+        previewFrame.setAttribute(
+            "title",
+            "ApexCoder Website Preview"
+        );
+
+
+        previewStage.appendChild(
+            previewFrame
+        );
+    }
+
+
+    previewFrame.srcdoc =
+        source;
 }
 
 
-/* =========================
+/* =========================================================
    EVENTS
-========================= */
+========================================================= */
 
 saveButton.addEventListener(
     "click",
-    saveAllFiles
+
+    () => {
+
+        saveAllFiles(
+            false
+        );
+    }
 );
 
 
@@ -1456,37 +2035,68 @@ previewModeButton.addEventListener(
 
 codeModeButton.addEventListener(
     "click",
+
     () => {
 
-        if (activeFile) {
+        showCode();
 
-            showCode();
+
+        if (
+            editor &&
+            activeFile
+        ) {
 
             editor.focus();
-
-            return;
         }
-
-
-        showCode();
     }
 );
 
 
 newFileButton.addEventListener(
     "click",
+
     () => {
 
         alert(
-            "New File is coming in the file-management checkpoint."
+            "New File is next in ApexCoder Studio."
         );
     }
 );
 
 
-/* =========================
+/* =========================================================
+   WARN ABOUT UNSAVED WORK
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+
+    event => {
+
+        const hasUnsavedFiles =
+            files.some(
+                file =>
+                    file.dirty
+            );
+
+
+        if (!hasUnsavedFiles) {
+
+            return;
+        }
+
+
+        event.preventDefault();
+
+        event.returnValue =
+            "";
+    }
+);
+
+
+/* =========================================================
    ERROR
-========================= */
+========================================================= */
 
 function showError(
     title,
@@ -1512,8 +2122,8 @@ function showError(
 }
 
 
-/* =========================
+/* =========================================================
    GO
-========================= */
+========================================================= */
 
 startEditor();
