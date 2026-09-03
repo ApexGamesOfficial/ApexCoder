@@ -9,11 +9,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>ApexCoder | Editor</title>
+    <title>ApexCoder Studio</title>
 
     <link
         rel="stylesheet"
-        href="editor.css?v=1"
+        href="editor.css?v=2"
     >
 
     <script
@@ -30,280 +30,45 @@
     ></script>
 
     <script
-        src="editor.js?v=1"
+        src="editor.js?v=2"
         defer
     ></script>
 </head>
 
 <body>
 
+    <!-- =========================
+         LOADING
+    ========================== -->
+
     <div
-        class="editor-loading"
+        class="loading-screen"
         id="editorLoading"
     >
-        <div class="loading-mark">
+        <div class="loading-logo">
             &lt;/&gt;
         </div>
 
         <strong>
-            Opening project
+            ApexCoder Studio
         </strong>
 
         <span>
-            Preparing ApexCoder...
+            Opening project...
         </span>
     </div>
 
 
-    <div
-        class="editor-app"
-        id="editorApp"
-        hidden
-    >
-
-        <!-- =========================
-             TOP BAR
-        ========================== -->
-
-        <header class="topbar">
-
-            <div class="topbar-left">
-
-                <a
-                    href="projects.html"
-                    class="back-button"
-                    title="Back to Projects"
-                >
-                    ←
-                </a>
-
-
-                <div class="brand-mark">
-                    &lt;/&gt;
-                </div>
-
-
-                <div class="project-info">
-
-                    <span class="project-platform">
-                        APEXCODER
-                    </span>
-
-                    <strong id="projectName">
-                        Project
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="topbar-actions">
-
-                <span
-                    class="save-status"
-                    id="saveStatus"
-                >
-                    Ready
-                </span>
-
-                <button
-                    class="toolbar-button"
-                    id="saveButton"
-                    type="button"
-                >
-                    Save
-                </button>
-
-                <button
-                    class="run-button"
-                    id="runButton"
-                    type="button"
-                >
-                    Run
-                </button>
-
-            </div>
-
-        </header>
-
-
-        <!-- =========================
-             WORKSPACE
-        ========================== -->
-
-        <div class="workspace">
-
-            <!-- EXPLORER -->
-
-            <aside class="explorer">
-
-                <div class="panel-header">
-
-                    <span>
-                        EXPLORER
-                    </span>
-
-                    <button
-                        id="newFileButton"
-                        type="button"
-                        title="New file"
-                    >
-                        +
-                    </button>
-
-                </div>
-
-
-                <div class="project-root">
-
-                    <span class="root-arrow">
-                        ▾
-                    </span>
-
-                    <span
-                        class="root-name"
-                        id="explorerProjectName"
-                    >
-                        Project
-                    </span>
-
-                </div>
-
-
-                <div
-                    class="file-list"
-                    id="fileList"
-                ></div>
-
-            </aside>
-
-
-            <!-- CENTER -->
-
-            <section class="editor-center">
-
-                <div
-                    class="editor-tabs"
-                    id="editorTabs"
-                ></div>
-
-
-                <div
-                    class="editor-empty"
-                    id="editorEmpty"
-                >
-
-                    <div class="empty-mark">
-                        &lt;/&gt;
-                    </div>
-
-                    <strong>
-                        ApexCoder
-                    </strong>
-
-                    <span>
-                        Select a file to begin editing.
-                    </span>
-
-                </div>
-
-
-                <div
-                    id="monacoEditor"
-                    class="monaco-container"
-                    hidden
-                ></div>
-
-            </section>
-
-
-            <!-- RIGHT PANEL -->
-
-            <aside class="preview-panel">
-
-                <div class="panel-header preview-header">
-
-                    <span>
-                        PREVIEW
-                    </span>
-
-                    <span class="preview-state">
-                        Website
-                    </span>
-
-                </div>
-
-
-                <div class="preview-empty">
-
-                    <div class="preview-icon">
-                        ▶
-                    </div>
-
-                    <strong>
-                        Ready to run
-                    </strong>
-
-                    <span>
-                        Your website preview will appear here.
-                    </span>
-
-                    <button
-                        id="previewRunButton"
-                        type="button"
-                    >
-                        Run Project
-                    </button>
-
-                </div>
-
-            </aside>
-
-        </div>
-
-
-        <!-- =========================
-             STATUS BAR
-        ========================== -->
-
-        <footer class="statusbar">
-
-            <div>
-                <span id="statusFile">
-                    No file selected
-                </span>
-            </div>
-
-
-            <div class="statusbar-right">
-
-                <span id="statusLanguage">
-                    Plain Text
-                </span>
-
-                <span id="statusCursor">
-                    Ln 1, Col 1
-                </span>
-
-                <span>
-                    ApexCoder
-                </span>
-
-            </div>
-
-        </footer>
-
-    </div>
-
+    <!-- =========================
+         ERROR
+    ========================== -->
 
     <div
         class="error-screen"
         id="errorScreen"
         hidden
     >
-
-        <div class="error-mark">
+        <div class="error-icon">
             !
         </div>
 
@@ -316,8 +81,475 @@
         </p>
 
         <a href="projects.html">
-            Return to Projects
+            Back to Projects
         </a>
+    </div>
+
+
+    <!-- =========================
+         STUDIO
+    ========================== -->
+
+    <div
+        class="studio"
+        id="editorApp"
+        hidden
+    >
+
+        <!-- TOP BAR -->
+
+        <header class="studio-topbar">
+
+            <div class="topbar-left">
+
+                <a
+                    href="projects.html"
+                    class="icon-button"
+                    title="Back"
+                >
+                    ←
+                </a>
+
+                <div class="studio-logo">
+                    &lt;/&gt;
+                </div>
+
+                <div class="project-title">
+
+                    <span>
+                        APEXCODER STUDIO
+                    </span>
+
+                    <strong id="projectName">
+                        Project
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="topbar-center">
+
+                <button
+                    class="mode-button active"
+                    id="previewModeButton"
+                    type="button"
+                >
+                    Preview
+                </button>
+
+                <button
+                    class="mode-button"
+                    id="codeModeButton"
+                    type="button"
+                >
+                    Code
+                </button>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <span
+                    class="save-status"
+                    id="saveStatus"
+                >
+                    Saved
+                </span>
+
+                <button
+                    class="small-button"
+                    id="saveButton"
+                    type="button"
+                >
+                    Save
+                </button>
+
+                <button
+                    class="run-button"
+                    id="runButton"
+                    type="button"
+                >
+                    ▶ Run
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             BODY
+        ========================== -->
+
+        <div class="studio-body">
+
+            <!-- ACTIVITY BAR -->
+
+            <aside class="activity-bar">
+
+                <button
+                    class="activity-button active"
+                    type="button"
+                    title="Explorer"
+                >
+                    ▣
+                </button>
+
+                <button
+                    class="activity-button"
+                    type="button"
+                    title="Search"
+                    disabled
+                >
+                    ⌕
+                </button>
+
+                <button
+                    class="activity-button"
+                    type="button"
+                    title="Run"
+                    id="activityRunButton"
+                >
+                    ▶
+                </button>
+
+                <div class="activity-spacer"></div>
+
+                <a
+                    href="settings.html"
+                    class="activity-button"
+                    title="Settings"
+                >
+                    ⚙
+                </a>
+
+            </aside>
+
+
+            <!-- =========================
+                 MAIN WORKSPACE
+            ========================== -->
+
+            <main class="workspace">
+
+                <!-- WORKSPACE TABS -->
+
+                <div
+                    class="workspace-tabs"
+                    id="workspaceTabs"
+                >
+
+                    <button
+                        class="workspace-tab preview-tab active"
+                        id="previewTab"
+                        type="button"
+                    >
+                        <span class="workspace-tab-icon">
+                            ◉
+                        </span>
+
+                        Preview
+                    </button>
+
+                    <div
+                        class="file-tabs"
+                        id="editorTabs"
+                    ></div>
+
+                </div>
+
+
+                <!-- PREVIEW -->
+
+                <section
+                    class="preview-workspace"
+                    id="previewWorkspace"
+                >
+
+                    <div class="preview-toolbar">
+
+                        <div class="preview-toolbar-left">
+
+                            <span class="preview-label">
+                                WEBSITE PREVIEW
+                            </span>
+
+                        </div>
+
+                        <div class="preview-toolbar-right">
+
+                            <button
+                                id="refreshPreviewButton"
+                                type="button"
+                                title="Refresh Preview"
+                            >
+                                ↻
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="preview-stage"
+                        id="previewStage"
+                    >
+
+                        <div class="preview-placeholder">
+
+                            <div class="preview-placeholder-icon">
+                                ▶
+                            </div>
+
+                            <strong>
+                                Ready to run
+                            </strong>
+
+                            <span>
+                                Run your project to preview
+                                your website.
+                            </span>
+
+                            <button
+                                id="previewRunButton"
+                                type="button"
+                            >
+                                Run Project
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- CODE -->
+
+                <section
+                    class="code-workspace"
+                    id="codeWorkspace"
+                    hidden
+                >
+
+                    <div
+                        class="editor-empty"
+                        id="editorEmpty"
+                    >
+                        <div class="empty-code-icon">
+                            &lt;/&gt;
+                        </div>
+
+                        <strong>
+                            No file open
+                        </strong>
+
+                        <span>
+                            Select a file from Explorer.
+                        </span>
+                    </div>
+
+
+                    <div
+                        class="monaco-container"
+                        id="monacoEditor"
+                        hidden
+                    ></div>
+
+                </section>
+
+
+                <!-- BOTTOM PANEL -->
+
+                <section class="bottom-panel">
+
+                    <div class="bottom-tabs">
+
+                        <button
+                            class="bottom-tab active"
+                            type="button"
+                        >
+                            Output
+                        </button>
+
+                        <button
+                            class="bottom-tab"
+                            type="button"
+                            disabled
+                        >
+                            Problems
+                        </button>
+
+                        <button
+                            class="bottom-tab"
+                            type="button"
+                            disabled
+                        >
+                            Console
+                        </button>
+
+                    </div>
+
+                    <div class="output-content">
+                        ApexCoder Studio ready.
+                    </div>
+
+                </section>
+
+            </main>
+
+
+            <!-- =========================
+                 RIGHT SIDEBAR
+            ========================== -->
+
+            <aside class="right-sidebar">
+
+                <!-- EXPLORER -->
+
+                <section class="studio-panel explorer-panel">
+
+                    <div class="panel-title">
+
+                        <span>
+                            Explorer
+                        </span>
+
+                        <button
+                            id="newFileButton"
+                            type="button"
+                            title="New File"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+
+                    <div class="project-root">
+
+                        <span>
+                            ▾
+                        </span>
+
+                        <strong id="explorerProjectName">
+                            Project
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="file-list"
+                        id="fileList"
+                    ></div>
+
+                </section>
+
+
+                <!-- PROPERTIES -->
+
+                <section class="studio-panel properties-panel">
+
+                    <div class="panel-title">
+                        <span>
+                            Properties
+                        </span>
+                    </div>
+
+
+                    <div
+                        class="properties-empty"
+                        id="propertiesEmpty"
+                    >
+                        Select a file to view its properties.
+                    </div>
+
+
+                    <div
+                        class="properties-content"
+                        id="propertiesContent"
+                        hidden
+                    >
+
+                        <div class="property-row">
+
+                            <span>
+                                Name
+                            </span>
+
+                            <strong id="propertyName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Type
+                            </span>
+
+                            <strong id="propertyType">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Language
+                            </span>
+
+                            <strong id="propertyLanguage">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </aside>
+
+        </div>
+
+
+        <!-- =========================
+             STATUS BAR
+        ========================== -->
+
+        <footer class="status-bar">
+
+            <span id="statusFile">
+                Preview
+            </span>
+
+            <div>
+
+                <span id="statusLanguage">
+                    Website
+                </span>
+
+                <span id="statusCursor">
+                    Ln 1, Col 1
+                </span>
+
+                <span>
+                    ApexCoder Studio
+                </span>
+
+            </div>
+
+        </footer>
 
     </div>
 
