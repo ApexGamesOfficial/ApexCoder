@@ -239,6 +239,81 @@ const propertyLanguage =
     );
 
 
+const outputTabButton =
+    document.getElementById(
+        "outputTabButton"
+    );
+
+const problemsTabButton =
+    document.getElementById(
+        "problemsTabButton"
+    );
+
+const consoleTabButton =
+    document.getElementById(
+        "consoleTabButton"
+    );
+
+const clearPanelButton =
+    document.getElementById(
+        "clearPanelButton"
+    );
+
+
+const outputPanel =
+    document.getElementById(
+        "outputPanel"
+    );
+
+const problemsPanel =
+    document.getElementById(
+        "problemsPanel"
+    );
+
+const consolePanel =
+    document.getElementById(
+        "consolePanel"
+    );
+
+
+const outputMessages =
+    document.getElementById(
+        "outputMessages"
+    );
+
+const problemMessages =
+    document.getElementById(
+        "problemMessages"
+    );
+
+const consoleMessages =
+    document.getElementById(
+        "consoleMessages"
+    );
+
+
+const outputEmpty =
+    document.getElementById(
+        "outputEmpty"
+    );
+
+const problemsEmpty =
+    document.getElementById(
+        "problemsEmpty"
+    );
+
+const consoleEmpty =
+    document.getElementById(
+        "consoleEmpty"
+    );
+
+
+const problemsCount =
+    document.getElementById(
+        "problemsCount"
+    );
+
+
 /* =========================================================
    STATE
 ========================================================= */
@@ -274,6 +349,12 @@ let autosaveTimer =
 
 let previewFrame =
     null;
+
+let currentBottomPanel =
+    "output";
+
+let runtimeProblems =
+    [];
 
 
 /* =========================================================
@@ -916,16 +997,16 @@ function renderExplorer() {
 
 
             button.addEventListener(
-    "contextmenu",
+                "contextmenu",
 
-    event => {
+                event => {
 
-        showFileMenu(
-            event,
-            file
-        );
-    }
-);
+                    showFileMenu(
+                        event,
+                        file
+                    );
+                }
+            );
 
 
             fileList.appendChild(
@@ -1078,14 +1159,6 @@ function openFile(
     renderExplorer();
 
     renderTabs();
-
-    showCode();
-
-
-    editor.focus();
-}
-
-
 /* =========================================================
    PROPERTIES
 ========================================================= */
@@ -1185,6 +1258,7 @@ function monacoLanguage(
 
 
     if (
+        language === "json" ||
         extension === "json"
     ) {
 
@@ -1224,6 +1298,15 @@ function languageLabel(
     ) {
 
         return "JavaScript";
+    }
+
+
+    if (
+        language ===
+        "json"
+    ) {
+
+        return "JSON";
     }
 
 
@@ -1558,12 +1641,32 @@ async function saveAllFiles(
             : "Saving...";
 
 
+    /*
+        Snapshot the exact version being saved.
+
+        If the user types while the network
+        request is running, the newer version
+        stays dirty and gets saved afterward.
+    */
+
+    const snapshots =
+        dirtyFiles.map(
+            file => ({
+                file,
+                content:
+                    file.content,
+                language:
+                    file.language
+            })
+        );
+
+
     try {
 
         const results =
             await Promise.all(
-                dirtyFiles.map(
-                    file => {
+                snapshots.map(
+                    snapshot => {
 
                         return supabaseClient
                             .from(
@@ -1571,14 +1674,14 @@ async function saveAllFiles(
                             )
                             .update({
                                 content:
-                                    file.content,
+                                    snapshot.content,
 
                                 language:
-                                    file.language
+                                    snapshot.language
                             })
                             .eq(
                                 "id",
-                                file.id
+                                snapshot.file.id
                             )
                             .eq(
                                 "project_id",
@@ -1606,11 +1709,29 @@ async function saveAllFiles(
         }
 
 
-        dirtyFiles.forEach(
-            file => {
+        /*
+            Only mark the file clean when its
+            contents still match the snapshot
+            that actually reached Supabase.
+        */
 
-                file.dirty =
-                    false;
+        snapshots.forEach(
+            snapshot => {
+
+                const file =
+                    snapshot.file;
+
+
+                if (
+                    file.content ===
+                        snapshot.content &&
+                    file.language ===
+                        snapshot.language
+                ) {
+
+                    file.dirty =
+                        false;
+                }
             }
         );
 
@@ -1646,16 +1767,25 @@ async function saveAllFiles(
         }
 
 
+        const stillDirty =
+            files.some(
+                file =>
+                    file.dirty
+            );
+
+
         saveStatus.textContent =
-            "Saved";
+            stillDirty
+                ? "Unsaved"
+                : "Saved";
 
 
         renderTabs();
 
 
         return true;
-
     }
+
     catch (error) {
 
         console.error(
@@ -1669,8 +1799,8 @@ async function saveAllFiles(
 
 
         return false;
-
     }
+
     finally {
 
         saveInProgress =
@@ -1681,7 +1811,9 @@ async function saveAllFiles(
             false;
 
 
-        if (saveRequestedAgain) {
+        if (
+            saveRequestedAgain
+        ) {
 
             saveRequestedAgain =
                 false;
@@ -1699,12 +1831,22 @@ async function saveAllFiles(
                 );
             }
         }
+
+        else if (
+            files.some(
+                file =>
+                    file.dirty
+            )
+        ) {
+
+            scheduleAutosave();
+        }
     }
 }
 
 
 /* =========================================================
-   PREVIEW BUILDING
+   PREVIEW FILE LOOKUP
 ========================================================= */
 
 function getFileByPath(
@@ -1770,9 +1912,11 @@ function buildPreviewDocument() {
 
         body {
             margin: 0;
+
             padding: 40px;
 
             background: #ffffff;
+
             color: #222222;
 
             font-family:
@@ -1807,8 +1951,8 @@ function buildPreviewDocument() {
 
 
     /*
-        Replace local stylesheet links
-        with the matching project CSS.
+        Replace local stylesheet links with
+        the current in-memory project CSS.
     */
 
     html =
@@ -1833,8 +1977,7 @@ function buildPreviewDocument() {
                     monacoLanguage(
                         linkedFile.language,
                         linkedFile.path
-                    ) !==
-                    "css"
+                    ) !== "css"
                 ) {
 
                     return fullMatch;
@@ -1853,8 +1996,8 @@ ${linkedFile.content}
 
 
     /*
-        Replace local JavaScript script files
-        with the matching project JS.
+        Replace local JavaScript files with
+        their current in-memory contents.
     */
 
     html =
@@ -1879,8 +2022,7 @@ ${linkedFile.content}
                     monacoLanguage(
                         linkedFile.language,
                         linkedFile.path
-                    ) !==
-                    "javascript"
+                    ) !== "javascript"
                 ) {
 
                     return fullMatch;
@@ -1895,19 +2037,62 @@ ${linkedFile.content}
 
 
                 return `
-<script data-apexcoder-file="${escapeAttribute(
-                    linkedFile.path
-                )}">
+<script
+    data-apexcoder-file="${escapeAttribute(
+        linkedFile.path
+    )}"
+>
 ${safeScript}
+//# sourceURL=apexcoder://${encodeURI(
+                    linkedFile.path
+                )}
 <\/script>
                 `;
             }
         );
 
 
+    /*
+        The debug bridge is inserted into the
+        document HEAD so it starts listening
+        before the user's normal body scripts
+        execute.
+    */
+
+    const debugBridge =
+        createDebugBridge();
+
+
+    if (
+        /<head[\s>]/i.test(
+            html
+        )
+    ) {
+
+        html =
+            html.replace(
+                /<head([^>]*)>/i,
+
+                match =>
+                    `${match}${debugBridge}`
+            );
+    }
+
+    else {
+
+        html =
+            debugBridge +
+            html;
+    }
+
+
     return html;
 }
 
+
+/* =========================================================
+   ATTRIBUTE ESCAPING
+========================================================= */
 
 function escapeAttribute(
     value
@@ -1936,10 +2121,1090 @@ function escapeAttribute(
 
 
 /* =========================================================
+   PREVIEW DEBUG BRIDGE
+========================================================= */
+
+function createDebugBridge() {
+
+    return `
+<script>
+(function () {
+
+    const send = (
+        type,
+        payload = {}
+    ) => {
+
+        window.parent.postMessage(
+            {
+                source:
+                    "apexcoder-preview",
+
+                type,
+
+                ...payload
+            },
+
+            "*"
+        );
+    };
+
+
+    function serialize(
+        value
+    ) {
+
+        try {
+
+            if (
+                typeof value ===
+                "string"
+            ) {
+
+                return value;
+            }
+
+
+            if (
+                value ===
+                undefined
+            ) {
+
+                return "undefined";
+            }
+
+
+            if (
+                value ===
+                null
+            ) {
+
+                return "null";
+            }
+
+
+            if (
+                typeof value ===
+                "function"
+            ) {
+
+                return value.toString();
+            }
+
+
+            if (
+                typeof value ===
+                "object"
+            ) {
+
+                return JSON.stringify(
+                    value,
+                    null,
+                    2
+                );
+            }
+
+
+            return String(
+                value
+            );
+        }
+
+        catch {
+
+            return String(
+                value
+            );
+        }
+    }
+
+
+    function serializeArguments(
+        args
+    ) {
+
+        return Array
+            .from(
+                args
+            )
+            .map(
+                serialize
+            )
+            .join(
+                " "
+            );
+    }
+
+
+    const originalLog =
+        console.log.bind(
+            console
+        );
+
+    const originalInfo =
+        console.info.bind(
+            console
+        );
+
+    const originalWarn =
+        console.warn.bind(
+            console
+        );
+
+    const originalError =
+        console.error.bind(
+            console
+        );
+
+
+    console.log =
+        function (...args) {
+
+            originalLog(
+                ...args
+            );
+
+
+            send(
+                "console",
+                {
+                    level:
+                        "log",
+
+                    message:
+                        serializeArguments(
+                            args
+                        )
+                }
+            );
+        };
+
+
+    console.info =
+        function (...args) {
+
+            originalInfo(
+                ...args
+            );
+
+
+            send(
+                "console",
+                {
+                    level:
+                        "info",
+
+                    message:
+                        serializeArguments(
+                            args
+                        )
+                }
+            );
+        };
+
+
+    console.warn =
+        function (...args) {
+
+            originalWarn(
+                ...args
+            );
+
+
+            send(
+                "console",
+                {
+                    level:
+                        "warn",
+
+                    message:
+                        serializeArguments(
+                            args
+                        )
+                }
+            );
+        };
+
+
+    console.error =
+        function (...args) {
+
+            originalError(
+                ...args
+            );
+
+
+            send(
+                "console",
+                {
+                    level:
+                        "error",
+
+                    message:
+                        serializeArguments(
+                            args
+                        )
+                }
+            );
+        };
+
+
+    window.addEventListener(
+        "error",
+
+        event => {
+
+            send(
+                "runtime-error",
+                {
+                    message:
+                        event.message ||
+                        "Unknown JavaScript error",
+
+                    filename:
+                        event.filename ||
+                        "script.js",
+
+                    line:
+                        event.lineno ||
+                        null,
+
+                    column:
+                        event.colno ||
+                        null
+                }
+            );
+        }
+    );
+
+
+    window.addEventListener(
+        "unhandledrejection",
+
+        event => {
+
+            let message =
+                "Unhandled Promise rejection";
+
+
+            try {
+
+                if (
+                    event.reason &&
+                    event.reason.message
+                ) {
+
+                    message =
+                        event.reason.message;
+                }
+
+                else if (
+                    event.reason !==
+                    undefined
+                ) {
+
+                    message =
+                        serialize(
+                            event.reason
+                        );
+                }
+            }
+
+            catch {}
+
+
+            send(
+                "runtime-error",
+                {
+                    message,
+
+                    filename:
+                        "script.js",
+
+                    line:
+                        null,
+
+                    column:
+                        null
+                }
+            );
+        }
+    );
+
+
+    send(
+        "preview-ready"
+    );
+
+})();
+<\/script>
+    `;
+}
+
+
+/* =========================================================
+   BOTTOM PANEL
+========================================================= */
+
+function showBottomPanel(
+    panel
+) {
+
+    currentBottomPanel =
+        panel;
+
+
+    const panels = {
+        output:
+            outputPanel,
+
+        problems:
+            problemsPanel,
+
+        console:
+            consolePanel
+    };
+
+
+    const buttons = {
+        output:
+            outputTabButton,
+
+        problems:
+            problemsTabButton,
+
+        console:
+            consoleTabButton
+    };
+
+
+    Object.values(
+        panels
+    ).forEach(
+        element => {
+
+            element.hidden =
+                true;
+
+
+            element.classList.remove(
+                "active"
+            );
+        }
+    );
+
+
+    Object.values(
+        buttons
+    ).forEach(
+        button => {
+
+            button.classList.remove(
+                "active"
+            );
+        }
+    );
+
+
+    panels[
+        panel
+    ].hidden =
+        false;
+
+
+    panels[
+        panel
+    ].classList.add(
+        "active"
+    );
+
+
+    buttons[
+        panel
+    ].classList.add(
+        "active"
+    );
+}
+
+
+/* =========================================================
+   OUTPUT
+========================================================= */
+
+function addOutputMessage(
+    message,
+    type = "info"
+) {
+
+    outputEmpty.hidden =
+        true;
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        `debug-row ${type}`;
+
+
+    const time =
+        document.createElement(
+            "span"
+        );
+
+
+    time.className =
+        "debug-time";
+
+
+    time.textContent =
+        new Date()
+            .toLocaleTimeString(
+                [],
+                {
+                    hour:
+                        "2-digit",
+
+                    minute:
+                        "2-digit",
+
+                    second:
+                        "2-digit"
+                }
+            );
+
+
+    const text =
+        document.createElement(
+            "span"
+        );
+
+
+    text.className =
+        "debug-message";
+
+
+    text.textContent =
+        message;
+
+
+    row.append(
+        time,
+        text
+    );
+
+
+    outputMessages.appendChild(
+        row
+    );
+
+
+    outputPanel.scrollTop =
+        outputPanel.scrollHeight;
+}
+
+
+/* =========================================================
+   CONSOLE
+========================================================= */
+
+function addConsoleMessage(
+    level,
+    message
+) {
+
+    consoleEmpty.hidden =
+        true;
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        `console-row ${level}`;
+
+
+    const icon =
+        document.createElement(
+            "span"
+        );
+
+
+    icon.className =
+        "console-icon";
+
+
+    if (
+        level ===
+        "error"
+    ) {
+
+        icon.textContent =
+            "×";
+    }
+
+    else if (
+        level ===
+        "warn"
+    ) {
+
+        icon.textContent =
+            "!";
+    }
+
+    else {
+
+        icon.textContent =
+            "›";
+    }
+
+
+    const text =
+        document.createElement(
+            "span"
+        );
+
+
+    text.className =
+        "console-message";
+
+
+    text.textContent =
+        message;
+
+
+    row.append(
+        icon,
+        text
+    );
+
+
+    consoleMessages.appendChild(
+        row
+    );
+
+
+    consolePanel.scrollTop =
+        consolePanel.scrollHeight;
+}
+
+
+/* =========================================================
+   PROBLEMS
+========================================================= */
+
+function updateProblemsCount() {
+
+    const count =
+        runtimeProblems.length;
+
+
+    problemsCount.textContent =
+        String(
+            count
+        );
+
+
+    problemsCount.hidden =
+        count === 0;
+}
+
+
+function findProblemFile(
+    filename
+) {
+
+    if (!filename) {
+
+        return getFileByPath(
+            "script.js"
+        );
+    }
+
+
+    let normalized =
+        String(
+            filename
+        );
+
+
+    /*
+        sourceURL errors can look like:
+        apexcoder://script.js
+    */
+
+    normalized =
+        normalized.replace(
+            /^apexcoder:\/\//i,
+            ""
+        );
+
+
+    try {
+
+        normalized =
+            decodeURI(
+                normalized
+            );
+    }
+
+    catch {}
+
+
+    normalized =
+        normalizePath(
+            normalized
+        );
+
+
+    const exact =
+        files.find(
+            file =>
+                normalizePath(
+                    file.path
+                ) ===
+                normalized
+        );
+
+
+    if (exact) {
+
+        return exact;
+    }
+
+
+    const endingMatch =
+        files.find(
+            file =>
+                normalized.endsWith(
+                    normalizePath(
+                        file.path
+                    )
+                )
+        );
+
+
+    if (endingMatch) {
+
+        return endingMatch;
+    }
+
+
+    return getFileByPath(
+        "script.js"
+    );
+}
+
+
+function addRuntimeProblem({
+    message,
+    filename,
+    line,
+    column
+}) {
+
+    const duplicate =
+        runtimeProblems.some(
+            problem =>
+
+                problem.message ===
+                    message &&
+
+                problem.filename ===
+                    filename &&
+
+                problem.line ===
+                    line &&
+
+                problem.column ===
+                    column
+        );
+
+
+    if (duplicate) {
+
+        return;
+    }
+
+
+    const problem = {
+        message,
+
+        filename:
+            filename ||
+            "script.js",
+
+        line,
+
+        column
+    };
+
+
+    runtimeProblems.push(
+        problem
+    );
+
+
+    problemsEmpty.hidden =
+        true;
+
+
+    const row =
+        document.createElement(
+            "button"
+        );
+
+
+    row.type =
+        "button";
+
+
+    row.className =
+        "problem-row";
+
+
+    const icon =
+        document.createElement(
+            "span"
+        );
+
+
+    icon.className =
+        "problem-icon";
+
+
+    icon.textContent =
+        "×";
+
+
+    const body =
+        document.createElement(
+            "span"
+        );
+
+
+    body.className =
+        "problem-body";
+
+
+    const messageElement =
+        document.createElement(
+            "strong"
+        );
+
+
+    messageElement.textContent =
+        problem.message;
+
+
+    const location =
+        document.createElement(
+            "span"
+        );
+
+
+    let locationText =
+        problem.filename;
+
+
+    if (
+        problem.line
+    ) {
+
+        locationText +=
+            `:${problem.line}`;
+
+
+        if (
+            problem.column
+        ) {
+
+            locationText +=
+                `:${problem.column}`;
+        }
+    }
+
+
+    location.textContent =
+        locationText;
+
+
+    body.append(
+        messageElement,
+        location
+    );
+
+
+    row.append(
+        icon,
+        body
+    );
+
+
+    row.addEventListener(
+        "click",
+
+        () => {
+
+            const matchingFile =
+                findProblemFile(
+                    problem.filename
+                );
+
+
+            if (!matchingFile) {
+
+                return;
+            }
+
+
+            openFile(
+                matchingFile
+            );
+
+
+            if (
+                problem.line &&
+                editor
+            ) {
+
+                const lineCount =
+                    editor
+                        .getModel()
+                        ?.getLineCount() ||
+                    1;
+
+
+                const safeLine =
+                    Math.min(
+                        Math.max(
+                            problem.line,
+                            1
+                        ),
+
+                        lineCount
+                    );
+
+
+                const lineLength =
+                    editor
+                        .getModel()
+                        ?.getLineLength(
+                            safeLine
+                        ) ||
+                    0;
+
+
+                const safeColumn =
+                    Math.min(
+                        Math.max(
+                            problem.column ||
+                            1,
+
+                            1
+                        ),
+
+                        lineLength + 1
+                    );
+
+
+                editor.revealLineInCenter(
+                    safeLine
+                );
+
+
+                editor.setPosition({
+                    lineNumber:
+                        safeLine,
+
+                    column:
+                        safeColumn
+                });
+
+
+                editor.focus();
+            }
+        }
+    );
+
+
+    problemMessages.appendChild(
+        row
+    );
+
+
+    updateProblemsCount();
+
+
+    addOutputMessage(
+        `Error: ${problem.message}`,
+        "error"
+    );
+}
+
+
+/* =========================================================
+   CLEAR DEBUG RESULTS
+========================================================= */
+
+function clearDebugResults() {
+
+    runtimeProblems =
+        [];
+
+
+    outputMessages.innerHTML =
+        "";
+
+    problemMessages.innerHTML =
+        "";
+
+    consoleMessages.innerHTML =
+        "";
+
+
+    outputEmpty.hidden =
+        false;
+
+    problemsEmpty.hidden =
+        false;
+
+    consoleEmpty.hidden =
+        false;
+
+
+    outputEmpty.textContent =
+        "Running project...";
+
+
+    problemsEmpty.textContent =
+        "No problems detected.";
+
+
+    consoleEmpty.textContent =
+        "Waiting for console output...";
+
+
+    updateProblemsCount();
+}
+
+
+/* =========================================================
+   PREVIEW MESSAGE RECEIVER
+========================================================= */
+
+window.addEventListener(
+    "message",
+
+    event => {
+
+        /*
+            Only accept messages coming from
+            the active sandboxed preview frame.
+        */
+
+        if (
+            !previewFrame ||
+            event.source !==
+                previewFrame.contentWindow
+        ) {
+
+            return;
+        }
+
+
+        const data =
+            event.data;
+
+
+        if (
+            !data ||
+            data.source !==
+                "apexcoder-preview"
+        ) {
+
+            return;
+        }
+
+
+        if (
+            data.type ===
+            "preview-ready"
+        ) {
+
+            outputEmpty.hidden =
+                true;
+
+
+            addOutputMessage(
+                "Website preview started.",
+                "success"
+            );
+
+
+            return;
+        }
+
+
+        if (
+            data.type ===
+            "console"
+        ) {
+
+            addConsoleMessage(
+                data.level ||
+                "log",
+
+                data.message ||
+                ""
+            );
+
+
+            return;
+        }
+
+
+        if (
+            data.type ===
+            "runtime-error"
+        ) {
+
+            addRuntimeProblem({
+                message:
+                    data.message ||
+                    "Unknown JavaScript error",
+
+                filename:
+                    data.filename ||
+                    "script.js",
+
+                line:
+                    data.line ||
+                    null,
+
+                column:
+                    data.column ||
+                    null
+            });
+        }
+    }
+);
+
+
+/* =========================================================
    RUN PROJECT
 ========================================================= */
 
 function runProject() {
+
+    clearDebugResults();
+
 
     showPreview();
 
@@ -1965,10 +3230,9 @@ function runProject() {
 
 
         /*
-            Important:
-            scripts may run inside the website preview,
-            but the preview does NOT receive same-origin
-            access to the ApexCoder editor.
+            The website may execute scripts,
+            but it does NOT get same-origin
+            access to ApexCoder itself.
         */
 
         previewFrame.setAttribute(
@@ -1992,21 +3256,32 @@ function runProject() {
     previewFrame.srcdoc =
         source;
 }
-
 /* =========================================================
    FILE MANAGEMENT
 ========================================================= */
 
-function cleanFilePath(value) {
+function cleanFilePath(
+    value
+) {
 
-    return String(value || "")
+    return String(
+        value || ""
+    )
         .trim()
-        .replace(/\\/g, "/")
-        .replace(/^\/+/, "");
+        .replace(
+            /\\/g,
+            "/"
+        )
+        .replace(
+            /^\/+/,
+            ""
+        );
 }
 
 
-function getLanguageFromPath(path) {
+function getLanguageFromPath(
+    path
+) {
 
     const extension =
         path
@@ -2015,34 +3290,61 @@ function getLanguageFromPath(path) {
             .toLowerCase();
 
 
-    if (extension === "html") {
+    if (
+        extension ===
+        "html"
+    ) {
+
         return "html";
     }
 
-    if (extension === "css") {
+
+    if (
+        extension ===
+        "css"
+    ) {
+
         return "css";
     }
 
-    if (extension === "js") {
+
+    if (
+        extension ===
+        "js"
+    ) {
+
         return "javascript";
     }
 
-    if (extension === "json") {
+
+    if (
+        extension ===
+        "json"
+    ) {
+
         return "json";
     }
+
 
     return "plaintext";
 }
 
 
-function isValidFilePath(path) {
+function isValidFilePath(
+    path
+) {
 
     if (!path) {
+
         return false;
     }
 
 
-    if (path.length > 255) {
+    if (
+        path.length >
+        255
+    ) {
+
         return false;
     }
 
@@ -2051,6 +3353,7 @@ function isValidFilePath(path) {
         path === "." ||
         path === ".."
     ) {
+
         return false;
     }
 
@@ -2059,6 +3362,7 @@ function isValidFilePath(path) {
         path.includes("../") ||
         path.includes("/../")
     ) {
+
         return false;
     }
 
@@ -2078,8 +3382,12 @@ function fileAlreadyExists(
 
     return files.some(
         file =>
-            file.id !== ignoredFileId &&
-            file.path.toLowerCase() === normalized
+            file.id !==
+                ignoredFileId &&
+
+            file.path
+                .toLowerCase() ===
+                normalized
     );
 }
 
@@ -2097,7 +3405,11 @@ async function createNewFile() {
         );
 
 
-    if (enteredName === null) {
+    if (
+        enteredName ===
+        null
+    ) {
+
         return;
     }
 
@@ -2108,7 +3420,11 @@ async function createNewFile() {
         );
 
 
-    if (!isValidFilePath(path)) {
+    if (
+        !isValidFilePath(
+            path
+        )
+    ) {
 
         alert(
             "Enter a valid file name."
@@ -2118,7 +3434,11 @@ async function createNewFile() {
     }
 
 
-    if (fileAlreadyExists(path)) {
+    if (
+        fileAlreadyExists(
+            path
+        )
+    ) {
 
         alert(
             "A file with that name already exists."
@@ -2149,19 +3469,19 @@ async function createNewFile() {
             error
         } =
             await supabaseClient
-                .from("project_files")
+                .from(
+                    "project_files"
+                )
                 .insert({
                     project_id:
                         currentProject.id,
 
-                    path:
-                        path,
+                    path,
 
                     content:
                         "",
 
-                    language:
-                        language
+                    language
                 })
                 .select(`
                     id,
@@ -2176,6 +3496,7 @@ async function createNewFile() {
 
 
         if (error) {
+
             throw error;
         }
 
@@ -2197,7 +3518,10 @@ async function createNewFile() {
 
 
         files.sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 a.path.localeCompare(
                     b.path
                 )
@@ -2214,8 +3538,8 @@ async function createNewFile() {
         openFile(
             newFile
         );
-
     }
+
     catch (error) {
 
         console.error(
@@ -2232,6 +3556,7 @@ async function createNewFile() {
             "ApexCoder couldn't create that file."
         );
     }
+
     finally {
 
         newFileButton.disabled =
@@ -2249,16 +3574,14 @@ async function renameFile(
 ) {
 
     if (!file) {
+
         return;
     }
 
 
-    /*
-        Save its current contents before
-        changing the path.
-    */
-
-    if (file.dirty) {
+    if (
+        file.dirty
+    ) {
 
         const saved =
             await saveAllFiles(
@@ -2284,7 +3607,11 @@ async function renameFile(
         );
 
 
-    if (enteredName === null) {
+    if (
+        enteredName ===
+        null
+    ) {
+
         return;
     }
 
@@ -2295,7 +3622,11 @@ async function renameFile(
         );
 
 
-    if (!isValidFilePath(newPath)) {
+    if (
+        !isValidFilePath(
+            newPath
+        )
+    ) {
 
         alert(
             "Enter a valid file name."
@@ -2345,7 +3676,9 @@ async function renameFile(
             error
         } =
             await supabaseClient
-                .from("project_files")
+                .from(
+                    "project_files"
+                )
                 .update({
                     path:
                         newPath,
@@ -2364,6 +3697,7 @@ async function renameFile(
 
 
         if (error) {
+
             throw error;
         }
 
@@ -2371,29 +3705,32 @@ async function renameFile(
         file.path =
             newPath;
 
+
         file.language =
             newLanguage;
 
 
-        /*
-            Monaco language may need to change
-            if the extension changed.
-        */
+        if (
+            file.model
+        ) {
 
-        if (file.model) {
+            monaco.editor
+                .setModelLanguage(
+                    file.model,
 
-            monaco.editor.setModelLanguage(
-                file.model,
-                monacoLanguage(
-                    newLanguage,
-                    newPath
-                )
-            );
+                    monacoLanguage(
+                        newLanguage,
+                        newPath
+                    )
+                );
         }
 
 
         files.sort(
-            (a, b) =>
+            (
+                a,
+                b
+            ) =>
                 a.path.localeCompare(
                     b.path
                 )
@@ -2428,8 +3765,8 @@ async function renameFile(
 
         saveStatus.textContent =
             "Saved";
-
     }
+
     catch (error) {
 
         console.error(
@@ -2458,6 +3795,7 @@ async function deleteFile(
 ) {
 
     if (!file) {
+
         return;
     }
 
@@ -2469,6 +3807,7 @@ async function deleteFile(
 
 
     if (!confirmed) {
+
         return;
     }
 
@@ -2483,7 +3822,9 @@ async function deleteFile(
             error
         } =
             await supabaseClient
-                .from("project_files")
+                .from(
+                    "project_files"
+                )
                 .delete()
                 .eq(
                     "id",
@@ -2496,21 +3837,19 @@ async function deleteFile(
 
 
         if (error) {
+
             throw error;
         }
 
 
-        if (file.model) {
-
-            /*
-                If Monaco is currently displaying
-                this model, detach it first.
-            */
+        if (
+            file.model
+        ) {
 
             if (
                 editor &&
                 editor.getModel() ===
-                file.model
+                    file.model
             ) {
 
                 editor.setModel(
@@ -2520,6 +3859,7 @@ async function deleteFile(
 
 
             file.model.dispose();
+
 
             file.model =
                 null;
@@ -2554,12 +3894,14 @@ async function deleteFile(
             editorEmpty.hidden =
                 false;
 
+
             monacoEditor.hidden =
                 true;
 
 
             propertiesContent.hidden =
                 true;
+
 
             propertiesEmpty.hidden =
                 false;
@@ -2568,11 +3910,39 @@ async function deleteFile(
             statusFile.textContent =
                 "No file";
 
+
             statusLanguage.textContent =
                 "Website";
 
+
             statusCursor.textContent =
                 "Ln 1, Col 1";
+
+
+            /*
+                If another file is still open,
+                automatically switch to it.
+            */
+
+            const fallbackFile =
+                openFiles[
+                    openFiles.length - 1
+                ];
+
+
+            if (
+                fallbackFile
+            ) {
+
+                openFile(
+                    fallbackFile
+                );
+            }
+
+            else {
+
+                showPreview();
+            }
         }
 
 
@@ -2583,8 +3953,8 @@ async function deleteFile(
 
         saveStatus.textContent =
             "Saved";
-
     }
+
     catch (error) {
 
         console.error(
@@ -2640,15 +4010,18 @@ function showFileMenu(
     renameButton.type =
         "button";
 
+
     renameButton.textContent =
         "Rename";
 
 
     renameButton.addEventListener(
         "click",
+
         () => {
 
             closeFileMenu();
+
 
             renameFile(
                 file
@@ -2666,8 +4039,10 @@ function showFileMenu(
     deleteButton.type =
         "button";
 
+
     deleteButton.textContent =
         "Delete";
+
 
     deleteButton.className =
         "danger";
@@ -2675,9 +4050,11 @@ function showFileMenu(
 
     deleteButton.addEventListener(
         "click",
+
         () => {
 
             closeFileMenu();
+
 
             deleteFile(
                 file
@@ -2700,12 +4077,14 @@ function showFileMenu(
     const menuWidth =
         130;
 
+
     const menuHeight =
         70;
 
 
     let x =
         event.clientX;
+
 
     let y =
         event.clientY;
@@ -2738,6 +4117,7 @@ function showFileMenu(
     menu.style.left =
         `${x}px`;
 
+
     menu.style.top =
         `${y}px`;
 }
@@ -2756,6 +4136,10 @@ function closeFileMenu() {
 }
 
 
+/* =========================================================
+   GENERAL EVENTS
+========================================================= */
+
 document.addEventListener(
     "click",
     closeFileMenu
@@ -2766,8 +4150,10 @@ window.addEventListener(
     "blur",
     closeFileMenu
 );
+
+
 /* =========================================================
-   EVENTS
+   SAVE / RUN EVENTS
 ========================================================= */
 
 saveButton.addEventListener(
@@ -2806,6 +4192,10 @@ refreshPreviewButton.addEventListener(
 );
 
 
+/* =========================================================
+   MODE EVENTS
+========================================================= */
+
 previewTab.addEventListener(
     "click",
     showPreview
@@ -2837,9 +4227,147 @@ codeModeButton.addEventListener(
 );
 
 
+/* =========================================================
+   BOTTOM PANEL EVENTS
+========================================================= */
+
+outputTabButton.addEventListener(
+    "click",
+
+    () => {
+
+        showBottomPanel(
+            "output"
+        );
+    }
+);
+
+
+problemsTabButton.addEventListener(
+    "click",
+
+    () => {
+
+        showBottomPanel(
+            "problems"
+        );
+    }
+);
+
+
+consoleTabButton.addEventListener(
+    "click",
+
+    () => {
+
+        showBottomPanel(
+            "console"
+        );
+    }
+);
+
+
+clearPanelButton.addEventListener(
+    "click",
+
+    () => {
+
+        runtimeProblems =
+            [];
+
+
+        outputMessages.innerHTML =
+            "";
+
+
+        problemMessages.innerHTML =
+            "";
+
+
+        consoleMessages.innerHTML =
+            "";
+
+
+        outputEmpty.hidden =
+            false;
+
+
+        problemsEmpty.hidden =
+            false;
+
+
+        consoleEmpty.hidden =
+            false;
+
+
+        outputEmpty.textContent =
+            "Output cleared.";
+
+
+        problemsEmpty.textContent =
+            "No problems detected.";
+
+
+        consoleEmpty.textContent =
+            "Console cleared.";
+
+
+        updateProblemsCount();
+    }
+);
+
+
+/* =========================================================
+   NEW FILE EVENT
+========================================================= */
+
 newFileButton.addEventListener(
     "click",
     createNewFile
+);
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+window.addEventListener(
+    "keydown",
+
+    event => {
+
+        const control =
+            event.ctrlKey ||
+            event.metaKey;
+
+
+        if (
+            control &&
+            event.key.toLowerCase() ===
+                "s"
+        ) {
+
+            event.preventDefault();
+
+
+            saveAllFiles(
+                false
+            );
+        }
+
+
+        if (
+            control &&
+            event.key ===
+                "Enter"
+        ) {
+
+            event.preventDefault();
+
+
+            runProject();
+        }
+    }
 );
 
 
@@ -2859,13 +4387,16 @@ window.addEventListener(
             );
 
 
-        if (!hasUnsavedFiles) {
+        if (
+            !hasUnsavedFiles
+        ) {
 
             return;
         }
 
 
         event.preventDefault();
+
 
         event.returnValue =
             "";
@@ -2874,7 +4405,7 @@ window.addEventListener(
 
 
 /* =========================================================
-   ERROR
+   ERROR SCREEN
 ========================================================= */
 
 function showError(
@@ -2885,8 +4416,10 @@ function showError(
     editorLoading.hidden =
         true;
 
+
     editorApp.hidden =
         true;
+
 
     errorScreen.hidden =
         false;
@@ -2902,7 +4435,7 @@ function showError(
 
 
 /* =========================================================
-   GO
+   START EDITOR
 ========================================================= */
 
 startEditor();
