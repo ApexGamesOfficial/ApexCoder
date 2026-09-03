@@ -72,30 +72,30 @@ textarea {
 }
 
 
-/* ==========================================
-   MAIN SIDEBAR
-========================================== */
+/* =========================
+   APEXCODER SIDEBAR
+========================= */
 
-.main-sidebar {
-    min-width: 0;
+.sidebar {
+    position: relative;
 
-    display: flex;
-    flex-direction: column;
+    width: 260px;
+    height: 100vh;
 
-    padding:
-        20px 14px;
+    padding: 20px 18px;
 
-    background:
-        linear-gradient(
-            180deg,
-            #090909 0%,
-            #070707 100%
-        );
+    background: #080808;
 
     border-right:
-        1px solid var(--border);
+        1px solid #1d1d1d;
+
+    overflow: hidden;
 }
 
+
+/* =========================
+   ACCOUNT
+========================= */
 
 .account-card {
     width: 100%;
@@ -103,14 +103,14 @@ textarea {
     display: flex;
     align-items: center;
 
-    gap: 11px;
+    gap: 12px;
 
-    padding: 9px;
+    padding: 10px;
 
     border:
         1px solid transparent;
 
-    border-radius: 10px;
+    border-radius: 9px;
 
     background: transparent;
     color: white;
@@ -120,16 +120,15 @@ textarea {
     cursor: pointer;
 
     transition:
-        background .15s ease,
-        border-color .15s ease;
+        background .18s ease,
+        border-color .18s ease;
 }
 
 
 .account-card:hover {
-    background: #101010;
+    background: #111111;
 
-    border-color:
-        var(--border);
+    border-color: #252525;
 }
 
 
@@ -137,14 +136,14 @@ textarea {
     width: 42px;
     height: 42px;
 
-    min-width: 42px;
+    flex: 0 0 42px;
 
     object-fit: cover;
 
-    border:
-        1px solid #292929;
+    border-radius: 50%;
 
-    border-radius: 10px;
+    border:
+        1px solid #333333;
 }
 
 
@@ -158,12 +157,12 @@ textarea {
 }
 
 
-.account-name {
+.account-gamertag {
     overflow: hidden;
 
     color: white;
 
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 850;
 
     white-space: nowrap;
@@ -172,25 +171,29 @@ textarea {
 
 
 .account-label {
-    color: #555;
+    color: #666666;
 
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
 }
 
 
-.main-nav {
+/* =========================
+   NAVIGATION
+========================= */
+
+.sidebar-nav {
     display: flex;
     flex-direction: column;
 
     gap: 5px;
 
-    margin-top: 34px;
+    margin-top: 38px;
 }
 
 
-.nav-item {
-    height: 43px;
+.sidebar-link {
+    min-height: 44px;
 
     display: flex;
     align-items: center;
@@ -203,120 +206,53 @@ textarea {
     border:
         1px solid transparent;
 
-    border-radius: 8px;
+    border-radius: 7px;
 
-    color: #676767;
+    color: #777777;
 
     text-decoration: none;
 
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
 
     transition:
-        color .15s ease,
-        background .15s ease,
-        border-color .15s ease;
+        background .18s ease,
+        color .18s ease,
+        border-color .18s ease;
 }
 
 
-.nav-item:hover {
-    color: #fff;
+.sidebar-link:hover {
+    background: #111111;
 
-    background: #0f0f0f;
-}
-
-
-.nav-item.active {
-    color: white;
-
-    background: #151515;
-
-    border-color:
-        #262626;
-}
-
-
-.nav-icon {
-    width: 18px;
-
-    display: inline-flex;
-    justify-content: center;
-
-    color: #858585;
-
-    font-size: 14px;
-}
-
-
-.nav-item.active .nav-icon {
     color: white;
 }
 
 
-.sidebar-brand {
-    min-width: 0;
+.sidebar-link.active {
+    background: #171717;
 
-    display: flex;
-    align-items: center;
+    color: white;
 
-    gap: 10px;
-
-    margin-top: auto;
-
-    padding:
-        12px 9px;
-
-    color: #4e4e4e;
+    border-color: #292929;
 }
 
 
-.sidebar-brand-logo {
-    width: 34px;
-    height: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.sidebar-dot {
+    width: 6px;
+    height: 6px;
 
     flex-shrink: 0;
 
-    border:
-        1px solid #202020;
+    border-radius: 50%;
 
-    border-radius: 8px;
-
-    font-size: 10px;
-    font-weight: 900;
+    background: #343434;
 }
 
 
-.sidebar-brand > div:last-child {
-    min-width: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    gap: 2px;
+.sidebar-link.active .sidebar-dot {
+    background: white;
 }
-
-
-.sidebar-brand strong {
-    color: #747474;
-
-    font-size: 10px;
-}
-
-
-.sidebar-brand span {
-    overflow: hidden;
-
-    font-size: 8px;
-
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-
 /* ==========================================
    FRIEND SIDEBAR
 ========================================== */
