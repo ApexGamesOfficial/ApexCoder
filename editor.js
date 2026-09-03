@@ -915,6 +915,19 @@ function renderExplorer() {
             );
 
 
+            button.addEventListener(
+    "contextmenu",
+
+    event => {
+
+        showFileMenu(
+            event,
+            file
+        );
+    }
+);
+
+
             fileList.appendChild(
                 button
             );
