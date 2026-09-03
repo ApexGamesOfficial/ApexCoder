@@ -8,6 +8,7 @@ const DEFAULT_FILES = [
 
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -65,6 +66,10 @@ h1 {
 ];
 
 
+/* =========================
+   ELEMENTS
+========================= */
+
 const editorLoading =
     document.getElementById(
         "editorLoading"
@@ -112,6 +117,34 @@ const editorTabs =
         "editorTabs"
     );
 
+
+const previewWorkspace =
+    document.getElementById(
+        "previewWorkspace"
+    );
+
+const codeWorkspace =
+    document.getElementById(
+        "codeWorkspace"
+    );
+
+
+const previewTab =
+    document.getElementById(
+        "previewTab"
+    );
+
+const previewModeButton =
+    document.getElementById(
+        "previewModeButton"
+    );
+
+const codeModeButton =
+    document.getElementById(
+        "codeModeButton"
+    );
+
+
 const editorEmpty =
     document.getElementById(
         "editorEmpty"
@@ -136,6 +169,16 @@ const runButton =
 const previewRunButton =
     document.getElementById(
         "previewRunButton"
+    );
+
+const refreshPreviewButton =
+    document.getElementById(
+        "refreshPreviewButton"
+    );
+
+const activityRunButton =
+    document.getElementById(
+        "activityRunButton"
     );
 
 const newFileButton =
@@ -165,29 +208,54 @@ const statusCursor =
     );
 
 
-let currentUser =
-    null;
+const propertiesEmpty =
+    document.getElementById(
+        "propertiesEmpty"
+    );
 
-let currentProject =
-    null;
+const propertiesContent =
+    document.getElementById(
+        "propertiesContent"
+    );
 
-let files =
-    [];
+const propertyName =
+    document.getElementById(
+        "propertyName"
+    );
 
-let openFiles =
-    [];
+const propertyType =
+    document.getElementById(
+        "propertyType"
+    );
 
-let activeFile =
-    null;
+const propertyLanguage =
+    document.getElementById(
+        "propertyLanguage"
+    );
 
-let editor =
-    null;
 
-let editorReady =
-    false;
+/* =========================
+   STATE
+========================= */
 
-let switchingFile =
-    false;
+let currentUser = null;
+
+let currentProject = null;
+
+let files = [];
+
+let openFiles = [];
+
+let activeFile = null;
+
+let editor = null;
+
+let editorReady = false;
+
+let switchingFile = false;
+
+let currentMode =
+    "preview";
 
 
 /* =========================
@@ -197,11 +265,6 @@ let switchingFile =
 function getEditorSettings() {
 
     return {
-        autosave:
-            localStorage.getItem(
-                "apexcoder_editor_autosave"
-            ) !== "false",
-
         wordWrap:
             localStorage.getItem(
                 "apexcoder_editor_word_wrap"
@@ -273,7 +336,7 @@ async function startEditor() {
 
             showError(
                 "No project selected",
-                "Open a project from your ApexCoder Projects page."
+                "Open a website project from your Projects page."
             );
 
             return;
@@ -293,7 +356,6 @@ async function startEditor() {
 
         await loadProjectFiles();
 
-
         await initializeMonaco();
 
 
@@ -307,12 +369,7 @@ async function startEditor() {
             false;
 
 
-        if (files.length > 0) {
-
-            openFile(
-                files[0]
-            );
-        }
+        showPreview();
 
     }
     catch (error) {
@@ -325,7 +382,7 @@ async function startEditor() {
 
         showError(
             "Editor failed to start",
-            "ApexCoder encountered an unexpected problem while opening this project."
+            "ApexCoder encountered a problem while opening this project."
         );
     }
 }
@@ -364,14 +421,13 @@ async function loadProject(
     ) {
 
         console.error(
-            "Unable to load project:",
             error
         );
 
 
         showError(
             "Project unavailable",
-            "This project doesn't exist or your account doesn't have access to it."
+            "This project doesn't exist or you don't have access to it."
         );
 
 
@@ -389,7 +445,6 @@ async function loadProject(
             "You don't have permission to open this project."
         );
 
-
         return false;
     }
 
@@ -400,10 +455,9 @@ async function loadProject(
     ) {
 
         showError(
-            "Editor not available yet",
-            "Website projects are supported first. The ApexCoder Game Editor is coming later."
+            "Editor unavailable",
+            "This version of ApexCoder Studio currently supports website projects."
         );
-
 
         return false;
     }
@@ -422,7 +476,7 @@ async function loadProject(
 
 
     document.title =
-        `${data.name} | ApexCoder`;
+        `${data.name} | ApexCoder Studio`;
 
 
     return true;
@@ -430,7 +484,7 @@ async function loadProject(
 
 
 /* =========================
-   FILES
+   LOAD FILES
 ========================= */
 
 async function loadProjectFiles() {
@@ -463,7 +517,6 @@ async function loadProjectFiles() {
 
 
     if (error) {
-
         throw error;
     }
 
@@ -531,7 +584,6 @@ async function createDefaultFiles() {
 
 
     if (error) {
-
         throw error;
     }
 
@@ -570,21 +622,6 @@ function initializeMonaco() {
             reject
         ) => {
 
-            if (
-                typeof require !==
-                "function"
-            ) {
-
-                reject(
-                    new Error(
-                        "Monaco loader is unavailable."
-                    )
-                );
-
-                return;
-            }
-
-
             require.config({
                 paths: {
                     vs:
@@ -603,6 +640,55 @@ function initializeMonaco() {
                         getEditorSettings();
 
 
+                    monaco.editor.defineTheme(
+                        "apexcoder-studio",
+                        {
+                            base:
+                                "vs-dark",
+
+                            inherit:
+                                true,
+
+                            rules: [],
+
+                            colors: {
+                                "editor.background":
+                                    "#1f2023",
+
+                                "editor.foreground":
+                                    "#e6e6e6",
+
+                                "editorLineNumber.foreground":
+                                    "#77787c",
+
+                                "editorLineNumber.activeForeground":
+                                    "#d7d7d7",
+
+                                "editorCursor.foreground":
+                                    "#ffffff",
+
+                                "editor.selectionBackground":
+                                    "#45474d",
+
+                                "editor.lineHighlightBackground":
+                                    "#25262a",
+
+                                "editorIndentGuide.background1":
+                                    "#35363a",
+
+                                "editorIndentGuide.activeBackground1":
+                                    "#57585d",
+
+                                "editorGutter.background":
+                                    "#1f2023",
+
+                                "minimap.background":
+                                    "#1f2023"
+                            }
+                        }
+                    );
+
+
                     editor =
                         monaco.editor.create(
                             monacoEditor,
@@ -614,13 +700,16 @@ function initializeMonaco() {
                                     "plaintext",
 
                                 theme:
-                                    "vs-dark",
+                                    "apexcoder-studio",
 
                                 automaticLayout:
                                     true,
 
                                 fontSize:
                                     settings.fontSize,
+
+                                lineHeight:
+                                    20,
 
                                 wordWrap:
                                     settings.wordWrap
@@ -635,18 +724,21 @@ function initializeMonaco() {
 
                                 minimap: {
                                     enabled:
-                                        true
-                                },
+                                        true,
 
-                                smoothScrolling:
-                                    true,
+                                    scale:
+                                        1
+                                },
 
                                 scrollBeyondLastLine:
                                     false,
 
+                                smoothScrolling:
+                                    true,
+
                                 padding: {
                                     top:
-                                        12
+                                        8
                                 },
 
                                 renderWhitespace:
@@ -791,7 +883,7 @@ function renderExplorer() {
 
 
 /* =========================
-   FILE ICON
+   FILE ICONS
 ========================= */
 
 function fileIcon(
@@ -815,11 +907,7 @@ function fileIcon(
     }
 
 
-    if (
-        extension === "js" ||
-        extension === "mjs"
-    ) {
-
+    if (extension === "js") {
         return "JS";
     }
 
@@ -873,6 +961,7 @@ function openFile(
         file.model =
             monaco.editor.createModel(
                 file.content,
+
                 monacoLanguage(
                     file.language,
                     file.path
@@ -911,9 +1000,16 @@ function openFile(
         );
 
 
+    updateProperties(
+        file
+    );
+
+
     renderExplorer();
 
     renderTabs();
+
+    showCode();
 
 
     editor.focus();
@@ -921,7 +1017,59 @@ function openFile(
 
 
 /* =========================
-   LANGUAGE
+   PROPERTIES
+========================= */
+
+function updateProperties(
+    file
+) {
+
+    propertiesEmpty.hidden =
+        true;
+
+    propertiesContent.hidden =
+        false;
+
+
+    propertyName.textContent =
+        file.path;
+
+
+    propertyType.textContent =
+        fileExtension(
+            file.path
+        );
+
+
+    propertyLanguage.textContent =
+        languageLabel(
+            file.language
+        );
+}
+
+
+function fileExtension(
+    path
+) {
+
+    const parts =
+        path.split(".");
+
+
+    if (parts.length < 2) {
+
+        return "File";
+    }
+
+
+    return parts
+        .pop()
+        .toUpperCase();
+}
+
+
+/* =========================
+   LANGUAGES
 ========================= */
 
 function monacoLanguage(
@@ -964,7 +1112,6 @@ function monacoLanguage(
 
 
     if (extension === "json") {
-
         return "json";
     }
 
@@ -1024,6 +1171,7 @@ function renderTabs() {
 
 
             if (
+                currentMode === "code" &&
                 activeFile?.id ===
                 file.id
             ) {
@@ -1105,7 +1253,95 @@ function renderTabs() {
 
 
 /* =========================
-   CHANGES
+   MODE
+========================= */
+
+function showPreview() {
+
+    currentMode =
+        "preview";
+
+
+    previewWorkspace.hidden =
+        false;
+
+    codeWorkspace.hidden =
+        true;
+
+
+    previewTab.classList.add(
+        "active"
+    );
+
+
+    previewModeButton.classList.add(
+        "active"
+    );
+
+
+    codeModeButton.classList.remove(
+        "active"
+    );
+
+
+    renderTabs();
+
+
+    statusFile.textContent =
+        "Preview";
+
+    statusLanguage.textContent =
+        "Website";
+}
+
+
+function showCode() {
+
+    currentMode =
+        "code";
+
+
+    previewWorkspace.hidden =
+        true;
+
+    codeWorkspace.hidden =
+        false;
+
+
+    previewTab.classList.remove(
+        "active"
+    );
+
+
+    previewModeButton.classList.remove(
+        "active"
+    );
+
+
+    codeModeButton.classList.add(
+        "active"
+    );
+
+
+    renderTabs();
+
+
+    if (activeFile) {
+
+        statusFile.textContent =
+            activeFile.path;
+
+
+        statusLanguage.textContent =
+            languageLabel(
+                activeFile.language
+            );
+    }
+}
+
+
+/* =========================
+   CHANGE
 ========================= */
 
 function handleEditorChange() {
@@ -1137,7 +1373,7 @@ function handleEditorChange() {
 
 
 /* =========================
-   SAVE PLACEHOLDER
+   SAVE
 ========================= */
 
 async function saveAllFiles() {
@@ -1146,36 +1382,40 @@ async function saveAllFiles() {
         "Saving...";
 
 
-    // Database saving is the next checkpoint.
-
-
     setTimeout(
         () => {
 
             saveStatus.textContent =
                 "Save system next";
         },
-        350
+        300
     );
 }
 
+
+/* =========================
+   RUN
+========================= */
+
+function runProject() {
+
+    showPreview();
+
+
+    alert(
+        "Live Preview is the next editor checkpoint."
+    );
+}
+
+
+/* =========================
+   EVENTS
+========================= */
 
 saveButton.addEventListener(
     "click",
     saveAllFiles
 );
-
-
-/* =========================
-   RUN PLACEHOLDER
-========================= */
-
-function runProject() {
-
-    alert(
-        "Live Preview is the next Editor checkpoint."
-    );
-}
 
 
 runButton.addEventListener(
@@ -1190,9 +1430,48 @@ previewRunButton.addEventListener(
 );
 
 
-/* =========================
-   NEW FILE PLACEHOLDER
-========================= */
+activityRunButton.addEventListener(
+    "click",
+    runProject
+);
+
+
+refreshPreviewButton.addEventListener(
+    "click",
+    runProject
+);
+
+
+previewTab.addEventListener(
+    "click",
+    showPreview
+);
+
+
+previewModeButton.addEventListener(
+    "click",
+    showPreview
+);
+
+
+codeModeButton.addEventListener(
+    "click",
+    () => {
+
+        if (activeFile) {
+
+            showCode();
+
+            editor.focus();
+
+            return;
+        }
+
+
+        showCode();
+    }
+);
+
 
 newFileButton.addEventListener(
     "click",
