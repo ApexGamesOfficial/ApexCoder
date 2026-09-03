@@ -1,6 +1,6 @@
 /* =========================================================
    APEXCODER GAME EDITOR
-   V0.1 — FOUNDATION
+   V0.2 — SELECTION + PARTS + TRANSFORM GIZMOS
 ========================================================= */
 
 (() => {
@@ -87,34 +87,55 @@
     const propertyScale =
         document.getElementById("propertyScale");
 
+    const selectToolButton =
+        document.getElementById("selectToolButton");
+
+    const moveToolButton =
+        document.getElementById("moveToolButton");
+
+    const rotateToolButton =
+        document.getElementById("rotateToolButton");
+
+    const scaleToolButton =
+        document.getElementById("scaleToolButton");
+
+    const addPartButton =
+        document.getElementById("addPartButton");
+
 
     /* =====================================================
        STATE
     ====================================================== */
 
     let currentSession = null;
-
     let currentProject = null;
 
     let THREE = null;
-
     let OrbitControls = null;
+    let TransformControls = null;
 
     let renderer = null;
-
     let scene = null;
-
     let camera = null;
-
     let controls = null;
+    let transformControls = null;
 
     let baseplate = null;
-
     let selectedSceneObject = null;
 
     let resizeObserver = null;
-
     let animationFrame = null;
+
+    let raycaster = null;
+    let pointer = null;
+
+    let selectionHelper = null;
+
+    let currentTool = "select";
+
+    const sceneObjects = [];
+
+    let partCounter = 1;
 
 
     /* =====================================================
@@ -143,6 +164,8 @@
 
             connectInterface();
 
+            renderExplorer();
+
             showEditor();
 
         } catch (error) {
@@ -164,7 +187,7 @@
 
 
     /* =====================================================
-       WAIT FOR AUTH.JS
+       HELPERS
     ====================================================== */
 
     async function waitForSupabase() {
@@ -344,33 +367,39 @@
 
     async function loadThree() {
 
-    rendererStatus.textContent =
-        "Loading 3D Engine";
+        rendererStatus.textContent =
+            "Loading 3D Engine";
 
 
-    const threeModule =
-        await import(
-            "three"
-        );
+        const threeModule =
+            await import("three");
+
+        const orbitModule =
+            await import(
+                "three/addons/controls/OrbitControls.js"
+            );
+
+        const transformModule =
+            await import(
+                "three/addons/controls/TransformControls.js"
+            );
 
 
-    const controlsModule =
-        await import(
-            "three/addons/controls/OrbitControls.js"
-        );
+        THREE =
+            threeModule;
+
+        OrbitControls =
+            orbitModule.OrbitControls;
+
+        TransformControls =
+            transformModule.TransformControls;
 
 
-    THREE =
-        threeModule;
+        rendererStatus.textContent =
+            "Three.js";
 
+    }
 
-    OrbitControls =
-        controlsModule.OrbitControls;
-
-
-    rendererStatus.textContent =
-        "Three.js";
-}
 
     /* =====================================================
        CREATE SCENE
@@ -378,27 +407,10 @@
 
     function createStudioScene() {
 
-        if (
-            !THREE ||
-            !OrbitControls
-        ) {
-
-            throw new Error(
-                "The 3D engine did not load correctly."
-            );
-
-        }
-
-
-        /* =================================================
-           RENDERER
-        ================================================== */
-
         renderer =
             new THREE.WebGLRenderer({
                 canvas,
-                antialias: true,
-                alpha: false
+                antialias: true
             });
 
 
@@ -422,10 +434,6 @@
             THREE.SRGBColorSpace;
 
 
-        /* =================================================
-           SCENE
-        ================================================== */
-
         scene =
             new THREE.Scene();
 
@@ -444,10 +452,6 @@
             );
 
 
-        /* =================================================
-           CAMERA
-        ================================================== */
-
         camera =
             new THREE.PerspectiveCamera(
                 55,
@@ -459,10 +463,6 @@
 
         resetCamera();
 
-
-        /* =================================================
-           ORBIT CONTROLS
-        ================================================== */
 
         controls =
             new OrbitControls(
@@ -505,9 +505,15 @@
         controls.update();
 
 
-        /* =================================================
-           GRID
-        ================================================== */
+        raycaster =
+            new THREE.Raycaster();
+
+
+        pointer =
+            new THREE.Vector2();
+
+
+        /* GRID */
 
         const grid =
             new THREE.GridHelper(
@@ -526,14 +532,10 @@
             true;
 
 
-        scene.add(
-            grid
-        );
+        scene.add(grid);
 
 
-        /* =================================================
-           BASEPLATE
-        ================================================== */
+        /* BASEPLATE */
 
         const baseplateGeometry =
             new THREE.BoxGeometry(
@@ -581,14 +583,19 @@
             "Baseplate";
 
 
-        scene.add(
+        baseplate.userData.locked =
+            true;
+
+
+        scene.add(baseplate);
+
+
+        registerSceneObject(
             baseplate
         );
 
 
-        /* =================================================
-           LIGHTING
-        ================================================== */
+        /* LIGHTING */
 
         const hemisphereLight =
             new THREE.HemisphereLight(
@@ -596,10 +603,6 @@
                 0x35363a,
                 1.45
             );
-
-
-        hemisphereLight.name =
-            "Environment Light";
 
 
         hemisphereLight.userData.editorOnly =
@@ -616,10 +619,6 @@
                 0xffffff,
                 2.35
             );
-
-
-        sunLight.name =
-            "Sun";
 
 
         sunLight.position.set(
@@ -641,22 +640,6 @@
             2048;
 
 
-        sunLight.shadow.camera.left =
-            -45;
-
-
-        sunLight.shadow.camera.right =
-            45;
-
-
-        sunLight.shadow.camera.top =
-            45;
-
-
-        sunLight.shadow.camera.bottom =
-            -45;
-
-
         sunLight.userData.editorOnly =
             true;
 
@@ -666,67 +649,77 @@
         );
 
 
-        /* =================================================
-           ORIGIN MARKER
-        ================================================== */
+        /* DEFAULT PART */
 
-        const originGeometry =
-            new THREE.BoxGeometry(
-                1,
-                1,
-                1
+        const starterPart =
+            createPartObject(
+                "SpawnPart"
             );
 
 
-        const originMaterial =
-            new THREE.MeshStandardMaterial({
-                color: 0xb2b4b9,
-                roughness: 0.65
-            });
-
-
-        const originPart =
-            new THREE.Mesh(
-                originGeometry,
-                originMaterial
-            );
-
-
-        originPart.name =
-            "SpawnPart";
-
-
-        originPart.position.set(
+        starterPart.position.set(
             0,
             0.5,
             0
         );
 
 
-        originPart.castShadow =
-            true;
-
-
-        originPart.receiveShadow =
-            true;
-
-
-        originPart.userData.apexObject =
-            true;
-
-
-        originPart.userData.objectType =
-            "Part";
-
-
         scene.add(
-            originPart
+            starterPart
         );
 
 
-        /* =================================================
-           RESIZE
-        ================================================== */
+        registerSceneObject(
+            starterPart
+        );
+
+
+        /* TRANSFORM CONTROLS */
+
+        transformControls =
+            new TransformControls(
+                camera,
+                renderer.domElement
+            );
+
+
+        transformControls.addEventListener(
+            "dragging-changed",
+            event => {
+
+                controls.enabled =
+                    !event.value;
+
+            }
+        );
+
+
+        transformControls.addEventListener(
+            "objectChange",
+            () => {
+
+                if (
+                    selectedSceneObject
+                ) {
+
+                    updateProperties(
+                        selectedSceneObject
+                    );
+
+                    updateSelectionHelper();
+
+                }
+
+            }
+        );
+
+
+        scene.add(
+            transformControls
+        );
+
+
+        /* RESIZE */
 
         resizeRenderer();
 
@@ -748,14 +741,779 @@
         );
 
 
-        /* =================================================
-           ANIMATION
-        ================================================== */
-
         animate();
 
 
         updateObjectCount();
+
+    }
+
+
+    /* =====================================================
+       PART CREATION
+    ====================================================== */
+
+    function createPartObject(
+        name = null
+    ) {
+
+        const geometry =
+            new THREE.BoxGeometry(
+                2,
+                2,
+                2
+            );
+
+
+        const material =
+            new THREE.MeshStandardMaterial({
+                color: 0xb7b9bd,
+                roughness: 0.72,
+                metalness: 0
+            });
+
+
+        const part =
+            new THREE.Mesh(
+                geometry,
+                material
+            );
+
+
+        part.name =
+            name ||
+            `Part${partCounter++}`;
+
+
+        part.castShadow =
+            true;
+
+
+        part.receiveShadow =
+            true;
+
+
+        part.userData.apexObject =
+            true;
+
+
+        part.userData.objectType =
+            "Part";
+
+
+        part.userData.locked =
+            false;
+
+
+        return part;
+
+    }
+
+
+    function addPart() {
+
+        const part =
+            createPartObject();
+
+
+        const direction =
+            new THREE.Vector3();
+
+
+        camera.getWorldDirection(
+            direction
+        );
+
+
+        const spawnPosition =
+            camera.position
+                .clone()
+                .add(
+                    direction.multiplyScalar(
+                        8
+                    )
+                );
+
+
+        spawnPosition.y =
+            Math.max(
+                1,
+                spawnPosition.y
+            );
+
+
+        part.position.copy(
+            spawnPosition
+        );
+
+
+        scene.add(
+            part
+        );
+
+
+        registerSceneObject(
+            part
+        );
+
+
+        renderExplorer();
+
+
+        selectSceneObject(
+            part
+        );
+
+
+        setTool(
+            "move"
+        );
+
+
+        updateObjectCount();
+
+    }
+
+
+    /* =====================================================
+       REGISTER OBJECT
+    ====================================================== */
+
+    function registerSceneObject(
+        object
+    ) {
+
+        if (
+            !sceneObjects.includes(
+                object
+            )
+        ) {
+
+            sceneObjects.push(
+                object
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       VIEWPORT SELECTION
+    ====================================================== */
+
+    function handleViewportPointerDown(
+        event
+    ) {
+
+        if (
+            transformControls?.dragging
+        ) {
+            return;
+        }
+
+
+        const rect =
+            renderer.domElement
+                .getBoundingClientRect();
+
+
+        pointer.x =
+            (
+                (
+                    event.clientX -
+                    rect.left
+                ) /
+                rect.width
+            ) * 2 - 1;
+
+
+        pointer.y =
+            -(
+                (
+                    event.clientY -
+                    rect.top
+                ) /
+                rect.height
+            ) * 2 + 1;
+
+
+        raycaster.setFromCamera(
+            pointer,
+            camera
+        );
+
+
+        const intersections =
+            raycaster.intersectObjects(
+                sceneObjects,
+                false
+            );
+
+
+        if (
+            intersections.length === 0
+        ) {
+
+            clearSelection();
+
+            return;
+
+        }
+
+
+        const hit =
+            intersections[0].object;
+
+
+        selectSceneObject(
+            hit
+        );
+
+    }
+
+
+    /* =====================================================
+       SELECTION
+    ====================================================== */
+
+    function selectSceneObject(
+        object
+    ) {
+
+        if (!object) {
+
+            clearSelection();
+
+            return;
+
+        }
+
+
+        selectedSceneObject =
+            object;
+
+
+        updateProperties(
+            object
+        );
+
+
+        highlightExplorerObject(
+            object
+        );
+
+
+        createSelectionHelper(
+            object
+        );
+
+
+        if (
+            object.userData?.locked
+        ) {
+
+            transformControls.detach();
+
+            setTool(
+                "select"
+            );
+
+        } else {
+
+            attachTransformForCurrentTool();
+
+        }
+
+    }
+
+
+    function clearSelection() {
+
+        selectedSceneObject =
+            null;
+
+
+        transformControls.detach();
+
+
+        removeSelectionHelper();
+
+
+        clearTreeSelection();
+
+
+        hideProperties();
+
+    }
+
+
+    /* =====================================================
+       SELECTION HELPER
+    ====================================================== */
+
+    function createSelectionHelper(
+        object
+    ) {
+
+        removeSelectionHelper();
+
+
+        if (
+            !object ||
+            !object.geometry
+        ) {
+            return;
+        }
+
+
+        selectionHelper =
+            new THREE.BoxHelper(
+                object,
+                0xffffff
+            );
+
+
+        selectionHelper.material.depthTest =
+            false;
+
+
+        selectionHelper.material.transparent =
+            true;
+
+
+        selectionHelper.material.opacity =
+            0.8;
+
+
+        selectionHelper.renderOrder =
+            999;
+
+
+        scene.add(
+            selectionHelper
+        );
+
+    }
+
+
+    function updateSelectionHelper() {
+
+        if (
+            selectionHelper &&
+            selectedSceneObject
+        ) {
+
+            selectionHelper.update();
+
+        }
+
+    }
+
+
+    function removeSelectionHelper() {
+
+        if (!selectionHelper) {
+            return;
+        }
+
+
+        scene.remove(
+            selectionHelper
+        );
+
+
+        selectionHelper.geometry?.dispose();
+
+
+        selectionHelper.material?.dispose();
+
+
+        selectionHelper =
+            null;
+
+    }
+
+
+    /* =====================================================
+       TOOLS
+    ====================================================== */
+
+    function setTool(
+        tool
+    ) {
+
+        currentTool =
+            tool;
+
+
+        updateToolButtons();
+
+
+        attachTransformForCurrentTool();
+
+    }
+
+
+    function updateToolButtons() {
+
+        [
+            selectToolButton,
+            moveToolButton,
+            rotateToolButton,
+            scaleToolButton
+        ].forEach(
+            button => {
+                button.classList.remove(
+                    "active"
+                );
+            }
+        );
+
+
+        if (
+            currentTool === "select"
+        ) {
+
+            selectToolButton.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (
+            currentTool === "move"
+        ) {
+
+            moveToolButton.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (
+            currentTool === "rotate"
+        ) {
+
+            rotateToolButton.classList.add(
+                "active"
+            );
+
+        }
+
+
+        if (
+            currentTool === "scale"
+        ) {
+
+            scaleToolButton.classList.add(
+                "active"
+            );
+
+        }
+
+    }
+
+
+    function attachTransformForCurrentTool() {
+
+        if (
+            !selectedSceneObject ||
+            selectedSceneObject.userData?.locked
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        if (
+            currentTool === "select"
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        transformControls.attach(
+            selectedSceneObject
+        );
+
+
+        if (
+            currentTool === "move"
+        ) {
+
+            transformControls.setMode(
+                "translate"
+            );
+
+        }
+
+
+        if (
+            currentTool === "rotate"
+        ) {
+
+            transformControls.setMode(
+                "rotate"
+            );
+
+        }
+
+
+        if (
+            currentTool === "scale"
+        ) {
+
+            transformControls.setMode(
+                "scale"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EXPLORER
+    ====================================================== */
+
+    function renderExplorer() {
+
+        const treeChildren =
+            document.querySelector(
+                ".tree-children"
+            );
+
+
+        treeChildren.innerHTML = "";
+
+
+        sceneObjects.forEach(
+            object => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.className =
+                    "tree-item child-item";
+
+
+                button.type =
+                    "button";
+
+
+                button.dataset.objectName =
+                    object.name;
+
+
+                button.innerHTML = `
+                    <span class="tree-indent"></span>
+
+                    <span class="tree-icon">
+                        ${
+                            object.userData
+                                ?.objectType ===
+                            "Baseplate"
+                                ? "▣"
+                                : "■"
+                        }
+                    </span>
+
+                    <span class="tree-name"></span>
+                `;
+
+
+                button
+                    .querySelector(
+                        ".tree-name"
+                    )
+                    .textContent =
+                    object.name;
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        selectSceneObject(
+                            object
+                        );
+
+                    }
+                );
+
+
+                treeChildren.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        /* CAMERA */
+
+        const cameraButton =
+            createSpecialTreeItem(
+                "◉",
+                "Camera"
+            );
+
+
+        cameraButton.addEventListener(
+            "click",
+            () => {
+
+                clearTreeSelection();
+
+                cameraButton.classList.add(
+                    "selected"
+                );
+
+                selectedSceneObject =
+                    camera;
+
+                transformControls.detach();
+
+                removeSelectionHelper();
+
+                updateProperties(
+                    camera,
+                    "Camera"
+                );
+
+            }
+        );
+
+
+        treeChildren.appendChild(
+            cameraButton
+        );
+
+
+        /* LIGHTING */
+
+        const lightingButton =
+            createSpecialTreeItem(
+                "☀",
+                "Lighting"
+            );
+
+
+        lightingButton.addEventListener(
+            "click",
+            () => {
+
+                clearTreeSelection();
+
+                lightingButton.classList.add(
+                    "selected"
+                );
+
+                selectedSceneObject =
+                    null;
+
+                transformControls.detach();
+
+                removeSelectionHelper();
+
+                showLightingProperties();
+
+            }
+        );
+
+
+        treeChildren.appendChild(
+            lightingButton
+        );
+
+    }
+
+
+    function createSpecialTreeItem(
+        icon,
+        name
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.className =
+            "tree-item child-item";
+
+
+        button.type =
+            "button";
+
+
+        button.innerHTML = `
+            <span class="tree-indent"></span>
+
+            <span class="tree-icon">
+                ${icon}
+            </span>
+
+            <span class="tree-name"></span>
+        `;
+
+
+        button
+            .querySelector(
+                ".tree-name"
+            )
+            .textContent =
+            name;
+
+
+        return button;
+
+    }
+
+
+    function highlightExplorerObject(
+        object
+    ) {
+
+        clearTreeSelection();
+
+
+        const items =
+            document.querySelectorAll(
+                ".tree-item"
+            );
+
+
+        items.forEach(
+            item => {
+
+                if (
+                    item.dataset.objectName ===
+                    object.name
+                ) {
+
+                    item.classList.add(
+                        "selected"
+                    );
+
+                }
+
+            }
+        );
 
     }
 
@@ -803,7 +1561,7 @@
 
 
     /* =====================================================
-       RENDER LOOP
+       ANIMATION
     ====================================================== */
 
     function animate() {
@@ -815,22 +1573,19 @@
 
 
         if (controls) {
+
             controls.update();
+
         }
 
 
-        if (
-            renderer &&
-            scene &&
+        updateSelectionHelper();
+
+
+        renderer.render(
+            scene,
             camera
-        ) {
-
-            renderer.render(
-                scene,
-                camera
-            );
-
-        }
+        );
 
     }
 
@@ -883,7 +1638,7 @@
 
 
     /* =====================================================
-       CONNECT UI
+       UI EVENTS
     ====================================================== */
 
     function connectInterface() {
@@ -910,71 +1665,92 @@
                     "selected"
                 );
 
+                selectedSceneObject =
+                    null;
+
+                transformControls.detach();
+
+                removeSelectionHelper();
+
                 showWorkspaceProperties();
 
             }
         );
 
 
-        baseplateTreeItem.addEventListener(
+        selectToolButton.disabled =
+            false;
+
+        moveToolButton.disabled =
+            false;
+
+        rotateToolButton.disabled =
+            false;
+
+        scaleToolButton.disabled =
+            false;
+
+        addPartButton.disabled =
+            false;
+
+
+        selectToolButton.addEventListener(
             "click",
             () => {
-
-                selectTreeObject(
-                    baseplateTreeItem,
-                    baseplate
-                );
-
+                setTool("select");
             }
         );
 
 
-        cameraTreeItem.addEventListener(
+        moveToolButton.addEventListener(
             "click",
             () => {
-
-                clearTreeSelection();
-
-                cameraTreeItem.classList.add(
-                    "selected"
-                );
-
-                selectedSceneObject =
-                    camera;
-
-                updateProperties(
-                    camera,
-                    "Camera"
-                );
-
+                setTool("move");
             }
         );
 
 
-        lightingTreeItem.addEventListener(
+        rotateToolButton.addEventListener(
             "click",
             () => {
-
-                clearTreeSelection();
-
-                lightingTreeItem.classList.add(
-                    "selected"
-                );
-
-                selectedSceneObject =
-                    null;
-
-                showLightingProperties();
-
+                setTool("rotate");
             }
+        );
+
+
+        scaleToolButton.addEventListener(
+            "click",
+            () => {
+                setTool("scale");
+            }
+        );
+
+
+        addPartButton.addEventListener(
+            "click",
+            addPart
+        );
+
+
+        renderer.domElement.addEventListener(
+            "pointerdown",
+            handleViewportPointerDown
         );
 
 
         renderer.domElement.addEventListener(
             "contextmenu",
             event => {
+
                 event.preventDefault();
+
             }
+        );
+
+
+        window.addEventListener(
+            "keydown",
+            handleKeyboardShortcuts
         );
 
 
@@ -983,57 +1759,71 @@
             cleanupEditor
         );
 
-
-        /* Default selection */
-
-        baseplateTreeItem.click();
-
     }
 
 
     /* =====================================================
-       TREE SELECTION
+       SHORTCUTS
     ====================================================== */
 
-    function clearTreeSelection() {
-
-        document
-            .querySelectorAll(
-                ".tree-item.selected"
-            )
-            .forEach(
-                item => {
-
-                    item.classList.remove(
-                        "selected"
-                    );
-
-                }
-            );
-
-    }
-
-
-    function selectTreeObject(
-        treeItem,
-        sceneObject
+    function handleKeyboardShortcuts(
+        event
     ) {
 
-        clearTreeSelection();
+        if (
+            event.target instanceof
+            HTMLInputElement
+        ) {
+            return;
+        }
 
 
-        treeItem.classList.add(
-            "selected"
-        );
+        const key =
+            event.key.toLowerCase();
 
 
-        selectedSceneObject =
-            sceneObject;
+        if (
+            key === "q"
+        ) {
+
+            setTool(
+                "select"
+            );
+
+        }
 
 
-        updateProperties(
-            sceneObject
-        );
+        if (
+            key === "w"
+        ) {
+
+            setTool(
+                "move"
+            );
+
+        }
+
+
+        if (
+            key === "e"
+        ) {
+
+            setTool(
+                "rotate"
+            );
+
+        }
+
+
+        if (
+            key === "r"
+        ) {
+
+            setTool(
+                "scale"
+            );
+
+        }
 
     }
 
@@ -1181,7 +1971,9 @@
     }
 
 
-    function formatVector(vector) {
+    function formatVector(
+        vector
+    ) {
 
         if (!vector) {
             return "—";
@@ -1197,7 +1989,9 @@
     }
 
 
-    function formatRotation(rotation) {
+    function formatRotation(
+        rotation
+    ) {
 
         if (!rotation) {
             return "—";
@@ -1227,10 +2021,14 @@
     }
 
 
-    function cleanNumber(number) {
+    function cleanNumber(
+        number
+    ) {
 
         if (
-            !Number.isFinite(number)
+            !Number.isFinite(
+                number
+            )
         ) {
             return "0";
         }
@@ -1265,33 +2063,9 @@
 
     function updateObjectCount() {
 
-        if (
-            !scene ||
-            !objectCountStatus
-        ) {
-            return;
-        }
-
-
-        let count = 0;
-
-
-        scene.traverse(
-            object => {
-
-                if (
-                    object.userData?.apexObject
-                ) {
-                    count++;
-                }
-
-            }
-        );
-
-
         objectCountStatus.textContent =
-            `${count} ${
-                count === 1
+            `${sceneObjects.length} ${
+                sceneObjects.length === 1
                     ? "Object"
                     : "Objects"
             }`;
@@ -1322,6 +2096,12 @@
 
         requestAnimationFrame(
             resizeRenderer
+        );
+
+
+        selectSceneObject(
+            sceneObjects[1] ||
+            baseplate
         );
 
     }
