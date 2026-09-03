@@ -1,40 +1,274 @@
-drop policy if exists
-"Friends can send messages"
-on public.messages;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
-create policy "Friends can send messages"
-on public.messages
-for insert
-to authenticated
-with check (
-    auth.uid() = sender_id
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    and sender_id <> receiver_id
+    <title>ApexCoder | Chat</title>
 
-    and exists (
-        select 1
-        from public.friend_requests
-        where
-            status = 'accepted'
+    <link
+        rel="stylesheet"
+        href="chat.css?v=1"
+    >
 
-            and (
-                (
-                    friend_requests.sender_id =
-                        messages.sender_id
-                    and
-                    friend_requests.receiver_id =
-                        messages.receiver_id
-                )
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
 
-                or
+    <script
+        src="auth.js"
+        defer
+    ></script>
 
-                (
-                    friend_requests.sender_id =
-                        messages.receiver_id
-                    and
-                    friend_requests.receiver_id =
-                        messages.sender_id
-                )
-            )
-    )
-);
+    <script
+        src="chat.js?v=1"
+        defer
+    ></script>
+</head>
+
+<body>
+
+    <div class="app-shell">
+
+        <aside class="sidebar">
+
+            <button
+                class="account-card"
+                id="accountCard"
+                type="button"
+            >
+                <img
+                    src="Default Apex Games Profile Picture.png"
+                    alt="Profile Picture"
+                    class="account-avatar"
+                    id="accountAvatar"
+                >
+
+                <div class="account-info">
+
+                    <span
+                        class="account-gamertag"
+                        id="accountGamertag"
+                    >
+                        Loading...
+                    </span>
+
+                    <span class="account-label">
+                        Apex Games Account
+                    </span>
+
+                </div>
+            </button>
+
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="dashboard.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Home
+                </a>
+
+                <a
+                    href="projects.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Projects
+                </a>
+
+                <a
+                    href="discover.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Discover
+                </a>
+
+                <a
+                    href="chat.html"
+                    class="sidebar-link active"
+                >
+                    <span class="sidebar-dot"></span>
+                    Chat
+                </a>
+
+                <a
+                    href="subscriptions.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Subscriptions
+                </a>
+
+                <a
+                    href="settings.html"
+                    class="sidebar-link"
+                >
+                    <span class="sidebar-dot"></span>
+                    Settings
+                </a>
+
+            </nav>
+
+        </aside>
+
+
+        <main class="chat-page">
+
+            <aside class="chat-list-panel">
+
+                <div class="chat-list-header">
+
+                    <div>
+                        <p class="eyebrow">
+                            APEXCODER
+                        </p>
+
+                        <h1>
+                            Chat
+                        </h1>
+                    </div>
+
+                </div>
+
+
+                <div class="friend-search-wrap">
+
+                    <input
+                        type="search"
+                        id="friendSearch"
+                        placeholder="Search friends..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <div
+                    class="friends-list"
+                    id="friendsList"
+                >
+                    <p class="loading-text">
+                        Loading friends...
+                    </p>
+                </div>
+
+            </aside>
+
+
+            <section class="conversation-panel">
+
+                <div
+                    class="conversation-empty"
+                    id="conversationEmpty"
+                >
+                    <div class="empty-icon">
+                        &lt;/&gt;
+                    </div>
+
+                    <h2>
+                        Your conversations
+                    </h2>
+
+                    <p>
+                        Choose a friend to start chatting.
+                    </p>
+                </div>
+
+
+                <div
+                    class="conversation"
+                    id="conversation"
+                    hidden
+                >
+
+                    <header class="conversation-header">
+
+                        <div class="conversation-user">
+
+                            <div class="avatar-wrap">
+
+                                <img
+                                    src="Default Apex Games Profile Picture.png"
+                                    alt="Friend"
+                                    class="conversation-avatar"
+                                    id="conversationAvatar"
+                                >
+
+                                <span
+                                    class="status-dot offline"
+                                    id="conversationStatus"
+                                ></span>
+
+                            </div>
+
+
+                            <div>
+
+                                <h2
+                                    id="conversationName"
+                                >
+                                    Friend
+                                </h2>
+
+                                <span
+                                    class="conversation-status-text"
+                                    id="conversationStatusText"
+                                >
+                                    Offline
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </header>
+
+
+                    <div
+                        class="messages"
+                        id="messages"
+                    ></div>
+
+
+                    <form
+                        class="message-form"
+                        id="messageForm"
+                    >
+
+                        <textarea
+                            id="messageInput"
+                            maxlength="2000"
+                            rows="1"
+                            placeholder="Message..."
+                            autocomplete="off"
+                        ></textarea>
+
+                        <button
+                            type="submit"
+                            class="send-button"
+                            id="sendButton"
+                            disabled
+                        >
+                            Send
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
