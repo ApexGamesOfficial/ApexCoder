@@ -28,7 +28,33 @@
         src="auth.js"
         defer
     ></script>
+<script>
+    window.addEventListener("error", function (event) {
+        window.addEventListener("DOMContentLoaded", function () {
+            const loading = document.getElementById("editorLoading");
 
+            if (!loading) {
+                return;
+            }
+
+            loading.innerHTML = `
+                <div style="
+                    max-width: 700px;
+                    padding: 25px;
+                    color: #ff9c9c;
+                    font-family: monospace;
+                    white-space: pre-wrap;
+                ">
+                    <strong>APEXCODER STARTUP ERROR</strong><br><br>
+                    ${event.message}<br><br>
+                    File: ${event.filename}<br>
+                    Line: ${event.lineno}<br>
+                    Column: ${event.colno}
+                </div>
+            `;
+        });
+    });
+</script>
     <script
         src="editor.js?v=3"
         defer
