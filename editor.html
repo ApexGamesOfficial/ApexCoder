@@ -13,7 +13,7 @@
 
     <link
         rel="stylesheet"
-        href="editor.css?v=2"
+        href="editor.css?v=3"
     >
 
     <script
@@ -30,16 +30,14 @@
     ></script>
 
     <script
-        src="editor.js?v=2"
+        src="editor.js?v=3"
         defer
     ></script>
 </head>
 
 <body>
 
-    <!-- =========================
-         LOADING
-    ========================== -->
+    <!-- LOADING -->
 
     <div
         class="loading-screen"
@@ -59,9 +57,7 @@
     </div>
 
 
-    <!-- =========================
-         ERROR
-    ========================== -->
+    <!-- ERROR -->
 
     <div
         class="error-screen"
@@ -86,9 +82,7 @@
     </div>
 
 
-    <!-- =========================
-         STUDIO
-    ========================== -->
+    <!-- STUDIO -->
 
     <div
         class="studio"
@@ -180,9 +174,7 @@
         </header>
 
 
-        <!-- =========================
-             BODY
-        ========================== -->
+        <!-- BODY -->
 
         <div class="studio-body">
 
@@ -229,9 +221,7 @@
             </aside>
 
 
-            <!-- =========================
-                 MAIN WORKSPACE
-            ========================== -->
+            <!-- MAIN WORKSPACE -->
 
             <main class="workspace">
 
@@ -363,118 +353,122 @@
                 </section>
 
 
-     <!-- BOTTOM PANEL -->
+                <!-- BOTTOM PANEL -->
 
-<section class="bottom-panel">
+                <section class="bottom-panel">
 
-    <div class="bottom-tabs">
+                    <div class="bottom-tabs">
 
-        <button
-            class="bottom-tab active"
-            id="outputTabButton"
-            type="button"
-        >
-            Output
-        </button>
+                        <button
+                            class="bottom-tab active"
+                            id="outputTabButton"
+                            type="button"
+                        >
+                            Output
+                        </button>
 
-        <button
-            class="bottom-tab"
-            id="problemsTabButton"
-            type="button"
-        >
-            Problems
+                        <button
+                            class="bottom-tab"
+                            id="problemsTabButton"
+                            type="button"
+                        >
+                            Problems
 
-            <span
-                class="bottom-tab-count"
-                id="problemsCount"
-                hidden
-            >
-                0
-            </span>
-        </button>
+                            <span
+                                class="bottom-tab-count"
+                                id="problemsCount"
+                                hidden
+                            >
+                                0
+                            </span>
+                        </button>
 
-        <button
-            class="bottom-tab"
-            id="consoleTabButton"
-            type="button"
-        >
-            Console
-        </button>
+                        <button
+                            class="bottom-tab"
+                            id="consoleTabButton"
+                            type="button"
+                        >
+                            Console
+                        </button>
 
-        <div class="bottom-tab-spacer"></div>
+                        <div class="bottom-tab-spacer"></div>
 
-        <button
-            class="bottom-clear-button"
-            id="clearPanelButton"
-            type="button"
-            title="Clear"
-        >
-            Clear
-        </button>
+                        <button
+                            class="bottom-clear-button"
+                            id="clearPanelButton"
+                            type="button"
+                            title="Clear panel"
+                        >
+                            Clear
+                        </button>
 
-    </div>
-
-
-    <div
-        class="bottom-content active"
-        id="outputPanel"
-    >
-
-        <div
-            class="panel-message muted"
-            id="outputEmpty"
-        >
-            ApexCoder Studio ready.
-        </div>
-
-        <div id="outputMessages"></div>
-
-    </div>
+                    </div>
 
 
-    <div
-        class="bottom-content"
-        id="problemsPanel"
-        hidden
-    >
+                    <!-- OUTPUT -->
 
-        <div
-            class="panel-message muted"
-            id="problemsEmpty"
-        >
-            No problems detected.
-        </div>
+                    <div
+                        class="bottom-content active"
+                        id="outputPanel"
+                    >
 
-        <div id="problemMessages"></div>
+                        <div
+                            class="panel-message muted"
+                            id="outputEmpty"
+                        >
+                            ApexCoder Studio ready.
+                        </div>
 
-    </div>
+                        <div id="outputMessages"></div>
+
+                    </div>
 
 
-    <div
-        class="bottom-content"
-        id="consolePanel"
-        hidden
-    >
+                    <!-- PROBLEMS -->
 
-        <div
-            class="panel-message muted"
-            id="consoleEmpty"
-        >
-            Run your website to view console output.
-        </div>
+                    <div
+                        class="bottom-content"
+                        id="problemsPanel"
+                        hidden
+                    >
 
-        <div id="consoleMessages"></div>
+                        <div
+                            class="panel-message muted"
+                            id="problemsEmpty"
+                        >
+                            No problems detected.
+                        </div>
 
-    </div>
+                        <div id="problemMessages"></div>
 
-</section>
+                    </div>
+
+
+                    <!-- CONSOLE -->
+
+                    <div
+                        class="bottom-content"
+                        id="consolePanel"
+                        hidden
+                    >
+
+                        <div
+                            class="panel-message muted"
+                            id="consoleEmpty"
+                        >
+                            Run your website to view console output.
+                        </div>
+
+                        <div id="consoleMessages"></div>
+
+                    </div>
+
+                </section>
 
             </main>
 
 
-            <!-- =========================
-                 RIGHT SIDEBAR
-            ========================== -->
+            <!-- RIGHT SIDEBAR -->
 
             <aside class="right-sidebar">
 
@@ -525,9 +519,11 @@
                 <section class="studio-panel properties-panel">
 
                     <div class="panel-title">
+
                         <span>
                             Properties
                         </span>
+
                     </div>
 
 
@@ -592,9 +588,7 @@
         </div>
 
 
-        <!-- =========================
-             STATUS BAR
-        ========================== -->
+        <!-- STATUS BAR -->
 
         <footer class="status-bar">
 
