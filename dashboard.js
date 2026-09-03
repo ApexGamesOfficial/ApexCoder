@@ -103,6 +103,66 @@ function getProjectLabel(type) {
 
 
 /* =========================
+   OPEN PROJECT
+========================= */
+
+function openProject(project) {
+
+    if (!project?.id) {
+        return;
+    }
+
+
+    const projectId =
+        encodeURIComponent(
+            project.id
+        );
+
+
+    if (
+        project.type ===
+        "game"
+    ) {
+
+        window.location.href =
+            `game-editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "website"
+    ) {
+
+        window.location.href =
+            `editor.html?project=${projectId}`;
+
+        return;
+    }
+
+
+    if (
+        project.type ===
+        "malware"
+    ) {
+
+        alert(
+            "The ApexCoder Malware Sandbox Editor is coming soon."
+        );
+
+        return;
+    }
+
+
+    alert(
+        "ApexCoder doesn't recognize this project type."
+    );
+}
+
+
+/* =========================
    LOAD DASHBOARD
 ========================= */
 
@@ -160,7 +220,10 @@ async function loadProfile() {
             .single();
 
 
-    if (error || !profile) {
+    if (
+        error ||
+        !profile
+    ) {
 
         console.error(
             "Unable to load profile:",
@@ -248,7 +311,10 @@ async function loadProjects() {
                     project.type ===
                     "game"
             )
-            .slice(0, 3);
+            .slice(
+                0,
+                3
+            );
 
 
     const websites =
@@ -258,7 +324,10 @@ async function loadProjects() {
                     project.type ===
                     "website"
             )
-            .slice(0, 3);
+            .slice(
+                0,
+                3
+            );
 
 
     const malware =
@@ -268,7 +337,10 @@ async function loadProjects() {
                     project.type ===
                     "malware"
             )
-            .slice(0, 3);
+            .slice(
+                0,
+                3
+            );
 
 
     renderProjects(
@@ -308,89 +380,86 @@ function renderProjects(
         Keep the New Project card.
 
         Only remove saved project
-        cards from a previous render.
+        cards from previous renders.
     */
 
     container
         .querySelectorAll(
             ".saved-project-card"
         )
-        .forEach(card => {
-            card.remove();
-        });
+        .forEach(
+            card => {
 
+                card.remove();
 
-    projects.forEach(project => {
-
-        const card =
-            document.createElement(
-                "button"
-            );
-
-
-        card.type =
-            "button";
-
-
-        card.className =
-            "project-card saved-project-card";
-
-
-        card.innerHTML = `
-            <span class="saved-project-icon">
-                ${escapeHTML(
-                    getProjectSymbol(
-                        project.type
-                    )
-                )}
-            </span>
-
-            <span class="saved-project-type">
-                ${escapeHTML(
-                    getProjectLabel(
-                        project.type
-                    )
-                )}
-            </span>
-
-            <span class="project-name">
-                ${escapeHTML(
-                    project.name
-                )}
-            </span>
-
-            <span class="project-description">
-                Continue project
-            </span>
-        `;
-
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                openProject(
-                    project.id
-                );
             }
         );
 
 
-        container.appendChild(
-            card
-        );
-    });
-}
+    projects.forEach(
+        project => {
+
+            const card =
+                document.createElement(
+                    "button"
+                );
 
 
-/* =========================
-   OPEN PROJECT
-========================= */
+            card.type =
+                "button";
 
-function openProject(projectId) {
 
-    window.location.href =
-        `editor.html?project=${encodeURIComponent(projectId)}`;
+            card.className =
+                "project-card saved-project-card";
+
+
+            card.innerHTML = `
+                <span class="saved-project-icon">
+                    ${escapeHTML(
+                        getProjectSymbol(
+                            project.type
+                        )
+                    )}
+                </span>
+
+                <span class="saved-project-type">
+                    ${escapeHTML(
+                        getProjectLabel(
+                            project.type
+                        )
+                    )}
+                </span>
+
+                <span class="project-name">
+                    ${escapeHTML(
+                        project.name
+                    )}
+                </span>
+
+                <span class="project-description">
+                    Continue project
+                </span>
+            `;
+
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    openProject(
+                        project
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
 }
 
 
@@ -402,22 +471,26 @@ document
     .querySelectorAll(
         "[data-project-type]"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const type =
-                    button.dataset
-                        .projectType;
+                    const type =
+                        button.dataset
+                            .projectType;
 
 
-                window.location.href =
-                    `new-project.html?type=${encodeURIComponent(type)}`;
-            }
-        );
-    });
+                    window.location.href =
+                        `new-project.html?type=${encodeURIComponent(type)}`;
+
+                }
+            );
+
+        }
+    );
 
 
 /* =========================
@@ -432,8 +505,10 @@ if (accountCard) {
 
             window.location.href =
                 "settings.html";
+
         }
     );
+
 }
 
 
