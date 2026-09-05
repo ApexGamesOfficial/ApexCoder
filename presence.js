@@ -1,656 +1,851 @@
-const accountCard =
-    document.getElementById(
-        "accountCard"
+/* =========================================================
+   APEX PRESENCE
+   Shared Supabase Realtime Presence system
+
+   Provides:
+   - getLiveStatus(userId)
+   - setLiveStatus(status)
+   - apex-presence-updated event
+
+   Real connection state determines whether somebody
+   is actually online. If they disconnect, they become Offline.
+========================================================= */
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+const APEX_PRESENCE_CHANNEL =
+    "apex-games-global-presence";
+
+const VALID_PRESENCE_STATUSES =
+    [
+        "online",
+        "away",
+        "dnd",
+        "offline"
+    ];
+
+const PRESENCE_STORAGE_KEY =
+    "apexPreferredStatus";
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let apexPresenceChannel =
+    null;
+
+let apexPresenceUser =
+    null;
+
+let apexPresenceStatus =
+    "online";
+
+let apexPresenceReady =
+    false;
+
+let apexPresenceState =
+    {};
+
+
+/* =========================================================
+   STATUS HELPERS
+========================================================= */
+
+function normalizePresenceStatus(
+    status
+) {
+
+    if (
+        VALID_PRESENCE_STATUSES.includes(
+            status
+        )
+    ) {
+
+        return status;
+    }
+
+
+    return "online";
+}
+
+
+/* =========================================================
+   PUBLIC LIVE STATUS
+========================================================= */
+
+function getLiveStatus(
+    userId
+) {
+
+    if (!userId) {
+
+        return "offline";
+    }
+
+
+    const entries =
+        apexPresenceState[
+            userId
+        ];
+
+
+    if (
+        !Array.isArray(entries) ||
+        entries.length === 0
+    ) {
+
+        return "offline";
+    }
+
+
+    /*
+        A user can have multiple tabs/devices.
+
+        We use the newest active Presence entry.
+    */
+
+    const sortedEntries =
+        [...entries].sort(
+            (a, b) => {
+
+                const aTime =
+                    Number(
+                        a.status_updated_at ||
+                        a.online_at ||
+                        0
+                    );
+
+
+                const bTime =
+                    Number(
+                        b.status_updated_at ||
+                        b.online_at ||
+                        0
+                    );
+
+
+                return (
+                    bTime -
+                    aTime
+                );
+            }
+        );
+
+
+    const newest =
+        sortedEntries[0];
+
+
+    if (!newest) {
+
+        return "offline";
+    }
+
+
+    const status =
+        normalizePresenceStatus(
+            newest.status
+        );
+
+
+    /*
+        User is technically connected,
+        but they chose "Appear Offline".
+    */
+
+    if (
+        status ===
+        "offline"
+    ) {
+
+        return "offline";
+    }
+
+
+    return status;
+}
+
+
+/* =========================================================
+   EXPOSE PUBLIC FUNCTION
+========================================================= */
+
+window.getLiveStatus =
+    getLiveStatus;
+
+
+/* =========================================================
+   DISPATCH UPDATE EVENT
+========================================================= */
+
+function dispatchPresenceUpdate() {
+
+    window.dispatchEvent(
+        new CustomEvent(
+            "apex-presence-updated",
+            {
+                detail: {
+                    state:
+                        apexPresenceState
+                }
+            }
+        )
     );
-
-const accountAvatar =
-    document.getElementById(
-        "accountAvatar"
-    );
-
-const accountGamertag =
-    document.getElementById(
-        "accountGamertag"
-    );
-
-const newProjectButton =
-    document.getElementById(
-        "newProjectButton"
-    );
-
-const projectSearch =
-    document.getElementById(
-        "projectSearch"
-    );
-
-const projectsGrid =
-    document.getElementById(
-        "projectsGrid"
-    );
-
-const emptyState =
-    document.getElementById(
-        "emptyState"
-    );
-
-const filterTabs =
-    document.querySelectorAll(
-        ".filter-tab"
-    );
+}
 
 
-let currentUser = null;
+/* =========================================================
+   READ SAVED STATUS
+========================================================= */
 
-let currentFilter =
-    "all";
+async function loadPreferredPresenceStatus() {
 
-let loadedProjects =
-    [];
+    /*
+        First try localStorage.
 
+        This makes status changes update quickly
+        across Apex pages.
+    */
 
-/* =========================
-   ACCOUNT
-========================= */
-
-async function loadAccount() {
-
-    const {
-        data: { session }
-    } =
-        await supabaseClient
-            .auth
-            .getSession();
+    const storedStatus =
+        localStorage.getItem(
+            PRESENCE_STORAGE_KEY
+        );
 
 
-    if (!session?.user) {
+    if (
+        VALID_PRESENCE_STATUSES.includes(
+            storedStatus
+        )
+    ) {
 
-        window.location.href =
-            "login.html";
+        apexPresenceStatus =
+            storedStatus;
 
         return;
     }
 
 
-    currentUser =
-        session.user;
+    /*
+        If nothing was stored locally,
+        read the user's profile preference.
+    */
 
+    if (!apexPresenceUser) {
 
-    const {
-        data: profile,
-        error
-    } =
-        await supabaseClient
-            .from("profiles")
-            .select(`
-                gamertag,
-                avatar_url
-            `)
-            .eq(
-                "id",
-                currentUser.id
-            )
-            .single();
+        apexPresenceStatus =
+            "online";
 
-
-    if (
-        error ||
-        !profile
-    ) {
-
-        console.error(
-            "Unable to load account:",
-            error
-        );
-
-
-        accountGamertag.textContent =
-            "Account";
-
-    } else {
-
-        accountGamertag.textContent =
-            profile.gamertag;
-
-
-        accountAvatar.src =
-            profile.avatar_url ||
-            "Default Apex Games Profile Picture.png";
-
+        return;
     }
 
-
-    await loadProjects();
-
-}
-
-
-/* =========================
-   LOAD PROJECTS
-========================= */
-
-async function loadProjects() {
 
     const {
         data,
         error
     } =
         await supabaseClient
-            .from("projects")
-            .select(`
-                id,
-                name,
-                type,
-                created_at,
-                updated_at
-            `)
-            .eq(
-                "owner_id",
-                currentUser.id
+            .from(
+                "profiles"
             )
-            .order(
-                "updated_at",
-                {
-                    ascending: false
-                }
-            );
+            .select(
+                "status"
+            )
+            .eq(
+                "id",
+                apexPresenceUser.id
+            )
+            .maybeSingle();
 
 
-    if (error) {
+    if (
+        error
+    ) {
 
-        console.error(
-            "Unable to load projects:",
+        console.warn(
+            "Unable to load Presence preference:",
             error
         );
 
 
+        apexPresenceStatus =
+            "online";
+
         return;
     }
 
 
-    loadedProjects =
-        data || [];
-
-
-    renderProjects();
-
-}
-
-
-/* =========================
-   SAFE TEXT
-========================= */
-
-function escapeHTML(text) {
-
-    return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-/* =========================
-   PROJECT LABELS
-========================= */
-
-function getProjectLabel(type) {
-
-    if (
-        type ===
-        "game"
-    ) {
-        return "Game";
-    }
-
-
-    if (
-        type ===
-        "website"
-    ) {
-        return "Website";
-    }
-
-
-    if (
-        type ===
-        "malware"
-    ) {
-        return "Malware Sandbox";
-    }
-
-
-    return "Project";
-}
-
-
-function getProjectSymbol(type) {
-
-    if (
-        type ===
-        "game"
-    ) {
-        return "◇";
-    }
-
-
-    if (
-        type ===
-        "website"
-    ) {
-        return "</>";
-    }
-
-
-    if (
-        type ===
-        "malware"
-    ) {
-        return "⌁";
-    }
-
-
-    return "•";
-}
-
-
-/* =========================
-   OPEN PROJECT
-========================= */
-
-function openProject(project) {
-
-    if (!project?.id) {
-        return;
-    }
-
-
-    const projectId =
-        encodeURIComponent(
-            project.id
+    apexPresenceStatus =
+        normalizePresenceStatus(
+            data?.status ||
+            "online"
         );
 
 
-    if (
-        project.type ===
-        "game"
-    ) {
-
-        window.location.href =
-            `game-editor.html?project=${projectId}`;
-
-        return;
-    }
-
-
-    if (
-        project.type ===
-        "website"
-    ) {
-
-        window.location.href =
-            `editor.html?project=${projectId}`;
-
-        return;
-    }
-
-
-    if (
-        project.type ===
-        "malware"
-    ) {
-
-        alert(
-            "The ApexCoder Malware Sandbox Editor is coming soon."
-        );
-
-        return;
-    }
-
-
-    alert(
-        "ApexCoder doesn't recognize this project type."
+    localStorage.setItem(
+        PRESENCE_STORAGE_KEY,
+        apexPresenceStatus
     );
-
 }
 
 
-/* =========================
-   RENDER
-========================= */
+/* =========================================================
+   CREATE PRESENCE PAYLOAD
+========================================================= */
 
-function renderProjects() {
+function buildPresencePayload() {
 
-    const search =
-        projectSearch.value
-            .trim()
-            .toLowerCase();
+    return {
+        user_id:
+            apexPresenceUser.id,
 
+        status:
+            apexPresenceStatus,
 
-    const visibleProjects =
-        loadedProjects.filter(
-            project => {
+        online_at:
+            Date.now(),
 
-                const matchesFilter =
-                    currentFilter ===
-                        "all" ||
-                    project.type ===
-                        currentFilter;
-
-
-                const matchesSearch =
-                    project.name
-                        .toLowerCase()
-                        .includes(
-                            search
-                        );
+        status_updated_at:
+            Date.now()
+    };
+}
 
 
-                return (
-                    matchesFilter &&
-                    matchesSearch
-                );
+/* =========================================================
+   TRACK CURRENT USER
+========================================================= */
 
-            }
-        );
+async function trackCurrentPresence() {
 
+    if (
+        !apexPresenceChannel ||
+        !apexPresenceUser ||
+        !apexPresenceReady
+    ) {
 
-    projectsGrid.innerHTML =
-        "";
-
-
-    visibleProjects.forEach(
-        project => {
-
-            const card =
-                document.createElement(
-                    "button"
-                );
+        return;
+    }
 
 
-            card.type =
-                "button";
-
-
-            card.className =
-                "project-card saved-project-card";
-
-
-            card.dataset.projectType =
-                project.type;
-
-
-            card.innerHTML = `
-                <span class="project-icon">
-                    ${escapeHTML(
-                        getProjectSymbol(
-                            project.type
-                        )
-                    )}
-                </span>
-
-                <span class="project-type-label">
-                    ${escapeHTML(
-                        getProjectLabel(
-                            project.type
-                        )
-                    )}
-                </span>
-
-                <span class="project-name">
-                    ${escapeHTML(
-                        project.name
-                    )}
-                </span>
-
-                <span class="project-meta">
-                    Open project
-                </span>
-            `;
-
-
-            card.addEventListener(
-                "click",
-                () => {
-
-                    openProject(
-                        project
-                    );
-
-                }
+    const {
+        error
+    } =
+        await apexPresenceChannel
+            .track(
+                buildPresencePayload()
             );
 
 
-            projectsGrid.appendChild(
-                card
-            );
+    if (
+        error
+    ) {
 
-        }
-    );
-
-
-    addCreateCards();
-
-
-    const hasVisibleContent =
-        visibleProjects.length > 0 ||
-        currentFilter === "all" ||
-        currentFilter === "game" ||
-        currentFilter === "website" ||
-        currentFilter === "malware";
-
-
-    emptyState.hidden =
-        hasVisibleContent;
-
+        console.error(
+            "Unable to track Apex Presence:",
+            error
+        );
+    }
 }
 
 
-/* =========================
-   CREATE CARDS
-========================= */
+/* =========================================================
+   UPDATE STATUS
+========================================================= */
 
-function addCreateCards() {
+async function setLiveStatus(
+    newStatus
+) {
 
-    const createTypes = [
-        {
-            type: "game",
-            name: "New Game",
-            meta: "Start a game project"
-        },
-
-        {
-            type: "website",
-            name: "New Website",
-            meta: "Start a website project"
-        },
-
-        {
-            type: "malware",
-            name: "New Malware",
-            meta: "Create in a safe sandbox"
-        }
-    ];
+    const normalized =
+        normalizePresenceStatus(
+            newStatus
+        );
 
 
-    createTypes.forEach(
-        item => {
-
-            if (
-                currentFilter !==
-                    "all" &&
-                currentFilter !==
-                    item.type
-            ) {
-                return;
-            }
+    apexPresenceStatus =
+        normalized;
 
 
-            const search =
-                projectSearch.value
-                    .trim()
-                    .toLowerCase();
+    localStorage.setItem(
+        PRESENCE_STORAGE_KEY,
+        normalized
+    );
 
 
-            const searchText =
-                `${item.name} ${item.meta}`
-                    .toLowerCase();
+    /*
+        Save preference to profile.
 
+        Presence still decides whether the
+        user is ACTUALLY connected.
+    */
 
-            if (
-                search &&
-                !searchText.includes(
-                    search
+    if (
+        apexPresenceUser
+    ) {
+
+        const {
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "profiles"
                 )
+                .update({
+                    status:
+                        normalized,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+                })
+                .eq(
+                    "id",
+                    apexPresenceUser.id
+                );
+
+
+        if (
+            error
+        ) {
+
+            console.warn(
+                "Unable to save Presence preference:",
+                error
+            );
+        }
+    }
+
+
+    await trackCurrentPresence();
+
+
+    dispatchPresenceUpdate();
+
+
+    return normalized;
+}
+
+
+/* =========================================================
+   EXPOSE STATUS SETTER
+========================================================= */
+
+window.setLiveStatus =
+    setLiveStatus;
+
+
+/* =========================================================
+   SYNC PRESENCE STATE
+========================================================= */
+
+function syncPresenceState() {
+
+    if (
+        !apexPresenceChannel
+    ) {
+
+        return;
+    }
+
+
+    apexPresenceState =
+        apexPresenceChannel
+            .presenceState() ||
+        {};
+
+
+    dispatchPresenceUpdate();
+}
+
+
+/* =========================================================
+   START PRESENCE
+========================================================= */
+
+async function startApexPresence() {
+
+    if (
+        typeof supabaseClient ===
+        "undefined"
+    ) {
+
+        console.error(
+            "Apex Presence could not start because Supabase is unavailable."
+        );
+
+        return;
+    }
+
+
+    const {
+        data: {
+            session
+        },
+        error
+    } =
+        await supabaseClient
+            .auth
+            .getSession();
+
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "Unable to read Apex session:",
+            error
+        );
+
+        return;
+    }
+
+
+    if (
+        !session?.user
+    ) {
+
+        apexPresenceUser =
+            null;
+
+        apexPresenceState =
+            {};
+
+        dispatchPresenceUpdate();
+
+        return;
+    }
+
+
+    apexPresenceUser =
+        session.user;
+
+
+    await loadPreferredPresenceStatus();
+
+
+    /*
+        Remove any previous channel before
+        creating another one.
+    */
+
+    if (
+        apexPresenceChannel
+    ) {
+
+        try {
+
+            await supabaseClient
+                .removeChannel(
+                    apexPresenceChannel
+                );
+
+        } catch (
+            error
+        ) {
+
+            console.warn(
+                "Unable to remove old Presence channel:",
+                error
+            );
+        }
+    }
+
+
+    apexPresenceChannel =
+        supabaseClient.channel(
+            APEX_PRESENCE_CHANNEL,
+            {
+                config: {
+                    presence: {
+                        key:
+                            apexPresenceUser.id
+                    }
+                }
+            }
+        );
+
+
+    /* =====================================================
+       PRESENCE SYNC
+    ===================================================== */
+
+    apexPresenceChannel.on(
+        "presence",
+        {
+            event:
+                "sync"
+        },
+        () => {
+
+            syncPresenceState();
+        }
+    );
+
+
+    /* =====================================================
+       PRESENCE JOIN
+    ===================================================== */
+
+    apexPresenceChannel.on(
+        "presence",
+        {
+            event:
+                "join"
+        },
+        () => {
+
+            syncPresenceState();
+        }
+    );
+
+
+    /* =====================================================
+       PRESENCE LEAVE
+    ===================================================== */
+
+    apexPresenceChannel.on(
+        "presence",
+        {
+            event:
+                "leave"
+        },
+        () => {
+
+            syncPresenceState();
+        }
+    );
+
+
+    /* =====================================================
+       SUBSCRIBE
+    ===================================================== */
+
+    apexPresenceChannel.subscribe(
+        async status => {
+
+            if (
+                status ===
+                "SUBSCRIBED"
             ) {
+
+                apexPresenceReady =
+                    true;
+
+
+                await trackCurrentPresence();
+
+
+                syncPresenceState();
+
+
                 return;
             }
 
 
-            const card =
-                document.createElement(
-                    "button"
+            if (
+                status ===
+                "CHANNEL_ERROR"
+            ) {
+
+                console.error(
+                    "Apex Presence channel error."
                 );
 
+                apexPresenceReady =
+                    false;
 
-            card.type =
-                "button";
-
-
-            card.className =
-                item.type ===
-                "malware"
-                    ? "project-card create-card sandbox"
-                    : "project-card create-card";
+                return;
+            }
 
 
-            card.dataset.createType =
-                item.type;
+            if (
+                status ===
+                "TIMED_OUT"
+            ) {
+
+                console.warn(
+                    "Apex Presence connection timed out."
+                );
+
+                apexPresenceReady =
+                    false;
+
+                return;
+            }
 
 
-            card.innerHTML = `
-                <span class="project-icon">
-                    +
-                </span>
+            if (
+                status ===
+                "CLOSED"
+            ) {
 
-                <span class="project-name">
-                    ${escapeHTML(
-                        item.name
-                    )}
-                </span>
-
-                <span class="project-meta">
-                    ${escapeHTML(
-                        item.meta
-                    )}
-                </span>
-            `;
-
-
-            card.addEventListener(
-                "click",
-                () => {
-
-                    window.location.href =
-                        `new-project.html?type=${encodeURIComponent(item.type)}`;
-
-                }
-            );
-
-
-            projectsGrid.appendChild(
-                card
-            );
-
+                apexPresenceReady =
+                    false;
+            }
         }
     );
-
 }
 
 
-/* =========================
-   FILTERS
-========================= */
+/* =========================================================
+   CROSS-TAB STATUS SYNC
+========================================================= */
 
-filterTabs.forEach(
-    tab => {
+window.addEventListener(
+    "storage",
+    async event => {
 
-        tab.addEventListener(
-            "click",
-            () => {
+        if (
+            event.key !==
+            PRESENCE_STORAGE_KEY
+        ) {
 
-                filterTabs.forEach(
-                    button => {
+            return;
+        }
 
-                        button.classList.remove(
-                            "active"
+
+        apexPresenceStatus =
+            normalizePresenceStatus(
+                event.newValue
+            );
+
+
+        await trackCurrentPresence();
+
+
+        dispatchPresenceUpdate();
+    }
+);
+
+
+/* =========================================================
+   AUTH CHANGES
+========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+    async (
+        event,
+        session
+    ) => {
+
+        if (
+            event ===
+            "SIGNED_OUT"
+        ) {
+
+            apexPresenceReady =
+                false;
+
+            apexPresenceUser =
+                null;
+
+            apexPresenceState =
+                {};
+
+
+            if (
+                apexPresenceChannel
+            ) {
+
+                try {
+
+                    await apexPresenceChannel
+                        .untrack();
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "Unable to untrack Presence:",
+                        error
+                    );
+                }
+
+
+                try {
+
+                    await supabaseClient
+                        .removeChannel(
+                            apexPresenceChannel
                         );
 
-                    }
-                );
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "Unable to close Presence channel:",
+                        error
+                    );
+                }
 
 
-                tab.classList.add(
-                    "active"
-                );
-
-
-                currentFilter =
-                    tab.dataset.filter;
-
-
-                renderProjects();
-
+                apexPresenceChannel =
+                    null;
             }
-        );
 
+
+            dispatchPresenceUpdate();
+
+            return;
+        }
+
+
+        if (
+            event ===
+                "SIGNED_IN" &&
+            session?.user &&
+            apexPresenceUser?.id !==
+                session.user.id
+        ) {
+
+            await startApexPresence();
+        }
     }
 );
 
 
-/* =========================
-   SEARCH
-========================= */
+/* =========================================================
+   PAGE CLEANUP
+========================================================= */
 
-projectSearch.addEventListener(
-    "input",
-    renderProjects
-);
-
-
-/* =========================
-   NEW PROJECT
-========================= */
-
-newProjectButton.addEventListener(
-    "click",
+window.addEventListener(
+    "beforeunload",
     () => {
 
-        window.location.href =
-            "new-project.html";
+        /*
+            Supabase removes the Presence member
+            when the realtime connection closes.
 
+            We deliberately DO NOT write "offline"
+            into profiles here.
+
+            profiles.status = user preference
+            Presence = actual live connection
+        */
+
+        if (
+            apexPresenceChannel
+        ) {
+
+            apexPresenceChannel
+                .untrack()
+                .catch(
+                    () => {}
+                );
+        }
     }
 );
 
 
-/* =========================
-   ACCOUNT CARD
-========================= */
-
-accountCard.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "settings.html";
-
-    }
-);
-
-
-/* =========================
+/* =========================================================
    START
-========================= */
+========================================================= */
 
-loadAccount();
+startApexPresence();
