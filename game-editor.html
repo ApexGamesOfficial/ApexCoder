@@ -37,16 +37,9 @@
         src="auth.js?v=2"
         defer
     ></script>
-
-    <!-- MONACO EDITOR -->
+<!-- GAME EDITOR -->
     <script
-        src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"
-        defer
-    ></script>
-
-    <!-- GAME EDITOR -->
-    <script
-        src="game-editor.js?v=5"
+        src="game-editor.js?v=6"
         defer
     ></script>
 </head>
@@ -859,99 +852,6 @@
         </footer>
 
     </div>
-
-
-    <!-- =====================================================
-         STARTUP DIAGNOSTIC
-    ====================================================== -->
-
-    <script>
-        window.addEventListener(
-            "DOMContentLoaded",
-            () => {
-
-                const loadingText =
-                    document.getElementById(
-                        "loadingText"
-                    );
-
-
-                if (!loadingText) {
-                    return;
-                }
-
-
-                setTimeout(
-                    () => {
-
-                        const editor =
-                            document.getElementById(
-                                "gameEditor"
-                            );
-
-
-                        const error =
-                            document.getElementById(
-                                "errorScreen"
-                            );
-
-
-                        if (
-                            editor.classList.contains(
-                                "hidden"
-                            ) &&
-                            error.classList.contains(
-                                "hidden"
-                            )
-                        ) {
-
-                            loadingText.textContent =
-                                "Still loading... checking the 3D engine.";
-
-                        }
-
-                    },
-                    5000
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        const editor =
-                            document.getElementById(
-                                "gameEditor"
-                            );
-
-
-                        const error =
-                            document.getElementById(
-                                "errorScreen"
-                            );
-
-
-                        if (
-                            editor.classList.contains(
-                                "hidden"
-                            ) &&
-                            error.classList.contains(
-                                "hidden"
-                            )
-                        ) {
-
-                            loadingText.textContent =
-                                "Startup is taking too long. The 3D engine or network may be blocked.";
-
-                        }
-
-                    },
-                    12000
-                );
-
-            }
-        );
-    </script>
-
 </body>
 
 </html>
