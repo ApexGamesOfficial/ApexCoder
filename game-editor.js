@@ -148,6 +148,18 @@
         );
 
 
+    const explorerAddButton =
+        document.getElementById(
+            "explorerAddButton"
+        );
+
+
+    const saveStatus =
+        document.getElementById(
+            "saveStatus"
+        );
+
+
     /* =====================================================
        STATE
     ====================================================== */
@@ -218,6 +230,14 @@
 
     let partCounter =
         1;
+
+
+    let explorerExpanded =
+        true;
+
+
+    let explorerContextMenu =
+        null;
 
 
     const sceneObjects =
@@ -944,6 +964,11 @@
 
                     updateSelectionHelper();
 
+
+                    setEditorStatus(
+                        "Scene updated"
+                    );
+
                 }
             );
 
@@ -1135,6 +1160,11 @@
 
 
         updateObjectCount();
+
+
+        setEditorStatus(
+            "Part added"
+        );
 
     }
 
@@ -1713,6 +1743,29 @@
             "";
 
 
+        treeChildren.classList.toggle(
+            "collapsed",
+            !explorerExpanded
+        );
+
+
+        const rootArrow =
+            workspaceTreeItem
+                ?.querySelector(
+                    ".tree-arrow"
+                );
+
+
+        if (rootArrow) {
+
+            rootArrow.textContent =
+                explorerExpanded
+                    ? "▾"
+                    : "▸";
+
+        }
+
+
         sceneObjects.forEach(
             object => {
 
@@ -1776,6 +1829,45 @@
                 );
 
 
+                button.addEventListener(
+                    "dblclick",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        beginRenameObject(
+                            object
+                        );
+
+                    }
+                );
+
+
+                button.addEventListener(
+                    "contextmenu",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        selectSceneObject(
+                            object
+                        );
+
+
+                        openExplorerContextMenu(
+                            event.clientX,
+                            event.clientY,
+                            object
+                        );
+
+                    }
+                );
+
+
                 treeChildren.appendChild(
                     button
                 );
@@ -1793,6 +1885,10 @@
                 "◉",
                 "Camera"
             );
+
+
+        cameraButton.dataset.special =
+            "camera";
 
 
         cameraButton.addEventListener(
@@ -1845,6 +1941,10 @@
             );
 
 
+        lightingButton.dataset.special =
+            "lighting";
+
+
         lightingButton.addEventListener(
             "click",
             () => {
@@ -1891,6 +1991,19 @@
             highlightExplorerObject(
                 selectedSceneObject
             );
+
+        }
+
+        else if (
+            selectedSceneObject ===
+            camera
+        ) {
+
+            cameraButton
+                .classList
+                .add(
+                    "selected"
+                );
 
         }
 
@@ -1967,6 +2080,676 @@
             );
 
         }
+
+    }
+
+
+    function toggleExplorer() {
+
+        explorerExpanded =
+            !explorerExpanded;
+
+
+        renderExplorer();
+
+    }
+
+
+    function beginRenameObject(
+        object
+    ) {
+
+        if (
+            !object ||
+            !sceneObjects.includes(
+                object
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        closeExplorerContextMenu();
+
+
+        const item =
+            document.querySelector(
+                `.tree-item[data-object-uuid="${object.uuid}"]`
+            );
+
+
+        const nameElement =
+            item?.querySelector(
+                ".tree-name"
+            );
+
+
+        if (
+            !item ||
+            !nameElement
+        ) {
+
+            return;
+
+        }
+
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            "text";
+
+
+        input.className =
+            "tree-rename-input";
+
+
+        input.value =
+            object.name ||
+            "Object";
+
+
+        input.maxLength =
+            60;
+
+
+        nameElement.replaceWith(
+            input
+        );
+
+
+        input.focus();
+        input.select();
+
+
+        let finished =
+            false;
+
+
+        const finish =
+            save => {
+
+                if (finished) {
+                    return;
+                }
+
+
+                finished =
+                    true;
+
+
+                const nextName =
+                    input.value
+                        .trim();
+
+
+                if (
+                    save &&
+                    nextName
+                ) {
+
+                    object.name =
+                        nextName;
+
+
+                    updateProperties(
+                        object
+                    );
+
+
+                    setEditorStatus(
+                        "Object renamed"
+                    );
+
+                }
+
+
+                renderExplorer();
+
+            };
+
+
+        input.addEventListener(
+            "click",
+            event => {
+                event.stopPropagation();
+            }
+        );
+
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                event.stopPropagation();
+
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    finish(
+                        true
+                    );
+
+                }
+
+                else if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    event.preventDefault();
+
+                    finish(
+                        false
+                    );
+
+                }
+
+            }
+        );
+
+
+        input.addEventListener(
+            "blur",
+            () => {
+
+                finish(
+                    true
+                );
+
+            }
+        );
+
+    }
+
+
+    function makeCopyName(
+        sourceName
+    ) {
+
+        const baseName =
+            `${sourceName || "Part"} Copy`;
+
+
+        let candidate =
+            baseName;
+
+
+        let suffix =
+            2;
+
+
+        const names =
+            new Set(
+                sceneObjects.map(
+                    object =>
+                        object.name
+                )
+            );
+
+
+        while (
+            names.has(
+                candidate
+            )
+        ) {
+
+            candidate =
+                `${baseName} ${suffix}`;
+
+
+            suffix++;
+
+        }
+
+
+        return candidate;
+
+    }
+
+
+    function duplicateSelectedObject() {
+
+        const source =
+            selectedSceneObject;
+
+
+        if (
+            !source ||
+            !sceneObjects.includes(
+                source
+            ) ||
+            source.userData
+                ?.locked
+        ) {
+
+            return;
+
+        }
+
+
+        const copy =
+            source.clone();
+
+
+        if (
+            source.geometry &&
+            typeof source.geometry.clone ===
+            "function"
+        ) {
+
+            copy.geometry =
+                source.geometry.clone();
+
+        }
+
+
+        if (
+            Array.isArray(
+                source.material
+            )
+        ) {
+
+            copy.material =
+                source.material.map(
+                    material =>
+                        material.clone()
+                );
+
+        }
+
+        else if (
+            source.material &&
+            typeof source.material.clone ===
+            "function"
+        ) {
+
+            copy.material =
+                source.material.clone();
+
+        }
+
+
+        copy.name =
+            makeCopyName(
+                source.name
+            );
+
+
+        copy.position.x +=
+            1;
+
+
+        copy.position.z +=
+            1;
+
+
+        copy.userData = {
+            ...source.userData,
+            apexObject: true,
+            locked: false
+        };
+
+
+        scene.add(
+            copy
+        );
+
+
+        registerSceneObject(
+            copy
+        );
+
+
+        renderExplorer();
+
+
+        selectSceneObject(
+            copy
+        );
+
+
+        setTool(
+            "move"
+        );
+
+
+        updateObjectCount();
+
+
+        setEditorStatus(
+            "Object duplicated"
+        );
+
+    }
+
+
+    function deleteSelectedObject() {
+
+        const object =
+            selectedSceneObject;
+
+
+        if (
+            !object ||
+            !sceneObjects.includes(
+                object
+            ) ||
+            object.userData
+                ?.locked
+        ) {
+
+            return;
+
+        }
+
+
+        transformControls
+            ?.detach();
+
+
+        removeSelectionHelper();
+
+
+        scene.remove(
+            object
+        );
+
+
+        const index =
+            sceneObjects.indexOf(
+                object
+            );
+
+
+        if (
+            index !==
+            -1
+        ) {
+
+            sceneObjects.splice(
+                index,
+                1
+            );
+
+        }
+
+
+        object.geometry
+            ?.dispose();
+
+
+        if (
+            Array.isArray(
+                object.material
+            )
+        ) {
+
+            object.material.forEach(
+                material => {
+                    material.dispose();
+                }
+            );
+
+        }
+
+        else {
+
+            object.material
+                ?.dispose();
+
+        }
+
+
+        selectedSceneObject =
+            null;
+
+
+        clearTreeSelection();
+        hideProperties();
+        renderExplorer();
+        updateObjectCount();
+
+
+        setTool(
+            "select"
+        );
+
+
+        setEditorStatus(
+            "Object deleted"
+        );
+
+    }
+
+
+    function ensureExplorerContextMenu() {
+
+        if (
+            explorerContextMenu
+        ) {
+
+            return;
+
+        }
+
+
+        explorerContextMenu =
+            document.createElement(
+                "div"
+            );
+
+
+        explorerContextMenu.className =
+            "explorer-context-menu hidden";
+
+
+        explorerContextMenu.innerHTML = `
+            <button type="button" data-action="rename">
+                Rename
+            </button>
+
+            <button type="button" data-action="duplicate">
+                Duplicate
+            </button>
+
+            <div class="explorer-context-separator"></div>
+
+            <button type="button" data-action="delete" class="danger-action">
+                Delete
+            </button>
+        `;
+
+
+        document.body.appendChild(
+            explorerContextMenu
+        );
+
+    }
+
+
+    function openExplorerContextMenu(
+        clientX,
+        clientY,
+        object
+    ) {
+
+        ensureExplorerContextMenu();
+
+
+        const locked =
+            Boolean(
+                object?.userData
+                    ?.locked
+            );
+
+
+        const renameButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="rename"]'
+                );
+
+
+        const duplicateButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="duplicate"]'
+                );
+
+
+        const deleteButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="delete"]'
+                );
+
+
+        renameButton.disabled =
+            false;
+
+
+        duplicateButton.disabled =
+            locked;
+
+
+        deleteButton.disabled =
+            locked;
+
+
+        renameButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                beginRenameObject(
+                    object
+                );
+
+            };
+
+
+        duplicateButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                duplicateSelectedObject();
+
+            };
+
+
+        deleteButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                deleteSelectedObject();
+
+            };
+
+
+        explorerContextMenu
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        const menuWidth =
+            explorerContextMenu
+                .offsetWidth;
+
+
+        const menuHeight =
+            explorerContextMenu
+                .offsetHeight;
+
+
+        const left =
+            Math.min(
+                clientX,
+                window.innerWidth -
+                menuWidth -
+                8
+            );
+
+
+        const top =
+            Math.min(
+                clientY,
+                window.innerHeight -
+                menuHeight -
+                8
+            );
+
+
+        explorerContextMenu.style.left =
+            `${Math.max(8, left)}px`;
+
+
+        explorerContextMenu.style.top =
+            `${Math.max(8, top)}px`;
+
+    }
+
+
+    function closeExplorerContextMenu() {
+
+        explorerContextMenu
+            ?.classList
+            .add(
+                "hidden"
+            );
+
+    }
+
+
+    function setEditorStatus(
+        message
+    ) {
+
+        if (!saveStatus) {
+
+            return;
+
+        }
+
+
+        saveStatus.textContent =
+            message;
+
+
+        window.clearTimeout(
+            setEditorStatus.timeoutId
+        );
+
+
+        setEditorStatus.timeoutId =
+            window.setTimeout(
+                () => {
+
+                    if (saveStatus) {
+
+                        saveStatus.textContent =
+                            "Ready";
+
+                    }
+
+                },
+                1500
+            );
 
     }
 
@@ -2183,6 +2966,14 @@
             false;
 
 
+        if (explorerAddButton) {
+
+            explorerAddButton.disabled =
+                false;
+
+        }
+
+
         /* =============================
            TOOL EVENTS
         ============================= */
@@ -2244,6 +3035,60 @@
                 "click",
                 addPart
             );
+
+
+        explorerAddButton
+            ?.addEventListener(
+                "click",
+                addPart
+            );
+
+
+        const workspaceArrow =
+            workspaceTreeItem
+                ?.querySelector(
+                    ".tree-arrow"
+                );
+
+
+        workspaceArrow
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    toggleExplorer();
+
+                }
+            );
+
+
+        document.addEventListener(
+            "pointerdown",
+            event => {
+
+                if (
+                    explorerContextMenu &&
+                    !explorerContextMenu
+                        .contains(
+                            event.target
+                        )
+                ) {
+
+                    closeExplorerContextMenu();
+
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "blur",
+            closeExplorerContextMenu
+        );
 
 
         /* =============================
@@ -2313,6 +3158,68 @@
         const key =
             event.key
                 .toLowerCase();
+
+
+        if (
+            key ===
+            "f2"
+        ) {
+
+            event.preventDefault();
+
+            beginRenameObject(
+                selectedSceneObject
+            );
+
+            return;
+
+        }
+
+
+        if (
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            key ===
+            "d"
+        ) {
+
+            event.preventDefault();
+
+            duplicateSelectedObject();
+
+            return;
+
+        }
+
+
+        if (
+            key ===
+            "delete" ||
+            key ===
+            "backspace"
+        ) {
+
+            if (
+                selectedSceneObject &&
+                sceneObjects.includes(
+                    selectedSceneObject
+                ) &&
+                !selectedSceneObject
+                    .userData
+                    ?.locked
+            ) {
+
+                event.preventDefault();
+
+                deleteSelectedObject();
+
+            }
+
+            return;
+
+        }
 
 
         if (
@@ -2783,6 +3690,19 @@
                 .disconnect();
 
         }
+
+
+        window.clearTimeout(
+            setEditorStatus.timeoutId
+        );
+
+
+        explorerContextMenu
+            ?.remove();
+
+
+        explorerContextMenu =
+            null;
 
     }
 
