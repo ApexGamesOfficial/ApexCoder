@@ -1194,3 +1194,305 @@ button {
     margin: 4px 3px;
     background: #3c3d41;
 }
+
+
+/* =========================================================
+   SCRIPT WORKSPACE / MONACO - V0.4
+========================================================= */
+
+.workspace-tabs {
+    height: 30px;
+    display: flex;
+    align-items: stretch;
+}
+
+.workspace-tab {
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.workspace-tab:hover {
+    background: var(--hover);
+    color: #ffffff;
+}
+
+.workspace-tab-code {
+    color: #8f9094;
+    font-family: monospace;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.script-header-status {
+    padding-right: 10px;
+    color: #77787c;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .55px;
+}
+
+.script-workspace {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    background: #1b1c1f;
+}
+
+.script-sidebar {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 30px minmax(0, 1fr) auto;
+    background: #222326;
+    border-right: 1px solid var(--border);
+}
+
+.script-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 7px 0 10px;
+    border-bottom: 1px solid var(--border-soft);
+    color: #a9aaad;
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: .7px;
+}
+
+.script-icon-button {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #9b9ca0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.script-icon-button:hover {
+    background: var(--hover);
+    color: #fff;
+}
+
+.script-list {
+    min-height: 0;
+    overflow: auto;
+    padding: 4px 0;
+}
+
+.script-list-item {
+    width: 100%;
+    height: 27px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 9px;
+    border: 0;
+    background: transparent;
+    color: #bcbdbf;
+    cursor: pointer;
+    text-align: left;
+    font-size: 10px;
+}
+
+.script-list-item:hover {
+    background: var(--hover);
+}
+
+.script-list-item.active {
+    background: #3d3e43;
+    color: #fff;
+}
+
+.script-list-icon {
+    width: 20px;
+    color: #d8c76c;
+    font-family: monospace;
+    font-size: 8px;
+    font-weight: 950;
+}
+
+.script-list-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.script-sidebar-footer {
+    padding: 9px 10px;
+    border-top: 1px solid var(--border-soft);
+    color: #696a6e;
+    line-height: 1.45;
+    font-size: 8px;
+}
+
+.script-editor-pane {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 34px minmax(0, 1fr) 23px;
+    background: #1e1f22;
+}
+
+.script-editor-toolbar {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 8px 0 11px;
+    border-bottom: 1px solid var(--border);
+    background: #252629;
+}
+
+.script-file-identity,
+.script-toolbar-actions {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.script-file-identity {
+    overflow: hidden;
+    color: #d4d4d5;
+    font-size: 10px;
+}
+
+#activeScriptName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.script-file-icon {
+    flex: 0 0 auto;
+    color: #d8c76c;
+    font-family: monospace;
+    font-size: 8px;
+    font-weight: 950;
+}
+
+.script-dirty-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: #d7d7d8;
+}
+
+.script-save-state {
+    color: #747579;
+    font-size: 8px;
+}
+
+.script-toolbar-button {
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid #44464a;
+    border-radius: 4px;
+    background: #303135;
+    color: #bfc0c2;
+    cursor: pointer;
+    font-size: 8px;
+    font-weight: 750;
+}
+
+.script-toolbar-button:not(:disabled):hover {
+    background: #3a3b40;
+    color: #fff;
+}
+
+.script-toolbar-button.danger:not(:disabled):hover {
+    border-color: rgba(255, 118, 118, .4);
+    color: var(--danger);
+}
+
+.script-toolbar-button:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.script-editor-stage {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #1e1e1e;
+}
+
+.monaco-editor-host {
+    position: absolute;
+    inset: 0;
+}
+
+.monaco-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    color: #7b7c80;
+    background: #1e1f22;
+    font-size: 10px;
+}
+
+.monaco-fallback.hidden {
+    display: none;
+}
+
+.monaco-fallback-mark {
+    color: #aaa;
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.script-runtime-note {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 9px;
+    border-top: 1px solid var(--border);
+    background: #202124;
+    color: #696a6e;
+    font-size: 8px;
+}
+
+.script-runtime-note span {
+    color: #86878a;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .script-workspace {
+        grid-template-columns: 150px minmax(0, 1fr);
+    }
+
+    .script-toolbar-button {
+        padding: 0 6px;
+    }
+}
+
+@media (max-width: 700px) {
+    .script-workspace {
+        grid-template-columns: 120px minmax(0, 1fr);
+    }
+
+    .script-save-state,
+    .script-runtime-note span {
+        display: none;
+    }
+}
