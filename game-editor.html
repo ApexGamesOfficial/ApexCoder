@@ -13,7 +13,7 @@
 
     <link
         rel="stylesheet"
-        href="game-editor.css?v=1"
+        href="game-editor.css?v=2"
     >
 
     <!-- THREE.JS IMPORT MAP -->
@@ -40,7 +40,7 @@
 
     <!-- GAME EDITOR -->
     <script
-        src="game-editor.js?v=3"
+        src="game-editor.js?v=4"
         defer
     ></script>
 </head>
@@ -323,6 +323,7 @@
             <aside class="activity-rail">
 
                 <button
+                    id="sceneActivityButton"
                     class="activity-button active"
                     type="button"
                     title="Scene"
@@ -332,6 +333,7 @@
 
 
                 <button
+                    id="scriptsActivityButton"
                     class="activity-button"
                     type="button"
                     title="Scripts — coming later"
@@ -479,10 +481,10 @@
                         </span>
 
                         <button
+                            id="explorerAddButton"
                             class="panel-action"
                             type="button"
-                            title="Add object"
-                            disabled
+                            title="Add Part"
                         >
                             +
                         </button>
