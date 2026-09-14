@@ -1,1499 +1,5158 @@
 /* =========================================================
-   ROOT
+   APEXCODER GAME EDITOR
+   V0.2 — WORLD EDITING FOUNDATION
 ========================================================= */
 
-:root {
-    --bg: #202124;
-    --topbar: #252629;
-    --panel: #292a2d;
-    --panel-2: #2d2e32;
-    --panel-3: #323337;
+(() => {
 
-    --viewport: #18191c;
-
-    --hover: #35363a;
-    --selected: #3b3c41;
-
-    --border: #3a3b3f;
-    --border-soft: #323337;
-
-    --text: #eeeeee;
-    --muted: #a3a3a6;
-    --dim: #737478;
-
-    --accent: #ffffff;
-
-    --green: #5bdb87;
-    --danger: #ff7676;
-}
+    "use strict";
 
 
-/* =========================================================
-   RESET
-========================================================= */
+    /* =====================================================
+       DOM
+    ====================================================== */
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-}
-
-body {
-    background: var(--bg);
-    color: var(--text);
-
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-}
-
-button,
-input,
-select,
-textarea {
-    font: inherit;
-}
-
-button {
-    color: inherit;
-}
-
-.hidden {
-    display: none !important;
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading-screen {
-    position: fixed;
-    inset: 0;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    gap: 16px;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #242529 0%,
-            #17181a 70%
+    const editorLoading =
+        document.getElementById(
+            "editorLoading"
         );
 
-    z-index: 1000;
-}
+    const errorScreen =
+        document.getElementById(
+            "errorScreen"
+        );
+
+    const errorTitle =
+        document.getElementById(
+            "errorTitle"
+        );
+
+    const errorMessage =
+        document.getElementById(
+            "errorMessage"
+        );
+
+    const gameEditor =
+        document.getElementById(
+            "gameEditor"
+        );
+
+    const projectName =
+        document.getElementById(
+            "projectName"
+        );
+
+    const explorerProjectName =
+        document.getElementById(
+            "explorerProjectName"
+        );
+
+    const statusProject =
+        document.getElementById(
+            "statusProject"
+        );
+
+    const rendererStatus =
+        document.getElementById(
+            "rendererStatus"
+        );
+
+    const objectCountStatus =
+        document.getElementById(
+            "objectCountStatus"
+        );
+
+    const viewportContainer =
+        document.getElementById(
+            "viewportContainer"
+        );
+
+    const canvas =
+        document.getElementById(
+            "gameCanvas"
+        );
+
+    const resetCameraButton =
+        document.getElementById(
+            "resetCameraButton"
+        );
+
+    const homeCameraButton =
+        document.getElementById(
+            "homeCameraButton"
+        );
+
+    const workspaceTreeItem =
+        document.getElementById(
+            "workspaceTreeItem"
+        );
+
+    const propertiesEmpty =
+        document.getElementById(
+            "propertiesEmpty"
+        );
+
+    const propertiesContent =
+        document.getElementById(
+            "propertiesContent"
+        );
+
+    const propertyName =
+        document.getElementById(
+            "propertyName"
+        );
+
+    const propertyType =
+        document.getElementById(
+            "propertyType"
+        );
+
+    const propertyPosition =
+        document.getElementById(
+            "propertyPosition"
+        );
+
+    const propertyRotation =
+        document.getElementById(
+            "propertyRotation"
+        );
+
+    const propertyScale =
+        document.getElementById(
+            "propertyScale"
+        );
+
+    const selectToolButton =
+        document.getElementById(
+            "selectToolButton"
+        );
+
+    const moveToolButton =
+        document.getElementById(
+            "moveToolButton"
+        );
+
+    const rotateToolButton =
+        document.getElementById(
+            "rotateToolButton"
+        );
+
+    const scaleToolButton =
+        document.getElementById(
+            "scaleToolButton"
+        );
+
+    const addPartButton =
+        document.getElementById(
+            "addPartButton"
+        );
+
+
+    const explorerAddButton =
+        document.getElementById(
+            "explorerAddButton"
+        );
+
+
+    const saveStatus =
+        document.getElementById(
+            "saveStatus"
+        );
+
+
+    const sceneActivityButton =
+        document.getElementById(
+            "sceneActivityButton"
+        );
+
+    const scriptsActivityButton =
+        document.getElementById(
+            "scriptsActivityButton"
+        );
+
+    const viewportTabButton =
+        document.getElementById(
+            "viewportTabButton"
+        );
+
+    const scriptTabButton =
+        document.getElementById(
+            "scriptTabButton"
+        );
 
-.loading-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+    const viewportHints =
+        document.getElementById(
+            "viewportHints"
+        );
 
-.loading-logo {
-    font-family: monospace;
-    font-size: 16px;
-    font-weight: 900;
-}
+    const scriptHeaderStatus =
+        document.getElementById(
+            "scriptHeaderStatus"
+        );
 
-.loading-name {
-    font-size: 17px;
-    font-weight: 850;
-    letter-spacing: -0.3px;
-}
+    const scriptWorkspace =
+        document.getElementById(
+            "scriptWorkspace"
+        );
 
-.loading-spinner {
-    width: 25px;
-    height: 25px;
+    const scriptList =
+        document.getElementById(
+            "scriptList"
+        );
 
-    border-radius: 50%;
+    const newScriptButton =
+        document.getElementById(
+            "newScriptButton"
+        );
 
-    border: 3px solid #3b3c40;
-    border-top-color: #ffffff;
+    const renameScriptButton =
+        document.getElementById(
+            "renameScriptButton"
+        );
 
-    animation: spin 0.8s linear infinite;
-}
+    const deleteScriptButton =
+        document.getElementById(
+            "deleteScriptButton"
+        );
 
-.loading-text {
-    color: var(--muted);
-    font-size: 12px;
-}
+    const activeScriptName =
+        document.getElementById(
+            "activeScriptName"
+        );
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+    const scriptSaveState =
+        document.getElementById(
+            "scriptSaveState"
+        );
 
+    const scriptDirtyDot =
+        document.getElementById(
+            "scriptDirtyDot"
+        );
 
-/* =========================================================
-   ERROR SCREEN
-========================================================= */
+    const monacoEditorHost =
+        document.getElementById(
+            "monacoEditor"
+        );
 
-.error-screen {
-    position: fixed;
-    inset: 0;
+    const monacoFallback =
+        document.getElementById(
+            "monacoFallback"
+        );
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    const monacoFallbackText =
+        document.getElementById(
+            "monacoFallbackText"
+        );
 
-    padding: 24px;
 
-    background: #151618;
+    /* =====================================================
+       STATE
+    ====================================================== */
 
-    z-index: 1000;
-}
+    let currentSession =
+        null;
 
-.error-card {
-    width: min(520px, 100%);
+    let currentProject =
+        null;
 
-    padding: 32px;
 
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    let THREE =
+        null;
 
-    background: var(--panel);
+    let OrbitControls =
+        null;
 
-    box-shadow:
-        0 22px 60px rgba(0, 0, 0, 0.35);
-}
+    let TransformControls =
+        null;
 
-.error-badge {
-    color: var(--muted);
 
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 1.3px;
-}
+    let renderer =
+        null;
 
-.error-card h1 {
-    margin: 12px 0 9px;
+    let scene =
+        null;
 
-    font-size: 23px;
-    letter-spacing: -0.5px;
-}
+    let camera =
+        null;
 
-.error-card p {
-    margin: 0 0 22px;
+    let controls =
+        null;
 
-    color: var(--muted);
+    let transformControls =
+        null;
 
-    line-height: 1.6;
-}
+    let transformHelper =
+        null;
 
-.error-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 
-    height: 38px;
+    let baseplate =
+        null;
 
-    padding: 0 16px;
+    let selectedSceneObject =
+        null;
 
-    border-radius: 7px;
+    let selectionHelper =
+        null;
 
-    background: #ffffff;
-    color: #111111;
 
-    text-decoration: none;
+    let raycaster =
+        null;
 
-    font-size: 12px;
-    font-weight: 850;
-}
+    let pointer =
+        null;
 
 
-/* =========================================================
-   MAIN STUDIO
-========================================================= */
+    let resizeObserver =
+        null;
 
-.studio {
-    width: 100%;
-    height: 100%;
+    let animationFrame =
+        null;
 
-    display: grid;
 
-    grid-template-rows:
-        44px
-        minmax(0, 1fr)
-        20px;
+    let currentTool =
+        "select";
 
-    background: var(--bg);
-}
 
+    let partCounter =
+        1;
 
-/* =========================================================
-   TOPBAR
-========================================================= */
 
-.topbar {
-    min-width: 0;
+    let explorerExpanded =
+        true;
 
-    display: grid;
 
-    grid-template-columns:
-        minmax(220px, 1fr)
-        auto
-        minmax(180px, 1fr);
+    let explorerContextMenu =
+        null;
 
-    align-items: center;
 
-    padding: 0 10px;
+    let currentWorkspaceMode =
+        "viewport";
 
-    background: var(--topbar);
+    let projectScripts =
+        [];
 
-    border-bottom:
-        1px solid var(--border);
-}
+    let activeScriptId =
+        null;
 
-.topbar-left,
-.topbar-right,
-.studio-tools {
-    display: flex;
-    align-items: center;
-}
+    let monacoInstance =
+        null;
 
-.topbar-left {
-    min-width: 0;
-    gap: 10px;
-}
+    let monacoLoadingPromise =
+        null;
 
-.topbar-right {
-    justify-content: flex-end;
-    gap: 12px;
-}
+    let scriptSaveTimer =
+        null;
 
-.brand {
-    display: flex;
-    align-items: center;
+    let suppressMonacoChange =
+        false;
 
-    gap: 8px;
 
-    color: #ffffff;
+    const sceneObjects =
+        [];
 
-    text-decoration: none;
-}
 
-.brand-icon {
-    font-family: monospace;
-    font-size: 13px;
-    font-weight: 950;
-}
+    /* =====================================================
+       START
+    ====================================================== */
 
-.brand-name {
-    font-size: 13px;
-    font-weight: 900;
-}
+    document.addEventListener(
+        "DOMContentLoaded",
+        boot
+    );
 
-.top-divider,
-.tool-divider {
-    width: 1px;
 
-    background: var(--border);
-}
+    async function boot() {
 
-.top-divider {
-    height: 18px;
-}
+        try {
 
-.tool-divider {
-    height: 22px;
-    margin: 0 4px;
-}
+            await waitForSupabase();
 
-.project-identity {
-    min-width: 0;
+            await loadSession();
 
-    display: flex;
-    align-items: center;
+            await loadProject();
 
-    gap: 8px;
-}
+            loadProjectScripts();
 
-.project-name {
-    overflow: hidden;
+            await loadThree();
 
-    color: #dcdcdc;
+            createStudioScene();
 
-    text-overflow: ellipsis;
-    white-space: nowrap;
+            connectInterface();
 
-    font-size: 12px;
-    font-weight: 750;
-}
+            renderExplorer();
 
-.project-type {
-    flex: 0 0 auto;
+            showEditor();
 
-    padding: 3px 5px;
+        }
 
-    border: 1px solid #46474b;
-    border-radius: 4px;
+        catch (error) {
 
-    color: var(--dim);
+            console.error(
+                "ApexCoder Game Editor startup error:",
+                error
+            );
 
-    font-size: 8px;
-    font-weight: 950;
-    letter-spacing: 0.8px;
-}
 
+            showError(
+                "Unable to open Game Editor",
+                error?.message ||
+                "An unexpected startup error occurred."
+            );
 
-/* =========================================================
-   STUDIO TOOLS
-========================================================= */
+        }
 
-.studio-tools {
-    justify-content: center;
-
-    gap: 3px;
-}
-
-.tool-button {
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 0 9px;
-
-    border: 1px solid transparent;
-    border-radius: 5px;
-
-    background: transparent;
-    color: #b9b9bb;
-
-    cursor: pointer;
-
-    font-size: 10px;
-    font-weight: 750;
-
-    transition:
-        background 120ms ease,
-        border-color 120ms ease,
-        color 120ms ease;
-}
-
-.tool-button:not(:disabled):hover {
-    background: var(--hover);
-    color: #ffffff;
-}
-
-.tool-button.active {
-    border-color: #494a4f;
-
-    background: var(--selected);
-    color: #ffffff;
-}
-
-.tool-button:disabled {
-    opacity: 0.36;
-    cursor: default;
-}
-
-.tool-symbol {
-    min-width: 12px;
-
-    text-align: center;
-
-    font-size: 13px;
-}
-
-.save-status {
-    color: var(--dim);
-
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.play-button {
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 6px;
-
-    padding: 0 13px;
-
-    border: 1px solid #4a4b4f;
-    border-radius: 6px;
-
-    background: #343539;
-    color: #b6b6b8;
-
-    font-size: 10px;
-    font-weight: 850;
-}
-
-.play-button:disabled {
-    opacity: 0.48;
-}
-
-.play-icon {
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   STUDIO BODY
-========================================================= */
-
-.studio-body {
-    min-width: 0;
-    min-height: 0;
-
-    display: grid;
-
-    grid-template-columns:
-        38px
-        minmax(400px, 1fr)
-        235px;
-}
-
-
-/* =========================================================
-   ACTIVITY RAIL
-========================================================= */
-
-.activity-rail {
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    padding: 5px 0;
-
-    background: #232427;
-
-    border-right:
-        1px solid var(--border);
-}
-
-.activity-button {
-    width: 32px;
-    height: 32px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 3px;
-
-    border: 1px solid transparent;
-    border-radius: 5px;
-
-    background: transparent;
-    color: #85868a;
-
-    cursor: pointer;
-
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 850;
-}
-
-.activity-button:not(:disabled):hover {
-    background: var(--hover);
-    color: #ffffff;
-}
-
-.activity-button.active {
-    border-color: #414246;
-
-    background: var(--selected);
-    color: #ffffff;
-}
-
-.activity-button:disabled {
-    opacity: 0.28;
-    cursor: default;
-}
-
-.activity-spacer {
-    flex: 1;
-}
-
-
-/* =========================================================
-   WORKSPACE
-========================================================= */
-
-.workspace {
-    min-width: 0;
-    min-height: 0;
-
-    display: grid;
-
-    grid-template-rows:
-        30px
-        minmax(0, 1fr);
-
-    background: var(--viewport);
-}
-
-.workspace-header {
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: var(--panel);
-
-    border-bottom:
-        1px solid var(--border);
-}
-
-.workspace-tab {
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 0 12px;
-
-    border-right:
-        1px solid var(--border);
-
-    color: #a4a4a7;
-
-    font-size: 10px;
-    font-weight: 750;
-}
-
-.workspace-tab.active {
-    background: #232427;
-    color: #ffffff;
-}
-
-.workspace-tab-dot {
-    width: 5px;
-    height: 5px;
-
-    border-radius: 50%;
-
-    background: #8f9094;
-}
-
-.viewport-hints {
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding-right: 10px;
-
-    overflow: hidden;
-
-    color: #6f7074;
-
-    white-space: nowrap;
-
-    font-size: 9px;
-}
-
-.viewport-hints strong {
-    color: #9a9b9e;
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   VIEWPORT
-========================================================= */
-
-.viewport-container {
-    position: relative;
-
-    min-width: 0;
-    min-height: 0;
-
-    overflow: hidden;
-
-    background: var(--viewport);
-}
-
-#gameCanvas {
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    display: block;
-
-    outline: none;
-}
-
-.viewport-corner {
-    position: absolute;
-
-    z-index: 5;
-
-    pointer-events: none;
-}
-
-.viewport-top-left {
-    top: 10px;
-    left: 10px;
-}
-
-.viewport-top-right {
-    top: 10px;
-    right: 10px;
-}
-
-.viewport-mode-badge {
-    padding: 4px 7px;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 5px;
-
-    background: rgba(25, 26, 29, 0.76);
-    color: rgba(255, 255, 255, 0.7);
-
-    backdrop-filter: blur(8px);
-
-    font-size: 8px;
-    font-weight: 950;
-    letter-spacing: 1px;
-}
-
-.viewport-icon-button {
-    width: 28px;
-    height: 28px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 6px;
-
-    background: rgba(25, 26, 29, 0.82);
-    color: #c3c3c5;
-
-    backdrop-filter: blur(8px);
-
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-.viewport-icon-button:hover {
-    background: rgba(53, 54, 58, 0.92);
-    color: #ffffff;
-}
-
-.viewport-info {
-    position: absolute;
-
-    right: 10px;
-    bottom: 9px;
-
-    z-index: 5;
-
-    padding: 4px 7px;
-
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-
-    background: rgba(24, 25, 28, 0.7);
-    color: rgba(255, 255, 255, 0.46);
-
-    pointer-events: none;
-
-    font-size: 9px;
-}
-
-
-/* =========================================================
-   RIGHT SIDEBAR
-========================================================= */
-
-.right-sidebar {
-    min-width: 0;
-    min-height: 0;
-
-    display: grid;
-
-    grid-template-rows:
-        minmax(220px, 1fr)
-        minmax(180px, 0.8fr);
-
-    background: var(--panel);
-
-    border-left:
-        1px solid var(--border);
-}
-
-.panel {
-    min-height: 0;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.explorer-panel {
-    border-bottom:
-        1px solid var(--border);
-}
-
-.panel-header {
-    height: 29px;
-    min-height: 29px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 8px 0 10px;
-
-    border-bottom:
-        1px solid var(--border-soft);
-
-    color: #ccccce;
-
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 0.35px;
-}
-
-.panel-action {
-    width: 22px;
-    height: 22px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 0;
-    border-radius: 4px;
-
-    background: transparent;
-    color: #8e8f92;
-
-    font-size: 15px;
-}
-
-.panel-action:disabled {
-    opacity: 0.32;
-}
-
-.panel-body {
-    min-height: 0;
-
-    overflow: auto;
-
-    padding: 4px 0;
-}
-
-
-/* =========================================================
-   EXPLORER TREE
-========================================================= */
-
-.tree {
-    min-width: 0;
-}
-
-.tree-item {
-    width: 100%;
-    height: 25px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 5px;
-
-    padding: 0 7px;
-
-    border: 0;
-
-    background: transparent;
-    color: #c1c1c3;
-
-    cursor: pointer;
-
-    text-align: left;
-
-    font-size: 10px;
-}
-
-.tree-item:hover {
-    background: var(--hover);
-}
-
-.tree-item.selected {
-    background: #414247;
-    color: #ffffff;
-}
-
-.tree-arrow {
-    width: 8px;
-
-    color: #929397;
-
-    font-size: 8px;
-}
-
-.tree-icon {
-    width: 13px;
-
-    color: #a0a1a4;
-
-    text-align: center;
-
-    font-size: 10px;
-}
-
-.tree-name {
-    min-width: 0;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.tree-children {
-    display: block;
-}
-
-.tree-indent {
-    width: 13px;
-    flex: 0 0 13px;
-}
-
-
-/* =========================================================
-   PROPERTIES
-========================================================= */
-
-.properties-empty {
-    padding: 16px 12px;
-
-    color: #77787c;
-
-    line-height: 1.5;
-
-    font-size: 10px;
-}
-
-.properties-content {
-    min-height: 0;
-
-    overflow-y: auto;
-}
-
-.property-section-title {
-    padding: 8px 9px 5px;
-
-    border-bottom:
-        1px solid var(--border-soft);
-
-    color: #7c7d81;
-
-    font-size: 8px;
-    font-weight: 950;
-    letter-spacing: 0.75px;
-}
-
-.property-row {
-    min-height: 28px;
-
-    display: grid;
-
-    grid-template-columns:
-        78px
-        minmax(0, 1fr);
-
-    align-items: center;
-
-    border-bottom:
-        1px solid var(--border-soft);
-
-    font-size: 9px;
-}
-
-.property-label {
-    height: 100%;
-
-    display: flex;
-    align-items: center;
-
-    padding-left: 9px;
-
-    border-right:
-        1px solid var(--border-soft);
-
-    color: #919296;
-}
-
-.property-value {
-    min-width: 0;
-
-    padding: 0 8px;
-
-    overflow: hidden;
-
-    color: #cdcdcf;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.property-value.mono {
-    font-family:
-        "SFMono-Regular",
-        Consolas,
-        monospace;
-
-    font-size: 8px;
-}
-
-
-/* =========================================================
-   STATUS BAR
-========================================================= */
-
-.statusbar {
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 8px;
-
-    background: #202124;
-
-    border-top:
-        1px solid var(--border);
-
-    color: #77787b;
-
-    font-size: 8px;
-}
-
-.status-left,
-.status-right {
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-
-    gap: 7px;
-}
-
-.status-item {
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.status-divider {
-    color: #4d4e52;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1000px) {
-
-    .studio-body {
-        grid-template-columns:
-            38px
-            minmax(350px, 1fr)
-            205px;
     }
 
-    .brand-name {
-        display: none;
+
+    /* =====================================================
+       WAIT FOR SUPABASE
+    ====================================================== */
+
+    async function waitForSupabase() {
+
+        const maxAttempts =
+            100;
+
+
+        for (
+            let attempt = 0;
+            attempt < maxAttempts;
+            attempt++
+        ) {
+
+            if (
+                typeof supabaseClient !==
+                "undefined"
+            ) {
+
+                return;
+
+            }
+
+
+            await sleep(
+                50
+            );
+
+        }
+
+
+        throw new Error(
+            "ApexCoder could not connect to the account system."
+        );
+
     }
 
-    .viewport-hints {
-        display: none;
+
+    function sleep(
+        milliseconds
+    ) {
+
+        return new Promise(
+            resolve => {
+
+                setTimeout(
+                    resolve,
+                    milliseconds
+                );
+
+            }
+        );
+
     }
 
-}
+
+    /* =====================================================
+       SESSION
+    ====================================================== */
+
+    async function loadSession() {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .auth
+                .getSession();
 
 
-@media (max-width: 780px) {
+        if (error) {
 
-    .right-sidebar {
-        display: none;
+            throw error;
+
+        }
+
+
+        currentSession =
+            data?.session ||
+            null;
+
+
+        if (!currentSession) {
+
+            window.location.href =
+                "login.html";
+
+
+            throw new Error(
+                "No active Apex Games Account session."
+            );
+
+        }
+
     }
 
-    .studio-body {
-        grid-template-columns:
-            38px
-            minmax(0, 1fr);
+
+    /* =====================================================
+       PROJECT
+    ====================================================== */
+
+    async function loadProject() {
+
+        const parameters =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const projectId =
+            parameters.get(
+                "project"
+            );
+
+
+        if (!projectId) {
+
+            throw new Error(
+                "No game project was provided."
+            );
+
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "projects"
+                )
+                .select(`
+                    id,
+                    owner_id,
+                    name,
+                    type,
+                    created_at,
+                    updated_at
+                `)
+                .eq(
+                    "id",
+                    projectId
+                )
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (!data) {
+
+            throw new Error(
+                "This project could not be found."
+            );
+
+        }
+
+
+        if (
+            data.owner_id !==
+            currentSession.user.id
+        ) {
+
+            throw new Error(
+                "You do not have access to this project."
+            );
+
+        }
+
+
+        if (
+            data.type !==
+            "game"
+        ) {
+
+            throw new Error(
+                "This project is not an ApexCoder game project."
+            );
+
+        }
+
+
+        currentProject =
+            data;
+
+
+        projectName.textContent =
+            currentProject.name;
+
+
+        explorerProjectName.textContent =
+            currentProject.name;
+
+
+        statusProject.textContent =
+            currentProject.name;
+
+
+        document.title =
+            `${currentProject.name} — ApexCoder Game Editor`;
+
     }
 
-    .topbar {
-        grid-template-columns:
-            1fr
-            auto;
+
+    /* =====================================================
+       THREE.JS
+    ====================================================== */
+
+    async function loadThree() {
+
+        rendererStatus.textContent =
+            "Loading 3D Engine";
+
+
+        const threeModule =
+            await import(
+                "three"
+            );
+
+
+        const orbitModule =
+            await import(
+                "three/addons/controls/OrbitControls.js"
+            );
+
+
+        const transformModule =
+            await import(
+                "three/addons/controls/TransformControls.js"
+            );
+
+
+        THREE =
+            threeModule;
+
+
+        OrbitControls =
+            orbitModule
+                .OrbitControls;
+
+
+        TransformControls =
+            transformModule
+                .TransformControls;
+
+
+        rendererStatus.textContent =
+            "Three.js";
+
     }
 
-    .studio-tools {
-        order: 3;
 
-        position: absolute;
+    /* =====================================================
+       SCENE CREATION
+    ====================================================== */
 
-        left: 50%;
+    function createStudioScene() {
 
-        transform: translateX(-50%);
+        renderer =
+            new THREE.WebGLRenderer({
+                canvas:
+                    canvas,
+
+                antialias:
+                    true,
+
+                alpha:
+                    false
+            });
+
+
+        renderer.setPixelRatio(
+            Math.min(
+                window.devicePixelRatio ||
+                1,
+
+                2
+            )
+        );
+
+
+        renderer.shadowMap.enabled =
+            true;
+
+
+        renderer.shadowMap.type =
+            THREE.PCFSoftShadowMap;
+
+
+        renderer.outputColorSpace =
+            THREE.SRGBColorSpace;
+
+
+        scene =
+            new THREE.Scene();
+
+
+        scene.background =
+            new THREE.Color(
+                0x1c1d20
+            );
+
+
+        scene.fog =
+            new THREE.Fog(
+                0x1c1d20,
+                75,
+                220
+            );
+
+
+        /* =============================
+           CAMERA
+        ============================= */
+
+        camera =
+            new THREE.PerspectiveCamera(
+                55,
+                1,
+                0.1,
+                1000
+            );
+
+
+        resetCamera();
+
+
+        /* =============================
+           ORBIT CONTROLS
+        ============================= */
+
+        controls =
+            new OrbitControls(
+                camera,
+                renderer.domElement
+            );
+
+
+        controls.enableDamping =
+            true;
+
+
+        controls.dampingFactor =
+            0.08;
+
+
+        controls.enablePan =
+            true;
+
+
+        controls.screenSpacePanning =
+            true;
+
+
+        controls.minDistance =
+            3;
+
+
+        controls.maxDistance =
+            180;
+
+
+        controls.target.set(
+            0,
+            2,
+            0
+        );
+
+
+        controls.update();
+
+
+        /* =============================
+           RAYCASTING
+        ============================= */
+
+        raycaster =
+            new THREE.Raycaster();
+
+
+        pointer =
+            new THREE.Vector2();
+
+
+        /* =============================
+           GRID
+        ============================= */
+
+        const grid =
+            new THREE.GridHelper(
+                200,
+                200,
+                0x5f6064,
+                0x343539
+            );
+
+
+        grid.position.y =
+            0.01;
+
+
+        grid.userData.editorOnly =
+            true;
+
+
+        scene.add(
+            grid
+        );
+
+
+        /* =============================
+           BASEPLATE
+        ============================= */
+
+        const baseplateGeometry =
+            new THREE.BoxGeometry(
+                40,
+                0.5,
+                40
+            );
+
+
+        const baseplateMaterial =
+            new THREE.MeshStandardMaterial({
+                color:
+                    0x64666b,
+
+                roughness:
+                    0.9,
+
+                metalness:
+                    0
+            });
+
+
+        baseplate =
+            new THREE.Mesh(
+                baseplateGeometry,
+                baseplateMaterial
+            );
+
+
+        baseplate.name =
+            "Baseplate";
+
+
+        baseplate.position.set(
+            0,
+            -0.25,
+            0
+        );
+
+
+        baseplate.receiveShadow =
+            true;
+
+
+        baseplate.userData.apexObject =
+            true;
+
+
+        baseplate.userData.objectType =
+            "Baseplate";
+
+
+        baseplate.userData.locked =
+            true;
+
+
+        scene.add(
+            baseplate
+        );
+
+
+        registerSceneObject(
+            baseplate
+        );
+
+
+        /* =============================
+           ENVIRONMENT LIGHT
+        ============================= */
+
+        const hemisphereLight =
+            new THREE.HemisphereLight(
+                0xffffff,
+                0x35363a,
+                1.45
+            );
+
+
+        hemisphereLight.name =
+            "Environment Light";
+
+
+        hemisphereLight.userData.editorOnly =
+            true;
+
+
+        scene.add(
+            hemisphereLight
+        );
+
+
+        /* =============================
+           SUN
+        ============================= */
+
+        const sunLight =
+            new THREE.DirectionalLight(
+                0xffffff,
+                2.35
+            );
+
+
+        sunLight.name =
+            "Sun";
+
+
+        sunLight.position.set(
+            18,
+            32,
+            16
+        );
+
+
+        sunLight.castShadow =
+            true;
+
+
+        sunLight.shadow.mapSize.width =
+            2048;
+
+
+        sunLight.shadow.mapSize.height =
+            2048;
+
+
+        sunLight.shadow.camera.left =
+            -45;
+
+
+        sunLight.shadow.camera.right =
+            45;
+
+
+        sunLight.shadow.camera.top =
+            45;
+
+
+        sunLight.shadow.camera.bottom =
+            -45;
+
+
+        sunLight.userData.editorOnly =
+            true;
+
+
+        scene.add(
+            sunLight
+        );
+
+
+        /* =============================
+           STARTING PART
+        ============================= */
+
+        const starterPart =
+            createPartObject(
+                "SpawnPart"
+            );
+
+
+        starterPart.position.set(
+            0,
+            1,
+            0
+        );
+
+
+        scene.add(
+            starterPart
+        );
+
+
+        registerSceneObject(
+            starterPart
+        );
+
+
+        /* =============================
+           TRANSFORM CONTROLS
+        ============================= */
+
+        transformControls =
+            new TransformControls(
+                camera,
+                renderer.domElement
+            );
+
+
+        /*
+            Newer Three.js versions expose
+            the visible gizmo through getHelper().
+        */
+
+        if (
+            typeof transformControls
+                .getHelper ===
+            "function"
+        ) {
+
+            transformHelper =
+                transformControls
+                    .getHelper();
+
+
+            scene.add(
+                transformHelper
+            );
+
+        }
+
+
+        transformControls
+            .addEventListener(
+                "dragging-changed",
+                event => {
+
+                    if (controls) {
+
+                        controls.enabled =
+                            !event.value;
+
+                    }
+
+                }
+            );
+
+
+        transformControls
+            .addEventListener(
+                "objectChange",
+                () => {
+
+                    if (
+                        !selectedSceneObject
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    updateProperties(
+                        selectedSceneObject
+                    );
+
+
+                    updateSelectionHelper();
+
+
+                    setEditorStatus(
+                        "Scene updated"
+                    );
+
+                }
+            );
+
+
+        /* =============================
+           RESIZE
+        ============================= */
+
+        resizeRenderer();
+
+
+        resizeObserver =
+            new ResizeObserver(
+                resizeRenderer
+            );
+
+
+        resizeObserver.observe(
+            viewportContainer
+        );
+
+
+        window.addEventListener(
+            "resize",
+            resizeRenderer
+        );
+
+
+        /* =============================
+           START LOOP
+        ============================= */
+
+        animate();
+
+
+        updateObjectCount();
+
     }
 
-    .topbar-right {
-        grid-column: 2;
+
+    /* =====================================================
+       PARTS
+    ====================================================== */
+
+    function createPartObject(
+        requestedName = null
+    ) {
+
+        const geometry =
+            new THREE.BoxGeometry(
+                2,
+                2,
+                2
+            );
+
+
+        const material =
+            new THREE.MeshStandardMaterial({
+                color:
+                    0xb7b9bd,
+
+                roughness:
+                    0.72,
+
+                metalness:
+                    0
+            });
+
+
+        const part =
+            new THREE.Mesh(
+                geometry,
+                material
+            );
+
+
+        if (requestedName) {
+
+            part.name =
+                requestedName;
+
+        }
+
+        else {
+
+            part.name =
+                `Part${partCounter}`;
+
+
+            partCounter++;
+
+        }
+
+
+        part.castShadow =
+            true;
+
+
+        part.receiveShadow =
+            true;
+
+
+        part.userData.apexObject =
+            true;
+
+
+        part.userData.objectType =
+            "Part";
+
+
+        part.userData.locked =
+            false;
+
+
+        return part;
+
     }
 
-    .project-identity {
-        display: none;
+
+    function addPart() {
+
+        if (
+            !scene ||
+            !camera
+        ) {
+
+            return;
+
+        }
+
+
+        const part =
+            createPartObject();
+
+
+        const direction =
+            new THREE.Vector3();
+
+
+        camera.getWorldDirection(
+            direction
+        );
+
+
+        const spawnPosition =
+            camera.position
+                .clone()
+                .add(
+                    direction
+                        .multiplyScalar(
+                            8
+                        )
+                );
+
+
+        spawnPosition.y =
+            Math.max(
+                1,
+                spawnPosition.y
+            );
+
+
+        part.position.copy(
+            spawnPosition
+        );
+
+
+        scene.add(
+            part
+        );
+
+
+        registerSceneObject(
+            part
+        );
+
+
+        renderExplorer();
+
+
+        selectSceneObject(
+            part
+        );
+
+
+        setTool(
+            "move"
+        );
+
+
+        updateObjectCount();
+
+
+        setEditorStatus(
+            "Part added"
+        );
+
     }
 
-}
+
+    /* =====================================================
+       OBJECT REGISTRATION
+    ====================================================== */
+
+    function registerSceneObject(
+        object
+    ) {
+
+        if (!object) {
+            return;
+        }
 
 
-@media (max-width: 620px) {
+        if (
+            sceneObjects.includes(
+                object
+            )
+        ) {
 
-    .tool-button span:not(.tool-symbol) {
-        display: none;
+            return;
+
+        }
+
+
+        sceneObjects.push(
+            object
+        );
+
     }
 
-    .tool-button {
-        width: 30px;
 
-        justify-content: center;
+    /* =====================================================
+       TREE SELECTION
+    ====================================================== */
 
-        padding: 0;
+    function clearTreeSelection() {
+
+        document
+            .querySelectorAll(
+                ".tree-item.selected"
+            )
+            .forEach(
+                item => {
+
+                    item.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
     }
 
-    .tool-divider {
-        margin: 0 2px;
+
+    /* =====================================================
+       VIEWPORT SELECTION
+    ====================================================== */
+
+    function handleViewportPointerDown(
+        event
+    ) {
+
+        if (
+            event.button !==
+            0
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            transformControls
+                ?.dragging
+        ) {
+
+            return;
+
+        }
+
+
+        const rect =
+            renderer
+                .domElement
+                .getBoundingClientRect();
+
+
+        pointer.x =
+            (
+                (
+                    event.clientX -
+                    rect.left
+                ) /
+                rect.width
+            ) *
+            2 -
+            1;
+
+
+        pointer.y =
+            -(
+                (
+                    event.clientY -
+                    rect.top
+                ) /
+                rect.height
+            ) *
+            2 +
+            1;
+
+
+        raycaster.setFromCamera(
+            pointer,
+            camera
+        );
+
+
+        const intersections =
+            raycaster.intersectObjects(
+                sceneObjects,
+                false
+            );
+
+
+        if (
+            intersections.length ===
+            0
+        ) {
+
+            clearSelection();
+
+            return;
+
+        }
+
+
+        const hitObject =
+            intersections[0]
+                .object;
+
+
+        selectSceneObject(
+            hitObject
+        );
+
     }
 
-    .save-status {
-        display: none;
+
+    /* =====================================================
+       SELECT OBJECT
+    ====================================================== */
+
+    function selectSceneObject(
+        object
+    ) {
+
+        if (!object) {
+
+            clearSelection();
+
+            return;
+
+        }
+
+
+        selectedSceneObject =
+            object;
+
+
+        updateProperties(
+            object
+        );
+
+
+        highlightExplorerObject(
+            object
+        );
+
+
+        createSelectionHelper(
+            object
+        );
+
+
+        if (
+            object.userData
+                ?.locked
+        ) {
+
+            transformControls
+                ?.detach();
+
+
+            currentTool =
+                "select";
+
+
+            updateToolButtons();
+
+
+            return;
+
+        }
+
+
+        attachTransformForCurrentTool();
+
     }
 
-}
 
-/* =========================================================
-   EXPLORER OBJECT MANAGEMENT - V0.3
-========================================================= */
+    function clearSelection() {
 
-.panel-action:not(:disabled) {
-    cursor: pointer;
-}
-
-.panel-action:not(:disabled):hover {
-    background: var(--hover);
-    color: #ffffff;
-}
-
-.tree-children.collapsed {
-    display: none;
-}
-
-.tree-item {
-    position: relative;
-}
-
-.tree-item .tree-name {
-    flex: 1;
-}
-
-.tree-rename-input {
-    min-width: 0;
-    width: 100%;
-    height: 19px;
-    padding: 0 5px;
-    border: 1px solid #66686e;
-    border-radius: 3px;
-    outline: none;
-    background: #202124;
-    color: #ffffff;
-    font-size: 10px;
-}
-
-.tree-rename-input:focus {
-    border-color: #8e9096;
-}
-
-.explorer-context-menu {
-    position: fixed;
-    z-index: 2000;
-    width: 150px;
-    padding: 4px;
-    border: 1px solid #48494e;
-    border-radius: 6px;
-    background: #292a2d;
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
-}
-
-.explorer-context-menu button {
-    width: 100%;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    padding: 0 9px;
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
-    color: #d4d4d6;
-    cursor: pointer;
-    text-align: left;
-    font-size: 10px;
-}
-
-.explorer-context-menu button:hover:not(:disabled) {
-    background: #3a3b40;
-    color: #ffffff;
-}
-
-.explorer-context-menu button:disabled {
-    color: #68696d;
-    cursor: default;
-}
-
-.explorer-context-menu .danger-action {
-    color: #ff9696;
-}
-
-.explorer-context-separator {
-    height: 1px;
-    margin: 4px 3px;
-    background: #3c3d41;
-}
+        selectedSceneObject =
+            null;
 
 
-/* =========================================================
-   SCRIPT WORKSPACE / MONACO - V0.4
-========================================================= */
+        transformControls
+            ?.detach();
 
-.workspace-tabs {
-    height: 30px;
-    display: flex;
-    align-items: stretch;
-}
 
-.workspace-tab {
-    border-top: 0;
-    border-bottom: 0;
-    border-left: 0;
-    background: transparent;
-    cursor: pointer;
-}
+        removeSelectionHelper();
 
-.workspace-tab:hover {
-    background: var(--hover);
-    color: #ffffff;
-}
 
-.workspace-tab-code {
-    color: #8f9094;
-    font-family: monospace;
-    font-size: 9px;
-    font-weight: 900;
-}
+        clearTreeSelection();
 
-.script-header-status {
-    padding-right: 10px;
-    color: #77787c;
-    font-family: "SFMono-Regular", Consolas, monospace;
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .55px;
-}
 
-.script-workspace {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: 190px minmax(0, 1fr);
-    background: #1b1c1f;
-}
+        hideProperties();
 
-.script-sidebar {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: 30px minmax(0, 1fr) auto;
-    background: #222326;
-    border-right: 1px solid var(--border);
-}
-
-.script-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 7px 0 10px;
-    border-bottom: 1px solid var(--border-soft);
-    color: #a9aaad;
-    font-size: 8px;
-    font-weight: 950;
-    letter-spacing: .7px;
-}
-
-.script-icon-button {
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
-    color: #9b9ca0;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.script-icon-button:hover {
-    background: var(--hover);
-    color: #fff;
-}
-
-.script-list {
-    min-height: 0;
-    overflow: auto;
-    padding: 4px 0;
-}
-
-.script-list-item {
-    width: 100%;
-    height: 27px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 0 9px;
-    border: 0;
-    background: transparent;
-    color: #bcbdbf;
-    cursor: pointer;
-    text-align: left;
-    font-size: 10px;
-}
-
-.script-list-item:hover {
-    background: var(--hover);
-}
-
-.script-list-item.active {
-    background: #3d3e43;
-    color: #fff;
-}
-
-.script-list-icon {
-    width: 20px;
-    color: #d8c76c;
-    font-family: monospace;
-    font-size: 8px;
-    font-weight: 950;
-}
-
-.script-list-name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.script-sidebar-footer {
-    padding: 9px 10px;
-    border-top: 1px solid var(--border-soft);
-    color: #696a6e;
-    line-height: 1.45;
-    font-size: 8px;
-}
-
-.script-editor-pane {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: 34px minmax(0, 1fr) 23px;
-    background: #1e1f22;
-}
-
-.script-editor-toolbar {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 8px 0 11px;
-    border-bottom: 1px solid var(--border);
-    background: #252629;
-}
-
-.script-file-identity,
-.script-toolbar-actions {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.script-file-identity {
-    overflow: hidden;
-    color: #d4d4d5;
-    font-size: 10px;
-}
-
-#activeScriptName {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.script-file-icon {
-    flex: 0 0 auto;
-    color: #d8c76c;
-    font-family: monospace;
-    font-size: 8px;
-    font-weight: 950;
-}
-
-.script-dirty-dot {
-    width: 6px;
-    height: 6px;
-    flex: 0 0 6px;
-    border-radius: 50%;
-    background: #d7d7d8;
-}
-
-.script-save-state {
-    color: #747579;
-    font-size: 8px;
-}
-
-.script-toolbar-button {
-    height: 22px;
-    padding: 0 8px;
-    border: 1px solid #44464a;
-    border-radius: 4px;
-    background: #303135;
-    color: #bfc0c2;
-    cursor: pointer;
-    font-size: 8px;
-    font-weight: 750;
-}
-
-.script-toolbar-button:not(:disabled):hover {
-    background: #3a3b40;
-    color: #fff;
-}
-
-.script-toolbar-button.danger:not(:disabled):hover {
-    border-color: rgba(255, 118, 118, .4);
-    color: var(--danger);
-}
-
-.script-toolbar-button:disabled {
-    opacity: .35;
-    cursor: default;
-}
-
-.script-editor-stage {
-    position: relative;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    background: #1e1e1e;
-}
-
-.monaco-editor-host {
-    position: absolute;
-    inset: 0;
-}
-
-.monaco-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    color: #7b7c80;
-    background: #1e1f22;
-    font-size: 10px;
-}
-
-.monaco-fallback.hidden {
-    display: none;
-}
-
-.monaco-fallback-mark {
-    color: #aaa;
-    font-family: monospace;
-    font-size: 20px;
-    font-weight: 900;
-}
-
-.script-runtime-note {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 0 9px;
-    border-top: 1px solid var(--border);
-    background: #202124;
-    color: #696a6e;
-    font-size: 8px;
-}
-
-.script-runtime-note span {
-    color: #86878a;
-    white-space: nowrap;
-}
-
-@media (max-width: 900px) {
-    .script-workspace {
-        grid-template-columns: 150px minmax(0, 1fr);
     }
 
-    .script-toolbar-button {
-        padding: 0 6px;
+
+    /* =====================================================
+       SELECTION OUTLINE
+    ====================================================== */
+
+    function createSelectionHelper(
+        object
+    ) {
+
+        removeSelectionHelper();
+
+
+        if (
+            !object ||
+            !object.geometry
+        ) {
+
+            return;
+
+        }
+
+
+        selectionHelper =
+            new THREE.BoxHelper(
+                object,
+                0xffffff
+            );
+
+
+        if (
+            selectionHelper.material
+        ) {
+
+            selectionHelper.material
+                .depthTest =
+                false;
+
+
+            selectionHelper.material
+                .transparent =
+                true;
+
+
+            selectionHelper.material
+                .opacity =
+                0.85;
+
+        }
+
+
+        selectionHelper.renderOrder =
+            999;
+
+
+        scene.add(
+            selectionHelper
+        );
+
     }
+
+
+    function updateSelectionHelper() {
+
+        if (
+            !selectionHelper ||
+            !selectedSceneObject
+        ) {
+
+            return;
+
+        }
+
+
+        selectionHelper.update();
+
+    }
+
+
+    function removeSelectionHelper() {
+
+        if (
+            !selectionHelper
+        ) {
+
+            return;
+
+        }
+
+
+        scene.remove(
+            selectionHelper
+        );
+
+
+        selectionHelper.geometry
+            ?.dispose();
+
+
+        if (
+            Array.isArray(
+                selectionHelper.material
+            )
+        ) {
+
+            selectionHelper.material
+                .forEach(
+                    material => {
+
+                        material.dispose();
+
+                    }
+                );
+
+        }
+
+        else {
+
+            selectionHelper.material
+                ?.dispose();
+
+        }
+
+
+        selectionHelper =
+            null;
+
+    }
+
+
+    /* =====================================================
+       TOOLS
+    ====================================================== */
+
+    function setTool(
+        tool
+    ) {
+
+        currentTool =
+            tool;
+
+
+        updateToolButtons();
+
+
+        attachTransformForCurrentTool();
+
+    }
+
+
+    function updateToolButtons() {
+
+        const buttons = [
+            selectToolButton,
+            moveToolButton,
+            rotateToolButton,
+            scaleToolButton
+        ];
+
+
+        buttons.forEach(
+            button => {
+
+                button
+                    ?.classList
+                    .remove(
+                        "active"
+                    );
+
+            }
+        );
+
+
+        if (
+            currentTool ===
+            "select"
+        ) {
+
+            selectToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
+
+        }
+
+
+        if (
+            currentTool ===
+            "move"
+        ) {
+
+            moveToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
+
+        }
+
+
+        if (
+            currentTool ===
+            "rotate"
+        ) {
+
+            rotateToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
+
+        }
+
+
+        if (
+            currentTool ===
+            "scale"
+        ) {
+
+            scaleToolButton
+                ?.classList
+                .add(
+                    "active"
+                );
+
+        }
+
+    }
+
+
+    function attachTransformForCurrentTool() {
+
+        if (
+            !transformControls
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !selectedSceneObject
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        if (
+            selectedSceneObject
+                .userData
+                ?.locked
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        if (
+            currentTool ===
+            "select"
+        ) {
+
+            transformControls.detach();
+
+            return;
+
+        }
+
+
+        transformControls.attach(
+            selectedSceneObject
+        );
+
+
+        if (
+            currentTool ===
+            "move"
+        ) {
+
+            transformControls.setMode(
+                "translate"
+            );
+
+        }
+
+
+        else if (
+            currentTool ===
+            "rotate"
+        ) {
+
+            transformControls.setMode(
+                "rotate"
+            );
+
+        }
+
+
+        else if (
+            currentTool ===
+            "scale"
+        ) {
+
+            transformControls.setMode(
+                "scale"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EXPLORER
+    ====================================================== */
+
+    function renderExplorer() {
+
+        const treeChildren =
+            document.querySelector(
+                ".tree-children"
+            );
+
+
+        if (!treeChildren) {
+
+            return;
+
+        }
+
+
+        treeChildren.innerHTML =
+            "";
+
+
+        treeChildren.classList.toggle(
+            "collapsed",
+            !explorerExpanded
+        );
+
+
+        const rootArrow =
+            workspaceTreeItem
+                ?.querySelector(
+                    ".tree-arrow"
+                );
+
+
+        if (rootArrow) {
+
+            rootArrow.textContent =
+                explorerExpanded
+                    ? "▾"
+                    : "▸";
+
+        }
+
+
+        sceneObjects.forEach(
+            object => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "tree-item child-item";
+
+
+                button.dataset
+                    .objectUuid =
+                    object.uuid;
+
+
+                const icon =
+                    object.userData
+                        ?.objectType ===
+                    "Baseplate"
+                        ? "▣"
+                        : "■";
+
+
+                button.innerHTML = `
+                    <span class="tree-indent"></span>
+
+                    <span class="tree-icon">
+                        ${icon}
+                    </span>
+
+                    <span class="tree-name"></span>
+                `;
+
+
+                const nameElement =
+                    button.querySelector(
+                        ".tree-name"
+                    );
+
+
+                nameElement.textContent =
+                    object.name;
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        selectSceneObject(
+                            object
+                        );
+
+                    }
+                );
+
+
+                button.addEventListener(
+                    "dblclick",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        beginRenameObject(
+                            object
+                        );
+
+                    }
+                );
+
+
+                button.addEventListener(
+                    "contextmenu",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        selectSceneObject(
+                            object
+                        );
+
+
+                        openExplorerContextMenu(
+                            event.clientX,
+                            event.clientY,
+                            object
+                        );
+
+                    }
+                );
+
+
+                treeChildren.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        /* =============================
+           CAMERA
+        ============================= */
+
+        const cameraButton =
+            createSpecialTreeItem(
+                "◉",
+                "Camera"
+            );
+
+
+        cameraButton.dataset.special =
+            "camera";
+
+
+        cameraButton.addEventListener(
+            "click",
+            () => {
+
+                clearTreeSelection();
+
+
+                cameraButton
+                    .classList
+                    .add(
+                        "selected"
+                    );
+
+
+                selectedSceneObject =
+                    camera;
+
+
+                transformControls
+                    ?.detach();
+
+
+                removeSelectionHelper();
+
+
+                updateProperties(
+                    camera,
+                    "Camera"
+                );
+
+            }
+        );
+
+
+        treeChildren.appendChild(
+            cameraButton
+        );
+
+
+        /* =============================
+           LIGHTING
+        ============================= */
+
+        const lightingButton =
+            createSpecialTreeItem(
+                "☀",
+                "Lighting"
+            );
+
+
+        lightingButton.dataset.special =
+            "lighting";
+
+
+        lightingButton.addEventListener(
+            "click",
+            () => {
+
+                clearTreeSelection();
+
+
+                lightingButton
+                    .classList
+                    .add(
+                        "selected"
+                    );
+
+
+                selectedSceneObject =
+                    null;
+
+
+                transformControls
+                    ?.detach();
+
+
+                removeSelectionHelper();
+
+
+                showLightingProperties();
+
+            }
+        );
+
+
+        treeChildren.appendChild(
+            lightingButton
+        );
+
+
+        if (
+            selectedSceneObject &&
+            sceneObjects.includes(
+                selectedSceneObject
+            )
+        ) {
+
+            highlightExplorerObject(
+                selectedSceneObject
+            );
+
+        }
+
+        else if (
+            selectedSceneObject ===
+            camera
+        ) {
+
+            cameraButton
+                .classList
+                .add(
+                    "selected"
+                );
+
+        }
+
+    }
+
+
+    function createSpecialTreeItem(
+        icon,
+        name
+    ) {
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.className =
+            "tree-item child-item";
+
+
+        button.innerHTML = `
+            <span class="tree-indent"></span>
+
+            <span class="tree-icon">
+                ${icon}
+            </span>
+
+            <span class="tree-name"></span>
+        `;
+
+
+        button
+            .querySelector(
+                ".tree-name"
+            )
+            .textContent =
+            name;
+
+
+        return button;
+
+    }
+
+
+    function highlightExplorerObject(
+        object
+    ) {
+
+        clearTreeSelection();
+
+
+        if (!object) {
+
+            return;
+
+        }
+
+
+        const item =
+            document.querySelector(
+                `.tree-item[data-object-uuid="${object.uuid}"]`
+            );
+
+
+        if (item) {
+
+            item.classList.add(
+                "selected"
+            );
+
+        }
+
+    }
+
+
+    function toggleExplorer() {
+
+        explorerExpanded =
+            !explorerExpanded;
+
+
+        renderExplorer();
+
+    }
+
+
+    function beginRenameObject(
+        object
+    ) {
+
+        if (
+            !object ||
+            !sceneObjects.includes(
+                object
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        closeExplorerContextMenu();
+
+
+        const item =
+            document.querySelector(
+                `.tree-item[data-object-uuid="${object.uuid}"]`
+            );
+
+
+        const nameElement =
+            item?.querySelector(
+                ".tree-name"
+            );
+
+
+        if (
+            !item ||
+            !nameElement
+        ) {
+
+            return;
+
+        }
+
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            "text";
+
+
+        input.className =
+            "tree-rename-input";
+
+
+        input.value =
+            object.name ||
+            "Object";
+
+
+        input.maxLength =
+            60;
+
+
+        nameElement.replaceWith(
+            input
+        );
+
+
+        input.focus();
+        input.select();
+
+
+        let finished =
+            false;
+
+
+        const finish =
+            save => {
+
+                if (finished) {
+                    return;
+                }
+
+
+                finished =
+                    true;
+
+
+                const nextName =
+                    input.value
+                        .trim();
+
+
+                if (
+                    save &&
+                    nextName
+                ) {
+
+                    object.name =
+                        nextName;
+
+
+                    updateProperties(
+                        object
+                    );
+
+
+                    setEditorStatus(
+                        "Object renamed"
+                    );
+
+                }
+
+
+                renderExplorer();
+
+            };
+
+
+        input.addEventListener(
+            "click",
+            event => {
+                event.stopPropagation();
+            }
+        );
+
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                event.stopPropagation();
+
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    finish(
+                        true
+                    );
+
+                }
+
+                else if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    event.preventDefault();
+
+                    finish(
+                        false
+                    );
+
+                }
+
+            }
+        );
+
+
+        input.addEventListener(
+            "blur",
+            () => {
+
+                finish(
+                    true
+                );
+
+            }
+        );
+
+    }
+
+
+    function makeCopyName(
+        sourceName
+    ) {
+
+        const baseName =
+            `${sourceName || "Part"} Copy`;
+
+
+        let candidate =
+            baseName;
+
+
+        let suffix =
+            2;
+
+
+        const names =
+            new Set(
+                sceneObjects.map(
+                    object =>
+                        object.name
+                )
+            );
+
+
+        while (
+            names.has(
+                candidate
+            )
+        ) {
+
+            candidate =
+                `${baseName} ${suffix}`;
+
+
+            suffix++;
+
+        }
+
+
+        return candidate;
+
+    }
+
+
+    function duplicateSelectedObject() {
+
+        const source =
+            selectedSceneObject;
+
+
+        if (
+            !source ||
+            !sceneObjects.includes(
+                source
+            ) ||
+            source.userData
+                ?.locked
+        ) {
+
+            return;
+
+        }
+
+
+        const copy =
+            source.clone();
+
+
+        if (
+            source.geometry &&
+            typeof source.geometry.clone ===
+            "function"
+        ) {
+
+            copy.geometry =
+                source.geometry.clone();
+
+        }
+
+
+        if (
+            Array.isArray(
+                source.material
+            )
+        ) {
+
+            copy.material =
+                source.material.map(
+                    material =>
+                        material.clone()
+                );
+
+        }
+
+        else if (
+            source.material &&
+            typeof source.material.clone ===
+            "function"
+        ) {
+
+            copy.material =
+                source.material.clone();
+
+        }
+
+
+        copy.name =
+            makeCopyName(
+                source.name
+            );
+
+
+        copy.position.x +=
+            1;
+
+
+        copy.position.z +=
+            1;
+
+
+        copy.userData = {
+            ...source.userData,
+            apexObject: true,
+            locked: false
+        };
+
+
+        scene.add(
+            copy
+        );
+
+
+        registerSceneObject(
+            copy
+        );
+
+
+        renderExplorer();
+
+
+        selectSceneObject(
+            copy
+        );
+
+
+        setTool(
+            "move"
+        );
+
+
+        updateObjectCount();
+
+
+        setEditorStatus(
+            "Object duplicated"
+        );
+
+    }
+
+
+    function deleteSelectedObject() {
+
+        const object =
+            selectedSceneObject;
+
+
+        if (
+            !object ||
+            !sceneObjects.includes(
+                object
+            ) ||
+            object.userData
+                ?.locked
+        ) {
+
+            return;
+
+        }
+
+
+        transformControls
+            ?.detach();
+
+
+        removeSelectionHelper();
+
+
+        scene.remove(
+            object
+        );
+
+
+        const index =
+            sceneObjects.indexOf(
+                object
+            );
+
+
+        if (
+            index !==
+            -1
+        ) {
+
+            sceneObjects.splice(
+                index,
+                1
+            );
+
+        }
+
+
+        object.geometry
+            ?.dispose();
+
+
+        if (
+            Array.isArray(
+                object.material
+            )
+        ) {
+
+            object.material.forEach(
+                material => {
+                    material.dispose();
+                }
+            );
+
+        }
+
+        else {
+
+            object.material
+                ?.dispose();
+
+        }
+
+
+        selectedSceneObject =
+            null;
+
+
+        clearTreeSelection();
+        hideProperties();
+        renderExplorer();
+        updateObjectCount();
+
+
+        setTool(
+            "select"
+        );
+
+
+        setEditorStatus(
+            "Object deleted"
+        );
+
+    }
+
+
+    function ensureExplorerContextMenu() {
+
+        if (
+            explorerContextMenu
+        ) {
+
+            return;
+
+        }
+
+
+        explorerContextMenu =
+            document.createElement(
+                "div"
+            );
+
+
+        explorerContextMenu.className =
+            "explorer-context-menu hidden";
+
+
+        explorerContextMenu.innerHTML = `
+            <button type="button" data-action="rename">
+                Rename
+            </button>
+
+            <button type="button" data-action="duplicate">
+                Duplicate
+            </button>
+
+            <div class="explorer-context-separator"></div>
+
+            <button type="button" data-action="delete" class="danger-action">
+                Delete
+            </button>
+        `;
+
+
+        document.body.appendChild(
+            explorerContextMenu
+        );
+
+    }
+
+
+    function openExplorerContextMenu(
+        clientX,
+        clientY,
+        object
+    ) {
+
+        ensureExplorerContextMenu();
+
+
+        const locked =
+            Boolean(
+                object?.userData
+                    ?.locked
+            );
+
+
+        const renameButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="rename"]'
+                );
+
+
+        const duplicateButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="duplicate"]'
+                );
+
+
+        const deleteButton =
+            explorerContextMenu
+                .querySelector(
+                    '[data-action="delete"]'
+                );
+
+
+        renameButton.disabled =
+            false;
+
+
+        duplicateButton.disabled =
+            locked;
+
+
+        deleteButton.disabled =
+            locked;
+
+
+        renameButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                beginRenameObject(
+                    object
+                );
+
+            };
+
+
+        duplicateButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                duplicateSelectedObject();
+
+            };
+
+
+        deleteButton.onclick =
+            () => {
+
+                closeExplorerContextMenu();
+
+                deleteSelectedObject();
+
+            };
+
+
+        explorerContextMenu
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        const menuWidth =
+            explorerContextMenu
+                .offsetWidth;
+
+
+        const menuHeight =
+            explorerContextMenu
+                .offsetHeight;
+
+
+        const left =
+            Math.min(
+                clientX,
+                window.innerWidth -
+                menuWidth -
+                8
+            );
+
+
+        const top =
+            Math.min(
+                clientY,
+                window.innerHeight -
+                menuHeight -
+                8
+            );
+
+
+        explorerContextMenu.style.left =
+            `${Math.max(8, left)}px`;
+
+
+        explorerContextMenu.style.top =
+            `${Math.max(8, top)}px`;
+
+    }
+
+
+    function closeExplorerContextMenu() {
+
+        explorerContextMenu
+            ?.classList
+            .add(
+                "hidden"
+            );
+
+    }
+
+
+    function setEditorStatus(
+        message
+    ) {
+
+        if (!saveStatus) {
+
+            return;
+
+        }
+
+
+        saveStatus.textContent =
+            message;
+
+
+        window.clearTimeout(
+            setEditorStatus.timeoutId
+        );
+
+
+        window.clearTimeout(
+            scriptSaveTimer
+        );
+
+
+        saveActiveScript();
+
+
+        monacoInstance
+            ?.dispose();
+
+
+        monacoInstance =
+            null;
+
+
+        setEditorStatus.timeoutId =
+            window.setTimeout(
+                () => {
+
+                    if (saveStatus) {
+
+                        saveStatus.textContent =
+                            "Ready";
+
+                    }
+
+                },
+                1500
+            );
+
+    }
+
+
+    /* =====================================================
+       CAMERA
+    ====================================================== */
+
+    function resetCamera() {
+
+        if (!camera) {
+
+            return;
+
+        }
+
+
+        camera.position.set(
+            16,
+            13,
+            18
+        );
+
+
+        if (controls) {
+
+            controls.target.set(
+                0,
+                2,
+                0
+            );
+
+
+            controls.update();
+
+        }
+
+        else {
+
+            camera.lookAt(
+                0,
+                2,
+                0
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ANIMATION
+    ====================================================== */
+
+    function animate() {
+
+        animationFrame =
+            requestAnimationFrame(
+                animate
+            );
+
+
+        controls
+            ?.update();
+
+
+        updateSelectionHelper();
+
+
+        if (
+            renderer &&
+            scene &&
+            camera
+        ) {
+
+            renderer.render(
+                scene,
+                camera
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       RESIZE
+    ====================================================== */
+
+    function resizeRenderer() {
+
+        if (
+            !renderer ||
+            !camera ||
+            !viewportContainer
+        ) {
+
+            return;
+
+        }
+
+
+        const width =
+            viewportContainer
+                .clientWidth;
+
+
+        const height =
+            viewportContainer
+                .clientHeight;
+
+
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        renderer.setSize(
+            width,
+            height,
+            false
+        );
+
+
+        camera.aspect =
+            width /
+            height;
+
+
+        camera
+            .updateProjectionMatrix();
+
+    }
+
+
+    /* =====================================================
+       SCRIPT WORKSPACE - V0.4
+    ====================================================== */
+
+    function getScriptStorageKey() {
+
+        return `apexcoder-game-scripts:${currentProject?.id || "unknown"}`;
+
+    }
+
+
+    function createDefaultScript() {
+
+        return {
+            id:
+                createScriptId(),
+
+            name:
+                "GameManager.js",
+
+            code:
+`// ApexCoder Game Studio
+// Project script foundation
+
+export function start(context) {
+    console.log("Game started", context);
 }
 
-@media (max-width: 700px) {
-    .script-workspace {
-        grid-template-columns: 120px minmax(0, 1fr);
+export function update(context, deltaTime) {
+    // Called every frame once runtime scripting is enabled.
+}
+`,
+
+            createdAt:
+                Date.now(),
+
+            updatedAt:
+                Date.now()
+        };
+
     }
 
-    .script-save-state,
-    .script-runtime-note span {
-        display: none;
+
+    function createScriptId() {
+
+        if (
+            window.crypto &&
+            typeof window.crypto.randomUUID ===
+            "function"
+        ) {
+
+            return window.crypto.randomUUID();
+
+        }
+
+
+        return `script-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
     }
+
+
+    function loadProjectScripts() {
+
+        try {
+
+            const raw =
+                window.localStorage.getItem(
+                    getScriptStorageKey()
+                );
+
+
+            const parsed =
+                raw
+                    ? JSON.parse(raw)
+                    : null;
+
+
+            if (
+                Array.isArray(parsed) &&
+                parsed.length > 0
+            ) {
+
+                projectScripts =
+                    parsed.filter(
+                        item =>
+                            item &&
+                            typeof item.id ===
+                            "string" &&
+                            typeof item.name ===
+                            "string" &&
+                            typeof item.code ===
+                            "string"
+                    );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "ApexCoder could not load local project scripts:",
+                error
+            );
+
+        }
+
+
+        if (
+            projectScripts.length ===
+            0
+        ) {
+
+            projectScripts = [
+                createDefaultScript()
+            ];
+
+
+            persistProjectScripts();
+
+        }
+
+
+        activeScriptId =
+            projectScripts[0]
+                ?.id ||
+            null;
+
+    }
+
+
+    function persistProjectScripts() {
+
+        try {
+
+            window.localStorage.setItem(
+                getScriptStorageKey(),
+                JSON.stringify(
+                    projectScripts
+                )
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "ApexCoder could not save local project scripts:",
+                error
+            );
+
+
+            setScriptSaveState(
+                "Save failed",
+                false
+            );
+
+        }
+
+    }
+
+
+    function getActiveScript() {
+
+        return projectScripts.find(
+            script =>
+                script.id ===
+                activeScriptId
+        ) || null;
+
+    }
+
+
+    function renderScriptList() {
+
+        if (!scriptList) {
+            return;
+        }
+
+
+        scriptList.innerHTML =
+            "";
+
+
+        projectScripts.forEach(
+            script => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "script-list-item";
+
+
+                if (
+                    script.id ===
+                    activeScriptId
+                ) {
+
+                    button.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                button.innerHTML = `
+                    <span class="script-list-icon">JS</span>
+                    <span class="script-list-name"></span>
+                `;
+
+
+                button
+                    .querySelector(
+                        ".script-list-name"
+                    )
+                    .textContent =
+                    script.name;
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        selectScript(
+                            script.id
+                        );
+
+                    }
+                );
+
+
+                button.addEventListener(
+                    "dblclick",
+                    () => {
+
+                        selectScript(
+                            script.id
+                        );
+
+
+                        renameActiveScript();
+
+                    }
+                );
+
+
+                scriptList.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    function selectScript(
+        scriptId
+    ) {
+
+        saveActiveScript();
+
+
+        activeScriptId =
+            scriptId;
+
+
+        renderScriptList();
+
+
+        syncActiveScriptToEditor();
+
+    }
+
+
+    function syncActiveScriptToEditor() {
+
+        const script =
+            getActiveScript();
+
+
+        if (activeScriptName) {
+
+            activeScriptName.textContent =
+                script?.name ||
+                "No script selected";
+
+        }
+
+
+        if (renameScriptButton) {
+
+            renameScriptButton.disabled =
+                !script;
+
+        }
+
+
+        if (deleteScriptButton) {
+
+            deleteScriptButton.disabled =
+                !script ||
+                projectScripts.length <=
+                1;
+
+        }
+
+
+        if (
+            !monacoInstance ||
+            !script
+        ) {
+
+            return;
+
+        }
+
+
+        suppressMonacoChange =
+            true;
+
+
+        monacoInstance.setValue(
+            script.code ||
+            ""
+        );
+
+
+        suppressMonacoChange =
+            false;
+
+
+        monacoInstance.focus();
+
+
+        markScriptClean();
+
+    }
+
+
+    function normalizeScriptName(
+        name
+    ) {
+
+        let value =
+            String(
+                name ||
+                ""
+            )
+                .trim()
+                .replace(
+                    /[\\/:*?"<>|]+/g,
+                    "-"
+                );
+
+
+        if (!value) {
+
+            value =
+                "Script";
+
+        }
+
+
+        if (
+            !value
+                .toLowerCase()
+                .endsWith(
+                    ".js"
+                )
+        ) {
+
+            value +=
+                ".js";
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function getUniqueScriptName(
+        requestedName,
+        ignoredId = null
+    ) {
+
+        const normalized =
+            normalizeScriptName(
+                requestedName
+            );
+
+
+        const extension =
+            ".js";
+
+
+        const base =
+            normalized.slice(
+                0,
+                -extension.length
+            );
+
+
+        let candidate =
+            normalized;
+
+
+        let counter =
+            2;
+
+
+        while (
+            projectScripts.some(
+                script =>
+                    script.id !==
+                    ignoredId &&
+                    script.name
+                        .toLowerCase() ===
+                    candidate
+                        .toLowerCase()
+            )
+        ) {
+
+            candidate =
+                `${base}${counter}${extension}`;
+
+
+            counter++;
+
+        }
+
+
+        return candidate;
+
+    }
+
+
+    function createNewScript() {
+
+        saveActiveScript();
+
+
+        const requested =
+            window.prompt(
+                "New script name:",
+                "Script.js"
+            );
+
+
+        if (requested === null) {
+            return;
+        }
+
+
+        const name =
+            getUniqueScriptName(
+                requested
+            );
+
+
+        const script = {
+            id:
+                createScriptId(),
+
+            name,
+
+            code:
+`// ${name}
+
+export function start(context) {
+    // Runs when the game starts.
 }
 
+export function update(context, deltaTime) {
+    // Runs every frame once runtime scripting is enabled.
+}
+`,
+
+            createdAt:
+                Date.now(),
+
+            updatedAt:
+                Date.now()
+        };
+
+
+        projectScripts.push(
+            script
+        );
+
+
+        activeScriptId =
+            script.id;
+
+
+        persistProjectScripts();
+
+
+        renderScriptList();
+
+
+        syncActiveScriptToEditor();
+
+
+        setEditorStatus(
+            `Created ${script.name}`
+        );
+
+    }
+
+
+    function renameActiveScript() {
+
+        const script =
+            getActiveScript();
+
+
+        if (!script) {
+            return;
+        }
+
+
+        saveActiveScript();
+
+
+        const requested =
+            window.prompt(
+                "Rename script:",
+                script.name
+            );
+
+
+        if (requested === null) {
+            return;
+        }
+
+
+        script.name =
+            getUniqueScriptName(
+                requested,
+                script.id
+            );
+
+
+        script.updatedAt =
+            Date.now();
+
+
+        persistProjectScripts();
+
+
+        renderScriptList();
+
+
+        syncActiveScriptToEditor();
+
+
+        setEditorStatus(
+            "Script renamed"
+        );
+
+    }
+
+
+    function deleteActiveScript() {
+
+        const script =
+            getActiveScript();
+
+
+        if (
+            !script ||
+            projectScripts.length <=
+            1
+        ) {
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                `Delete ${script.name}?`
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        const index =
+            projectScripts.findIndex(
+                item =>
+                    item.id ===
+                    script.id
+            );
+
+
+        projectScripts.splice(
+            index,
+            1
+        );
+
+
+        activeScriptId =
+            projectScripts[
+                Math.max(
+                    0,
+                    index - 1
+                )
+            ]?.id ||
+            projectScripts[0]?.id ||
+            null;
+
+
+        persistProjectScripts();
+
+
+        renderScriptList();
+
+
+        syncActiveScriptToEditor();
+
+
+        setEditorStatus(
+            "Script deleted"
+        );
+
+    }
+
+
+    function markScriptDirty() {
+
+        scriptDirtyDot
+            ?.classList
+            .remove(
+                "hidden"
+            );
+
+
+        setScriptSaveState(
+            "Unsaved"
+        );
+
+    }
+
+
+    function markScriptClean() {
+
+        scriptDirtyDot
+            ?.classList
+            .add(
+                "hidden"
+            );
+
+
+        setScriptSaveState(
+            "Saved locally"
+        );
+
+    }
+
+
+    function setScriptSaveState(
+        message
+    ) {
+
+        if (scriptSaveState) {
+
+            scriptSaveState.textContent =
+                message;
+
+        }
+
+    }
+
+
+    function queueScriptSave() {
+
+        window.clearTimeout(
+            scriptSaveTimer
+        );
+
+
+        scriptSaveTimer =
+            window.setTimeout(
+                saveActiveScript,
+                500
+            );
+
+    }
+
+
+    function saveActiveScript() {
+
+        const script =
+            getActiveScript();
+
+
+        if (
+            !script ||
+            !monacoInstance
+        ) {
+
+            return;
+
+        }
+
+
+        script.code =
+            monacoInstance.getValue();
+
+
+        script.updatedAt =
+            Date.now();
+
+
+        persistProjectScripts();
+
+
+        markScriptClean();
+
+    }
+
+
+    function switchWorkspaceMode(
+        mode
+    ) {
+
+        currentWorkspaceMode =
+            mode ===
+            "scripts"
+                ? "scripts"
+                : "viewport";
+
+
+        const scriptsOpen =
+            currentWorkspaceMode ===
+            "scripts";
+
+
+        viewportContainer
+            ?.classList
+            .toggle(
+                "hidden",
+                scriptsOpen
+            );
+
+
+        scriptWorkspace
+            ?.classList
+            .toggle(
+                "hidden",
+                !scriptsOpen
+            );
+
+
+        viewportTabButton
+            ?.classList
+            .toggle(
+                "active",
+                !scriptsOpen
+            );
+
+
+        scriptTabButton
+            ?.classList
+            .toggle(
+                "active",
+                scriptsOpen
+            );
+
+
+        sceneActivityButton
+            ?.classList
+            .toggle(
+                "active",
+                !scriptsOpen
+            );
+
+
+        scriptsActivityButton
+            ?.classList
+            .toggle(
+                "active",
+                scriptsOpen
+            );
+
+
+        viewportHints
+            ?.classList
+            .toggle(
+                "hidden",
+                scriptsOpen
+            );
+
+
+        scriptHeaderStatus
+            ?.classList
+            .toggle(
+                "hidden",
+                !scriptsOpen
+            );
+
+
+        if (scriptsOpen) {
+
+            renderScriptList();
+
+
+            ensureMonacoLoaded()
+                .then(
+                    () => {
+
+                        syncActiveScriptToEditor();
+
+
+                        window.setTimeout(
+                            () => {
+
+                                monacoInstance
+                                    ?.layout();
+
+                            },
+                            0
+                        );
+
+                    }
+                )
+                .catch(
+                    error => {
+
+                        console.error(
+                            "ApexCoder Monaco startup error:",
+                            error
+                        );
+
+
+                        if (monacoFallbackText) {
+
+                            monacoFallbackText.textContent =
+                                "Monaco Editor could not load. Check your network connection.";
+
+                        }
+
+                    }
+                );
+
+        }
+
+        else {
+
+            requestAnimationFrame(
+                resizeRenderer
+            );
+
+        }
+
+    }
+
+
+    function ensureMonacoLoaded() {
+
+        if (monacoInstance) {
+
+            return Promise.resolve(
+                monacoInstance
+            );
+
+        }
+
+
+        if (monacoLoadingPromise) {
+
+            return monacoLoadingPromise;
+
+        }
+
+
+        monacoLoadingPromise =
+            new Promise(
+                (resolve, reject) => {
+
+                    if (monacoFallbackText) {
+
+                        monacoFallbackText.textContent =
+                            "Loading Monaco Editor...";
+
+                    }
+
+
+                    const startMonaco =
+                        () => {
+
+                            if (
+                                typeof window.require !==
+                                "function" ||
+                                typeof window.require.config !==
+                                "function"
+                            ) {
+
+                                reject(
+                                    new Error(
+                                        "Monaco loader did not become available."
+                                    )
+                                );
+
+                                return;
+
+                            }
+
+
+                            window.require.config({
+                                paths: {
+                                    vs:
+                                        "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs"
+                                }
+                            });
+
+
+                            window.require(
+                                [
+                                    "vs/editor/editor.main"
+                                ],
+                                () => {
+
+                                    try {
+
+                                        createMonacoEditor();
+
+
+                                        resolve(
+                                            monacoInstance
+                                        );
+
+                                    }
+
+                                    catch (error) {
+
+                                        reject(
+                                            error
+                                        );
+
+                                    }
+
+                                },
+                                reject
+                            );
+
+                        };
+
+
+                    if (
+                        typeof window.require ===
+                        "function" &&
+                        typeof window.require.config ===
+                        "function"
+                    ) {
+
+                        startMonaco();
+
+                        return;
+
+                    }
+
+
+                    const existingLoader =
+                        document.querySelector(
+                            'script[data-apexcoder-monaco-loader="true"]'
+                        );
+
+
+                    if (existingLoader) {
+
+                        existingLoader.addEventListener(
+                            "load",
+                            startMonaco,
+                            {
+                                once:
+                                    true
+                            }
+                        );
+
+
+                        existingLoader.addEventListener(
+                            "error",
+                            () => {
+
+                                reject(
+                                    new Error(
+                                        "Monaco Editor could not be loaded."
+                                    )
+                                );
+
+                            },
+                            {
+                                once:
+                                    true
+                            }
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    const loaderScript =
+                        document.createElement(
+                            "script"
+                        );
+
+
+                    loaderScript.src =
+                        "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js";
+
+
+                    loaderScript.async =
+                        true;
+
+
+                    loaderScript.dataset
+                        .apexcoderMonacoLoader =
+                        "true";
+
+
+                    loaderScript.addEventListener(
+                        "load",
+                        startMonaco,
+                        {
+                            once:
+                                true
+                        }
+                    );
+
+
+                    loaderScript.addEventListener(
+                        "error",
+                        () => {
+
+                            reject(
+                                new Error(
+                                    "Monaco Editor could not be loaded."
+                                )
+                            );
+
+                        },
+                        {
+                            once:
+                                true
+                        }
+                    );
+
+
+                    document.head.appendChild(
+                        loaderScript
+                    );
+
+                }
+            )
+                .catch(
+                    error => {
+
+                        monacoLoadingPromise =
+                            null;
+
+
+                        throw error;
+
+                    }
+                );
+
+
+        return monacoLoadingPromise;
+
+    }
+
+
+    function createMonacoEditor() {
+
+        if (
+            monacoInstance ||
+            !monacoEditorHost ||
+            !window.monaco
+        ) {
+
+            return;
+
+        }
+
+
+        window.monaco.editor.defineTheme(
+            "apexcoder-dark",
+            {
+                base:
+                    "vs-dark",
+
+                inherit:
+                    true,
+
+                rules: [],
+
+                colors: {
+                    "editor.background":
+                        "#1e1e1e",
+                    "editorLineNumber.foreground":
+                        "#66676b",
+                    "editorLineNumber.activeForeground":
+                        "#c1c2c4",
+                    "editor.selectionBackground":
+                        "#3c4453",
+                    "editor.inactiveSelectionBackground":
+                        "#30353e"
+                }
+            }
+        );
+
+
+        monacoInstance =
+            window.monaco.editor.create(
+                monacoEditorHost,
+                {
+                    value:
+                        "",
+
+                    language:
+                        "javascript",
+
+                    theme:
+                        "apexcoder-dark",
+
+                    automaticLayout:
+                        true,
+
+                    minimap: {
+                        enabled:
+                            true
+                    },
+
+                    fontSize:
+                        12,
+
+                    lineHeight:
+                        19,
+
+                    fontFamily:
+                        "SFMono-Regular, Consolas, 'Liberation Mono', monospace",
+
+                    tabSize:
+                        4,
+
+                    insertSpaces:
+                        true,
+
+                    wordWrap:
+                        "off",
+
+                    smoothScrolling:
+                        true,
+
+                    scrollBeyondLastLine:
+                        false,
+
+                    renderWhitespace:
+                        "selection",
+
+                    bracketPairColorization: {
+                        enabled:
+                            true
+                    },
+
+                    guides: {
+                        bracketPairs:
+                            true,
+                        indentation:
+                            true
+                    },
+
+                    padding: {
+                        top:
+                            10
+                    }
+                }
+            );
+
+
+        monacoInstance.onDidChangeModelContent(
+            () => {
+
+                if (suppressMonacoChange) {
+                    return;
+                }
+
+
+                markScriptDirty();
+
+
+                queueScriptSave();
+
+            }
+        );
+
+
+        monacoInstance.addCommand(
+            window.monaco.KeyMod.CtrlCmd |
+            window.monaco.KeyCode.KeyS,
+            () => {
+
+                saveActiveScript();
+
+
+                setEditorStatus(
+                    "Script saved"
+                );
+
+            }
+        );
+
+
+        monacoFallback
+            ?.classList
+            .add(
+                "hidden"
+            );
+
+
+        syncActiveScriptToEditor();
+
+    }
+
+
+    /* =====================================================
+       UI
+    ====================================================== */
+
+    function connectInterface() {
+
+        resetCameraButton
+            ?.addEventListener(
+                "click",
+                resetCamera
+            );
+
+
+        homeCameraButton
+            ?.addEventListener(
+                "click",
+                resetCamera
+            );
+
+
+        workspaceTreeItem
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    clearTreeSelection();
+
+
+                    workspaceTreeItem
+                        .classList
+                        .add(
+                            "selected"
+                        );
+
+
+                    selectedSceneObject =
+                        null;
+
+
+                    transformControls
+                        ?.detach();
+
+
+                    removeSelectionHelper();
+
+
+                    showWorkspaceProperties();
+
+                }
+            );
+
+
+        /* =============================
+           ENABLE TOOLS
+        ============================= */
+
+        selectToolButton.disabled =
+            false;
+
+
+        moveToolButton.disabled =
+            false;
+
+
+        rotateToolButton.disabled =
+            false;
+
+
+        scaleToolButton.disabled =
+            false;
+
+
+        addPartButton.disabled =
+            false;
+
+
+        if (explorerAddButton) {
+
+            explorerAddButton.disabled =
+                false;
+
+        }
+
+
+        /* =============================
+           TOOL EVENTS
+        ============================= */
+
+        selectToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "select"
+                    );
+
+                }
+            );
+
+
+        moveToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "move"
+                    );
+
+                }
+            );
+
+
+        rotateToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "rotate"
+                    );
+
+                }
+            );
+
+
+        scaleToolButton
+            .addEventListener(
+                "click",
+                () => {
+
+                    setTool(
+                        "scale"
+                    );
+
+                }
+            );
+
+
+        addPartButton
+            .addEventListener(
+                "click",
+                addPart
+            );
+
+
+        explorerAddButton
+            ?.addEventListener(
+                "click",
+                addPart
+            );
+
+
+        if (scriptsActivityButton) {
+
+            scriptsActivityButton.disabled =
+                false;
+
+        }
+
+
+        sceneActivityButton
+            ?.addEventListener(
+                "click",
+                () =>
+                    switchWorkspaceMode(
+                        "viewport"
+                    )
+            );
+
+
+        scriptsActivityButton
+            ?.addEventListener(
+                "click",
+                () =>
+                    switchWorkspaceMode(
+                        "scripts"
+                    )
+            );
+
+
+        viewportTabButton
+            ?.addEventListener(
+                "click",
+                () =>
+                    switchWorkspaceMode(
+                        "viewport"
+                    )
+            );
+
+
+        scriptTabButton
+            ?.addEventListener(
+                "click",
+                () =>
+                    switchWorkspaceMode(
+                        "scripts"
+                    )
+            );
+
+
+        newScriptButton
+            ?.addEventListener(
+                "click",
+                createNewScript
+            );
+
+
+        renameScriptButton
+            ?.addEventListener(
+                "click",
+                renameActiveScript
+            );
+
+
+        deleteScriptButton
+            ?.addEventListener(
+                "click",
+                deleteActiveScript
+            );
+
+
+        const workspaceArrow =
+            workspaceTreeItem
+                ?.querySelector(
+                    ".tree-arrow"
+                );
+
+
+        workspaceArrow
+            ?.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    toggleExplorer();
+
+                }
+            );
+
+
+        document.addEventListener(
+            "pointerdown",
+            event => {
+
+                if (
+                    explorerContextMenu &&
+                    !explorerContextMenu
+                        .contains(
+                            event.target
+                        )
+                ) {
+
+                    closeExplorerContextMenu();
+
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "blur",
+            closeExplorerContextMenu
+        );
+
+
+        /* =============================
+           VIEWPORT
+        ============================= */
+
+        renderer
+            .domElement
+            .addEventListener(
+                "pointerdown",
+                handleViewportPointerDown
+            );
+
+
+        renderer
+            .domElement
+            .addEventListener(
+                "contextmenu",
+                event => {
+
+                    event.preventDefault();
+
+                }
+            );
+
+
+        /* =============================
+           KEYBOARD
+        ============================= */
+
+        window.addEventListener(
+            "keydown",
+            handleKeyboardShortcuts
+        );
+
+
+        window.addEventListener(
+            "beforeunload",
+            cleanupEditor
+        );
+
+    }
+
+
+    /* =====================================================
+       KEYBOARD SHORTCUTS
+    ====================================================== */
+
+    function handleKeyboardShortcuts(
+        event
+    ) {
+
+        if (
+            event.target
+                instanceof
+                HTMLInputElement ||
+            event.target
+                instanceof
+                HTMLTextAreaElement ||
+            event.target
+                ?.closest?.(
+                    ".monaco-editor"
+                )
+        ) {
+
+            return;
+
+        }
+
+
+        const key =
+            event.key
+                .toLowerCase();
+
+
+        if (
+            key ===
+            "f2"
+        ) {
+
+            event.preventDefault();
+
+            beginRenameObject(
+                selectedSceneObject
+            );
+
+            return;
+
+        }
+
+
+        if (
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            key ===
+            "d"
+        ) {
+
+            event.preventDefault();
+
+            duplicateSelectedObject();
+
+            return;
+
+        }
+
+
+        if (
+            key ===
+            "delete" ||
+            key ===
+            "backspace"
+        ) {
+
+            if (
+                selectedSceneObject &&
+                sceneObjects.includes(
+                    selectedSceneObject
+                ) &&
+                !selectedSceneObject
+                    .userData
+                    ?.locked
+            ) {
+
+                event.preventDefault();
+
+                deleteSelectedObject();
+
+            }
+
+            return;
+
+        }
+
+
+        if (
+            key ===
+            "q"
+        ) {
+
+            setTool(
+                "select"
+            );
+
+        }
+
+
+        else if (
+            key ===
+            "w"
+        ) {
+
+            setTool(
+                "move"
+            );
+
+        }
+
+
+        else if (
+            key ===
+            "e"
+        ) {
+
+            setTool(
+                "rotate"
+            );
+
+        }
+
+
+        else if (
+            key ===
+            "r"
+        ) {
+
+            setTool(
+                "scale"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       PROPERTIES
+    ====================================================== */
+
+    function updateProperties(
+        object,
+        forcedType = null
+    ) {
+
+        if (!object) {
+
+            hideProperties();
+
+            return;
+
+        }
+
+
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        propertyName.textContent =
+            object.name ||
+            "Object";
+
+
+        propertyType.textContent =
+            forcedType ||
+            object.userData
+                ?.objectType ||
+            object.type ||
+            "Object";
+
+
+        propertyPosition.textContent =
+            formatVector(
+                object.position
+            );
+
+
+        propertyRotation.textContent =
+            formatRotation(
+                object.rotation
+            );
+
+
+        propertyScale.textContent =
+            formatVector(
+                object.scale
+            );
+
+    }
+
+
+    function showWorkspaceProperties() {
+
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        propertyName.textContent =
+            currentProject?.name ||
+            "Workspace";
+
+
+        propertyType.textContent =
+            "Workspace";
+
+
+        propertyPosition.textContent =
+            "—";
+
+
+        propertyRotation.textContent =
+            "—";
+
+
+        propertyScale.textContent =
+            "—";
+
+    }
+
+
+    function showLightingProperties() {
+
+        propertiesEmpty
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        propertiesContent
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        propertyName.textContent =
+            "Lighting";
+
+
+        propertyType.textContent =
+            "Environment";
+
+
+        propertyPosition.textContent =
+            "—";
+
+
+        propertyRotation.textContent =
+            "—";
+
+
+        propertyScale.textContent =
+            "—";
+
+    }
+
+
+    function hideProperties() {
+
+        propertiesContent
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        propertiesEmpty
+            .classList
+            .remove(
+                "hidden"
+            );
+
+    }
+
+
+    function formatVector(
+        vector
+    ) {
+
+        if (!vector) {
+
+            return "—";
+
+        }
+
+
+        return [
+            cleanNumber(
+                vector.x
+            ),
+
+            cleanNumber(
+                vector.y
+            ),
+
+            cleanNumber(
+                vector.z
+            )
+        ].join(
+            ", "
+        );
+
+    }
+
+
+    function formatRotation(
+        rotation
+    ) {
+
+        if (!rotation) {
+
+            return "—";
+
+        }
+
+
+        return [
+            cleanNumber(
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.x
+                    )
+            ),
+
+            cleanNumber(
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.y
+                    )
+            ),
+
+            cleanNumber(
+                THREE.MathUtils
+                    .radToDeg(
+                        rotation.z
+                    )
+            )
+        ].join(
+            ", "
+        );
+
+    }
+
+
+    function cleanNumber(
+        number
+    ) {
+
+        if (
+            !Number.isFinite(
+                number
+            )
+        ) {
+
+            return "0";
+
+        }
+
+
+        const rounded =
+            Math.round(
+                number *
+                100
+            ) /
+            100;
+
+
+        if (
+            Object.is(
+                rounded,
+                -0
+            )
+        ) {
+
+            return "0";
+
+        }
+
+
+        return String(
+            rounded
+        );
+
+    }
+
+
+    /* =====================================================
+       OBJECT COUNT
+    ====================================================== */
+
+    function updateObjectCount() {
+
+        if (
+            !objectCountStatus
+        ) {
+
+            return;
+
+        }
+
+
+        objectCountStatus.textContent =
+            `${sceneObjects.length} ${
+                sceneObjects.length ===
+                1
+                    ? "Object"
+                    : "Objects"
+            }`;
+
+    }
+
+
+    /* =====================================================
+       SHOW EDITOR
+    ====================================================== */
+
+    function showEditor() {
+
+        editorLoading
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        errorScreen
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        gameEditor
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        requestAnimationFrame(
+            resizeRenderer
+        );
+
+
+        renderScriptList();
+
+
+        syncActiveScriptToEditor();
+
+
+        const starterPart =
+            sceneObjects.find(
+                object =>
+                    object.userData
+                        ?.objectType ===
+                    "Part"
+            );
+
+
+        if (starterPart) {
+
+            selectSceneObject(
+                starterPart
+            );
+
+        }
+
+        else {
+
+            selectSceneObject(
+                baseplate
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ERROR SCREEN
+    ====================================================== */
+
+    function showError(
+        title,
+        message
+    ) {
+
+        editorLoading
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        gameEditor
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        errorScreen
+            .classList
+            .remove(
+                "hidden"
+            );
+
+
+        errorTitle.textContent =
+            title;
+
+
+        errorMessage.textContent =
+            message;
+
+    }
+
+
+    /* =====================================================
+       CLEANUP
+    ====================================================== */
+
+    function cleanupEditor() {
+
+        if (animationFrame) {
+
+            cancelAnimationFrame(
+                animationFrame
+            );
+
+        }
+
+
+        if (resizeObserver) {
+
+            resizeObserver
+                .disconnect();
+
+        }
+
+
+        window.clearTimeout(
+            setEditorStatus.timeoutId
+        );
+
+
+        explorerContextMenu
+            ?.remove();
+
+
+        explorerContextMenu =
+            null;
+
+    }
+
+
+})();
