@@ -1106,3 +1106,91 @@ button {
     }
 
 }
+
+/* =========================================================
+   EXPLORER OBJECT MANAGEMENT - V0.3
+========================================================= */
+
+.panel-action:not(:disabled) {
+    cursor: pointer;
+}
+
+.panel-action:not(:disabled):hover {
+    background: var(--hover);
+    color: #ffffff;
+}
+
+.tree-children.collapsed {
+    display: none;
+}
+
+.tree-item {
+    position: relative;
+}
+
+.tree-item .tree-name {
+    flex: 1;
+}
+
+.tree-rename-input {
+    min-width: 0;
+    width: 100%;
+    height: 19px;
+    padding: 0 5px;
+    border: 1px solid #66686e;
+    border-radius: 3px;
+    outline: none;
+    background: #202124;
+    color: #ffffff;
+    font-size: 10px;
+}
+
+.tree-rename-input:focus {
+    border-color: #8e9096;
+}
+
+.explorer-context-menu {
+    position: fixed;
+    z-index: 2000;
+    width: 150px;
+    padding: 4px;
+    border: 1px solid #48494e;
+    border-radius: 6px;
+    background: #292a2d;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
+}
+
+.explorer-context-menu button {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #d4d4d6;
+    cursor: pointer;
+    text-align: left;
+    font-size: 10px;
+}
+
+.explorer-context-menu button:hover:not(:disabled) {
+    background: #3a3b40;
+    color: #ffffff;
+}
+
+.explorer-context-menu button:disabled {
+    color: #68696d;
+    cursor: default;
+}
+
+.explorer-context-menu .danger-action {
+    color: #ff9696;
+}
+
+.explorer-context-separator {
+    height: 1px;
+    margin: 4px 3px;
+    background: #3c3d41;
+}
