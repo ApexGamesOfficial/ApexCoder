@@ -13,7 +13,7 @@
 
     <link
         rel="stylesheet"
-        href="game-editor.css?v=2"
+        href="game-editor.css?v=3"
     >
 
     <!-- THREE.JS IMPORT MAP -->
@@ -38,9 +38,15 @@
         defer
     ></script>
 
+    <!-- MONACO EDITOR -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"
+        defer
+    ></script>
+
     <!-- GAME EDITOR -->
     <script
-        src="game-editor.js?v=4"
+        src="game-editor.js?v=5"
         defer
     ></script>
 </head>
@@ -336,8 +342,7 @@
                     id="scriptsActivityButton"
                     class="activity-button"
                     type="button"
-                    title="Scripts — coming later"
-                    disabled
+                    title="Scripts"
                 >
                     &lt;/&gt;
                 </button>
@@ -376,40 +381,42 @@
 
                 <div class="workspace-header">
 
-                    <div class="workspace-tab active">
+                    <div class="workspace-tabs">
 
-                        <span class="workspace-tab-dot"></span>
+                        <button
+                            id="viewportTabButton"
+                            class="workspace-tab active"
+                            type="button"
+                        >
+                            <span class="workspace-tab-dot"></span>
+                            <span>3D Viewport</span>
+                        </button>
 
-                        <span>
-                            3D Viewport
-                        </span>
+                        <button
+                            id="scriptTabButton"
+                            class="workspace-tab"
+                            type="button"
+                        >
+                            <span class="workspace-tab-code">&lt;/&gt;</span>
+                            <span id="scriptTabLabel">Scripts</span>
+                        </button>
 
                     </div>
 
+                    <div
+                        id="viewportHints"
+                        class="viewport-hints"
+                    >
+                        <span>Orbit <strong>Left Drag</strong></span>
+                        <span>Pan <strong>Right Drag</strong></span>
+                        <span>Zoom <strong>Scroll</strong></span>
+                    </div>
 
-                    <div class="viewport-hints">
-
-                        <span>
-                            Orbit
-                            <strong>
-                                Left Drag
-                            </strong>
-                        </span>
-
-                        <span>
-                            Pan
-                            <strong>
-                                Right Drag
-                            </strong>
-                        </span>
-
-                        <span>
-                            Zoom
-                            <strong>
-                                Scroll
-                            </strong>
-                        </span>
-
+                    <div
+                        id="scriptHeaderStatus"
+                        class="script-header-status hidden"
+                    >
+                        PROJECT SCRIPTS · JAVASCRIPT
                     </div>
 
                 </div>
@@ -422,22 +429,11 @@
 
                     <canvas id="gameCanvas"></canvas>
 
-
-                    <div
-                        class="viewport-corner viewport-top-left"
-                    >
-
-                        <div class="viewport-mode-badge">
-                            EDIT
-                        </div>
-
+                    <div class="viewport-corner viewport-top-left">
+                        <div class="viewport-mode-badge">EDIT</div>
                     </div>
 
-
-                    <div
-                        class="viewport-corner viewport-top-right"
-                    >
-
+                    <div class="viewport-corner viewport-top-right">
                         <button
                             id="homeCameraButton"
                             class="viewport-icon-button"
@@ -446,9 +442,7 @@
                         >
                             ⌂
                         </button>
-
                     </div>
-
 
                     <div
                         id="viewportInfo"
@@ -456,6 +450,101 @@
                     >
                         Perspective
                     </div>
+
+                </div>
+
+
+                <div
+                    id="scriptWorkspace"
+                    class="script-workspace hidden"
+                >
+
+                    <aside class="script-sidebar">
+
+                        <div class="script-sidebar-header">
+                            <span>SCRIPTS</span>
+                            <button
+                                id="newScriptButton"
+                                class="script-icon-button"
+                                type="button"
+                                title="New Script"
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        <div
+                            id="scriptList"
+                            class="script-list"
+                        ></div>
+
+                        <div class="script-sidebar-footer">
+                            Stored with this project in your browser for now.
+                        </div>
+
+                    </aside>
+
+                    <section class="script-editor-pane">
+
+                        <div class="script-editor-toolbar">
+
+                            <div class="script-file-identity">
+                                <span class="script-file-icon">JS</span>
+                                <span id="activeScriptName">No script selected</span>
+                                <span
+                                    id="scriptDirtyDot"
+                                    class="script-dirty-dot hidden"
+                                    title="Unsaved changes"
+                                ></span>
+                            </div>
+
+                            <div class="script-toolbar-actions">
+                                <span
+                                    id="scriptSaveState"
+                                    class="script-save-state"
+                                >
+                                    Ready
+                                </span>
+                                <button
+                                    id="renameScriptButton"
+                                    class="script-toolbar-button"
+                                    type="button"
+                                    disabled
+                                >
+                                    Rename
+                                </button>
+                                <button
+                                    id="deleteScriptButton"
+                                    class="script-toolbar-button danger"
+                                    type="button"
+                                    disabled
+                                >
+                                    Delete
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="script-editor-stage">
+                            <div
+                                id="monacoEditor"
+                                class="monaco-editor-host"
+                            ></div>
+                            <div
+                                id="monacoFallback"
+                                class="monaco-fallback"
+                            >
+                                <div class="monaco-fallback-mark">&lt;/&gt;</div>
+                                <div id="monacoFallbackText">Open Scripts to load Monaco Editor.</div>
+                            </div>
+                        </div>
+
+                        <div class="script-runtime-note">
+                            Script editing is live. Game runtime execution hooks come next.
+                            <span>Ctrl/⌘ + S to save</span>
+                        </div>
+
+                    </section>
 
                 </div>
 
